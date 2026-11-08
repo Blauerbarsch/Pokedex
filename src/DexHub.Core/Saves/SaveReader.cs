@@ -95,7 +95,7 @@ public static class SaveReader
 
         LogOnce(best is null
             ? $"{source}: kein Gen-4-Pokédex gefunden ({data.Length} Bytes) – ist das ein Spielstand dieses Spiels?"
-            : $"{source}: Pokédex bei {string.Join(", ", found)}, {best.Caught.Count} gefangen, {best.Seen.Count} gesehen");
+            : $"{source}: Pokédex bei {string.Join(", ", found)} – gefangen: {Ids(best.Caught)} – gesehen: {Ids(best.Seen)}");
         return best;
     }
 
@@ -113,6 +113,10 @@ public static class SaveReader
             if (IsGen4Dex(data, o)) return o;
         return -1;
     }
+
+    /// <summary>Kurze Liste der Nummern für die Diagnose, z. B. "3 (#387, #390, #393)".</summary>
+    private static string Ids(IReadOnlySet<int> ids) =>
+        ids.Count == 0 ? "0" : $"{ids.Count} (" + string.Join(", ", ids.Order().Take(12).Select(i => "#" + i)) + (ids.Count > 12 ? ", …)" : ")");
 
     private static bool IsGen4Dex(byte[] data, int offset) =>
         offset >= 0 && offset + 0x84 <= data.Length && BitConverter.ToUInt32(data, offset) == Gen4DexMagic;
