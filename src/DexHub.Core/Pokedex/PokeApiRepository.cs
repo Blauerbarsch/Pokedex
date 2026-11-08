@@ -65,15 +65,26 @@ public sealed class PokeApiRepository
     }
 
     /// <summary>Lädt das Bild eines Pokémon (einmalig) und gibt den lokalen Pfad zurück.</summary>
+    /// <summary>Höchstens 6 Bilder gleichzeitig laden – der Pokédex fragt beim Aufklappen viele auf einmal an.</summary>
+    private static readonly SemaphoreSlim SpriteDownloads = new(6);
+
     public async Task<string?> GetSpritePathAsync(int id, CancellationToken ct = default)
     {
+        var local = Path.Combine(CacheFolder, "sprites", $"{id}.png");
+        if (File.Exists(local)) return local;
+
+        await SpriteDownloads.WaitAsync(ct);
         try
         {
             return await GetCachedAsync(Path.Combine("sprites", $"{id}.png"), $"{SpriteBase}{id}.png", false, ct);
         }
-        catch (HttpRequestException)
+        catch (Exception ex) when (ex is HttpRequestException or IOException)
         {
             return null;
+        }
+        finally
+        {
+            SpriteDownloads.Release();
         }
     }
 

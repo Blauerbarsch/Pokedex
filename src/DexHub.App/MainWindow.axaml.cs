@@ -377,34 +377,203 @@ public partial class MainWindow : Window
         }
     }
 
+    // ---------- Pokédex als Kacheln, nach Generationen ----------
+
+    private static readonly string[] Regions =
+        ["", "Kanto", "Johto", "Hoenn", "Sinnoh", "Einall", "Kalos", "Alola", "Galar", "Paldea"];
+
+    /// <summary>Eine Generation im Pokédex: einklappbarer Bereich, Kacheln werden erst beim Aufklappen erzeugt.</summary>
+    private sealed class DexGroup
+    {
+        public required int Generation { get; init; }
+        public required Expander Expander { get; init; }
+        public required WrapPanel Panel { get; init; }
+        public bool Realized { get; set; }
+    }
+
+    private sealed record DexTile(Border Tile, TextBlock Marker);
+
+    private readonly List<DexGroup> _dexGroups = [];
+    private readonly Dictionary<int, DexTile> _dexTiles = [];
+    private Dictionary<int, DexEntry> _dexById = [];
+    private int _selectedDexId;
+
     private void RebuildDex()
     {
         _dex = PokedexService.Build(_species, _games);
+        _dexById = _dex.ToDictionary(d => d.Id);
+
+        // Gruppen nur einmal anlegen (bzw. wenn sich die Anzahl Generationen ändert)
+        var generations = _dex.Select(d => d.Species.Generation).Distinct().Order().ToList();
+        if (!generations.SequenceEqual(_dexGroups.Select(g => g.Generation)))
+            BuildDexGroups(generations);
+
+        foreach (var (id, tile) in _dexTiles)
+            if (_dexById.TryGetValue(id, out var entry)) StyleDexTile(tile, entry);
+
         ApplyDexFilter();
+
+        // Detailansicht aktuell halten
+        if (_dexById.TryGetValue(_selectedDexId, out var selected)) DetailText.Text = selected.DetailText;
+    }
+
+    private void BuildDexGroups(List<int> generations)
+    {
+        DexPanel.Children.Clear();
+        _dexGroups.Clear();
+        _dexTiles.Clear();
+
+        foreach (var gen in generations)
+        {
+            var panel = new WrapPanel();
+            var expander = new Expander
+            {
+                Content = panel,
+                HorizontalAlignment = HorizontalAlignment.Stretch,
+            };
+            var group = new DexGroup { Generation = gen, Expander = expander, Panel = panel };
+            _dexGroups.Add(group);
+
+            expander.PropertyChanged += (_, e) =>
+            {
+                if (e.Property != Expander.IsExpandedProperty) return;
+                if (expander.IsExpanded)
+                {
+                    RealizeDexGroup(group);
+                    ApplyDexFilter();
+                    _settings.ExpandedGenerations.Add(gen);
+                }
+                else
+                {
+                    _settings.ExpandedGenerations.Remove(gen);
+                }
+                _settings.Save();
+            };
+
+            // Erst nach dem Anhängen des Handlers setzen, damit die Kacheln entstehen
+            expander.IsExpanded = _settings.ExpandedGenerations.Contains(gen);
+            DexPanel.Children.Add(expander);
+        }
+    }
+
+    /// <summary>Kacheln einer Generation erzeugen (erst beim ersten Aufklappen – spart Zeit beim Start).</summary>
+    private void RealizeDexGroup(DexGroup group)
+    {
+        if (group.Realized) return;
+        group.Realized = true;
+
+        foreach (var entry in _dex.Where(d => d.Species.Generation == group.Generation))
+        {
+            var sprite = new Image { Width = 96, Height = 96, Stretch = Stretch.Uniform };
+            RenderOptions.SetBitmapInterpolationMode(sprite, BitmapInterpolationMode.None);
+
+            var marker = new TextBlock { Foreground = SelectedBrush, FontSize = 14, HorizontalAlignment = HorizontalAlignment.Right };
+            var tile = new Border
+            {
+                Width = 124,
+                Margin = new Thickness(4),
+                Padding = new Thickness(6),
+                CornerRadius = new CornerRadius(8),
+                Background = TileBrush,
+                BorderThickness = new Thickness(2),
+                BorderBrush = Brushes.Transparent,
+                Cursor = new Cursor(StandardCursorType.Hand),
+                Child = new StackPanel
+                {
+                    Spacing = 2,
+                    Children =
+                    {
+                        new Grid
+                        {
+                            ColumnDefinitions = new ColumnDefinitions("*,Auto"),
+                            Children = { new TextBlock { Text = entry.Number, Opacity = 0.6, FontSize = 12 }, WithColumn(marker, 1) },
+                        },
+                        sprite,
+                        new TextBlock
+                        {
+                            Text = entry.Name,
+                            FontWeight = FontWeight.SemiBold,
+                            TextAlignment = TextAlignment.Center,
+                            TextTrimming = TextTrimming.CharacterEllipsis,
+                        },
+                    },
+                },
+            };
+
+            var id = entry.Id;
+            tile.PointerPressed += async (_, _) => await ShowDexDetailAsync(id);
+
+            var dexTile = new DexTile(tile, marker);
+            _dexTiles[id] = dexTile;
+            StyleDexTile(dexTile, entry);
+            group.Panel.Children.Add(tile);
+            _ = LoadSpriteAsync(id, sprite);
+        }
+    }
+
+    private static Control WithColumn(Control control, int column)
+    {
+        Grid.SetColumn(control, column);
+        return control;
+    }
+
+    /// <summary>Gefangen = voll sichtbar mit ●, gesehen = ○, unbekannt = blass.</summary>
+    private void StyleDexTile(DexTile tile, DexEntry entry)
+    {
+        tile.Marker.Text = entry.CaughtMarker;
+        tile.Tile.Opacity = entry.IsCaught ? 1.0 : entry.SeenIn.Count > 0 ? 0.75 : 0.45;
+        tile.Tile.BorderBrush = entry.Id == _selectedDexId ? SelectedBrush : Brushes.Transparent;
+    }
+
+    private async Task LoadSpriteAsync(int id, Image target)
+    {
+        var path = await _pokeApi.GetSpritePathAsync(id);
+        if (path is null) return;
+        try { target.Source = new Bitmap(path); }
+        catch (Exception ex) { Console.WriteLine($"[DexHub] Bild #{id} fehlerhaft: {ex.Message}"); }
     }
 
     private void ApplyDexFilter()
     {
-        IEnumerable<DexEntry> items = _dex;
+        var query = SearchBox.Text?.Trim() ?? "";
+        int number = int.TryParse(query.TrimStart('#'), out var n) ? n : -1;
+        int genFilter = GenFilter.SelectedIndex; // 0 = alle
+        bool onlyCaught = OnlyCaughtBox.IsChecked == true;
 
-        var query = SearchBox.Text?.Trim();
-        if (!string.IsNullOrEmpty(query))
-        {
-            var number = int.TryParse(query.TrimStart('#'), out var n) ? n : -1;
-            items = items.Where(d => d.Id == number
+        bool Matches(DexEntry d) =>
+            (query.Length == 0 || d.Id == number
                 || d.Name.Contains(query, StringComparison.OrdinalIgnoreCase)
-                || d.Species.NameEn.Contains(query, StringComparison.OrdinalIgnoreCase));
+                || d.Species.NameEn.Contains(query, StringComparison.OrdinalIgnoreCase))
+            && (genFilter <= 0 || d.Species.Generation == genFilter)
+            && (!onlyCaught || d.IsCaught);
+
+        int totalShown = 0, totalCaught = 0;
+        foreach (var group in _dexGroups)
+        {
+            var entries = _dex.Where(d => d.Species.Generation == group.Generation).ToList();
+            var matching = entries.Where(Matches).ToList();
+            int caught = entries.Count(d => d.IsCaught);
+
+            group.Expander.IsVisible = matching.Count > 0;
+            group.Expander.Header = $"Generation {group.Generation} – {Regions.ElementAtOrDefault(group.Generation)}" +
+                                    $"   ·   {caught} / {entries.Count} gefangen";
+
+            // Bei einer Suche Bereiche mit Treffern automatisch aufklappen
+            if (query.Length > 0 && matching.Count > 0 && !group.Expander.IsExpanded)
+                group.Expander.IsExpanded = true;
+
+            if (group.Realized)
+            {
+                var visible = matching.Select(d => d.Id).ToHashSet();
+                foreach (var d in entries)
+                    if (_dexTiles.TryGetValue(d.Id, out var tile)) tile.Tile.IsVisible = visible.Contains(d.Id);
+            }
+
+            totalShown += matching.Count;
+            totalCaught += matching.Count(d => d.IsCaught);
         }
 
-        if (GenFilter.SelectedIndex > 0)
-            items = items.Where(d => d.Species.Generation == GenFilter.SelectedIndex);
-
-        if (OnlyCaughtBox.IsChecked == true)
-            items = items.Where(d => d.IsCaught);
-
-        var list = items.ToList();
-        DexList.ItemsSource = list;
-        DexCounter.Text = $"{list.Count(d => d.IsCaught)} / {list.Count} gefangen";
+        DexCounter.Text = $"{totalCaught} / {totalShown} gefangen";
     }
 
     private void OnSearchChanged(object? sender, TextChangedEventArgs e) { if (_ready) ApplyDexFilter(); }
@@ -413,22 +582,27 @@ public partial class MainWindow : Window
 
     private async void OnReloadDexClick(object? sender, RoutedEventArgs e) => await LoadPokedexAsync(forceRefresh: true);
 
-    private async void OnDexSelectionChanged(object? sender, SelectionChangedEventArgs e)
+    private async Task ShowDexDetailAsync(int id)
     {
-        if (!_ready || DexList.SelectedItem is not DexEntry entry) return;
+        if (!_dexById.TryGetValue(id, out var entry)) return;
+
+        int previous = _selectedDexId;
+        _selectedDexId = id;
+        foreach (var other in new[] { previous, id })
+            if (_dexTiles.TryGetValue(other, out var t) && _dexById.TryGetValue(other, out var e)) StyleDexTile(t, e);
 
         DetailName.Text = $"{entry.Number} {entry.Name}";
         DetailText.Text = entry.DetailText;
         SpriteImage.Source = null;
 
-        // Bild nachladen; ältere Ladevorgänge abbrechen, wenn man schnell durch die Liste scrollt
+        // Bild nachladen; ältere Ladevorgänge abbrechen, wenn man schnell weiterklickt
         _spriteCts?.Cancel();
         _spriteCts = new CancellationTokenSource();
         var token = _spriteCts.Token;
 
         try
         {
-            var path = await _pokeApi.GetSpritePathAsync(entry.Id, token);
+            var path = await _pokeApi.GetSpritePathAsync(id, token);
             if (!token.IsCancellationRequested && path is not null)
                 SpriteImage.Source = new Bitmap(path);
         }
