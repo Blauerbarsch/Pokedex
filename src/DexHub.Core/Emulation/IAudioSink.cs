@@ -10,6 +10,9 @@ public interface IAudioSink : IDisposable
 
     /// <summary>Wie viel Ton noch in der Warteschlange liegt.</summary>
     double QueuedSeconds { get; }
+
+    /// <summary>Kurze Beschreibung für die Diagnose (Treiber, Rate …).</summary>
+    string Description { get; }
 }
 
 /// <summary>Stumme Tonausgabe, falls keine Audio-Hardware verfügbar ist.</summary>
@@ -18,5 +21,6 @@ public sealed class NullAudioSink : IAudioSink
     public void Open(int sampleRate) { }
     public void Push(ReadOnlySpan<short> interleavedStereo) { }
     public double QueuedSeconds => 0;
+    public string Description => "stumm";
     public void Dispose() { }
 }

@@ -54,6 +54,23 @@ public sealed unsafe class EmulatorSession : ICoreHost, IDisposable
         _thread.Start();
     }
 
+    /// <summary>Zusätzliche Eingabequelle, z. B. Controller. Wird im Emulator-Thread abgefragt.</summary>
+    public IInputProvider? InputProvider { get; set; }
+
+    /// <summary>Lautstärke 0.0 – 1.0</summary>
+    public float Volume
+    {
+        get => _volume;
+        set => _volume = Math.Clamp(value, 0f, 1f);
+    }
+    private volatile float _volume = 0.8f;
+
+    /// <summary>Faktor für den Schnellvorlauf, 0 = so schnell wie möglich.</summary>
+    public int FastForwardSpeed { get; set; } = 3;
+
+    private volatile bool _fastForwardKey;
+    public void SetFastForward(bool active) => _fastForwardKey = active;
+
     public bool IsPaused => _paused;
     public void TogglePause() => _paused = !_paused;
     public void RequestSaveState() => _stateRequest = 1;
@@ -66,7 +83,8 @@ public sealed unsafe class EmulatorSession : ICoreHost, IDisposable
     }
 
     // ---------- Eingabe ----------
-    private int _buttons; // Bitmaske, Bit n = JoypadButton n
+    private int _buttons;          // Tastatur, Bitmaske, Bit n = JoypadButton n
+    private int _effectiveButtons; // Tastatur + Controller, gilt für das aktuelle Bild
     private volatile short _pointerX, _pointerY;
     private volatile bool _pointerPressed;
 
@@ -146,6 +164,7 @@ public sealed unsafe class EmulatorSession : ICoreHost, IDisposable
             int frameCounter = 0;
 
             Message?.Invoke($"{Game.Title} gestartet ({_core.LibraryName})");
+            Log($"Core {_core.LibraryName} {_core.LibraryVersion}, {fps:0.##} fps");
 
             while (!_stopRequested && !_core.ShutdownRequested)
             {
@@ -158,14 +177,22 @@ public sealed unsafe class EmulatorSession : ICoreHost, IDisposable
                     continue;
                 }
 
+                // Eingaben sammeln: Tastatur (vom UI-Thread) + Controller
+                var pad = PollInputProvider();
+                Volatile.Write(ref _effectiveButtons, Volatile.Read(ref _buttons) | pad.Buttons);
+                bool fastForward = _fastForwardKey || pad.FastForward;
+
                 _core.RunFrame();
-                FlushAudio();
+                FlushAudio(fastForward);
 
                 // Etwa alle 5 Sekunden prüfen, ob das Spiel gespeichert hat
                 if (++frameCounter % 300 == 0) WriteSramIfChanged();
 
                 // Takt halten: auf den Zeitpunkt des nächsten Bildes warten
-                nextFrame += ticksPerFrame;
+                if (fastForward)
+                    nextFrame += FastForwardSpeed > 0 ? ticksPerFrame / FastForwardSpeed : 0;
+                else
+                    nextFrame += ticksPerFrame;
                 long now = clock.ElapsedTicks;
                 if (now - nextFrame > ticksPerFrame * 5) nextFrame = now; // zu weit hinterher -> neu anfangen
                 WaitUntil(clock, nextFrame);
@@ -175,6 +202,7 @@ public sealed unsafe class EmulatorSession : ICoreHost, IDisposable
         }
         catch (Exception ex)
         {
+            Log("Spiel abgebrochen: " + ex);
             Failed?.Invoke(ex.Message);
         }
         finally
@@ -200,12 +228,16 @@ public sealed unsafe class EmulatorSession : ICoreHost, IDisposable
 
     private void OpenAudio(double sampleRate)
     {
+        int rate = (int)Math.Round(sampleRate > 0 ? sampleRate : 44100);
+        Log($"Core-Tonrate: {sampleRate:0.##} Hz");
         try
         {
-            _audio.Open((int)Math.Round(sampleRate > 0 ? sampleRate : 44100));
+            _audio.Open(rate);
+            Log("Ton: " + _audio.Description);
         }
         catch (Exception ex)
         {
+            Log("Ton fehlgeschlagen: " + ex);
             _audio.Dispose();
             _audio = new NullAudioSink();
             Message?.Invoke("Kein Ton: " + ex.Message);
@@ -336,13 +368,41 @@ public sealed unsafe class EmulatorSession : ICoreHost, IDisposable
         _audioCount += samples.Length;
     }
 
-    private void FlushAudio()
+    private void FlushAudio(bool fastForward)
     {
-        // Liegt schon zu viel Ton in der Warteschlange, verwerfen wir etwas, damit der Ton nicht hinterherhinkt
-        if (_audioCount > 0 && _audio.QueuedSeconds < 0.15)
-            _audio.Push(_audioBuffer.AsSpan(0, _audioCount));
+        var samples = _audioBuffer.AsSpan(0, _audioCount);
         _audioCount = 0;
+
+        // Beim Schnellvorlauf stumm. Liegt schon zu viel Ton in der Warteschlange,
+        // verwerfen wir etwas, damit der Ton nicht hinterherhinkt.
+        if (samples.IsEmpty || fastForward || _audio.QueuedSeconds > 0.15) return;
+
+        float volume = _volume;
+        if (volume < 0.999f)
+            for (int i = 0; i < samples.Length; i++)
+                samples[i] = (short)(samples[i] * volume);
+
+        _audio.Push(samples);
     }
+
+    private InputSnapshot PollInputProvider()
+    {
+        if (InputProvider is null) return default;
+        try
+        {
+            return InputProvider.Poll();
+        }
+        catch (Exception ex)
+        {
+            InputProvider = null; // kaputter Controller-Treiber soll das Spiel nicht stören
+            Log("Controller deaktiviert: " + ex.Message);
+            Message?.Invoke("Controller deaktiviert: " + ex.Message);
+            return default;
+        }
+    }
+
+    /// <summary>Diagnose-Ausgabe im Terminal.</summary>
+    private static void Log(string text) => Console.WriteLine("[DexHub] " + text);
 
     public void PollInput() { }
 
@@ -352,7 +412,7 @@ public sealed unsafe class EmulatorSession : ICoreHost, IDisposable
         switch (device & 0xFF)
         {
             case Retro.DeviceJoypad:
-                int buttons = Volatile.Read(ref _buttons);
+                int buttons = Volatile.Read(ref _effectiveButtons);
                 if (id == Retro.JoypadMask) return (short)(buttons & 0xFFFF);
                 return (short)((buttons >> (int)id) & 1);
 
