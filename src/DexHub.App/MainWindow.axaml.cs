@@ -19,6 +19,7 @@ using DexHub.Core.Pokedex;
 using DexHub.Core.Pokemon;
 using DexHub.Core.Saves;
 using DexHub.Core.Settings;
+using DexHub.Core.Trading;
 using GamePlatform = DexHub.Core.Models.Platform;
 
 namespace DexHub.App;
@@ -40,6 +41,7 @@ public partial class MainWindow : Window
     {
         InitializeComponent();
         FillSettingsForm();
+        FillProfiles();
         _ready = true;
 
         // Tastendrücke abfangen, bevor ein Steuerelement sie bekommt (für "Taste belegen")
@@ -95,6 +97,7 @@ public partial class MainWindow : Window
 
         RefreshGamesList();
         RebuildDex();
+        BuildTradePanel();
         SetStatus($"{_games.Count} Spiel(e) gefunden.");
     }
 
@@ -334,12 +337,19 @@ public partial class MainWindow : Window
     {
         try
         {
-            _saveWatcher = new FileSystemWatcher(AppSettings.SavesFolder)
+            // Ganzen DexHub-Ordner beobachten (alle Benutzer), aber nur auf Spielstände reagieren
+            _saveWatcher = new FileSystemWatcher(AppSettings.AppDataFolder)
             {
                 IncludeSubdirectories = true,
                 NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName | NotifyFilters.Size,
             };
-            FileSystemEventHandler changed = (_, _) => Dispatcher.UIThread.Post(() =>
+            FileSystemEventHandler changed = (_, e) =>
+            {
+                var path = e.FullPath.Replace('\\', '/');
+                if (!path.Contains("/saves/") && !path.EndsWith("/saves", StringComparison.Ordinal)) return;
+                Dispatcher.UIThread.Post(OnSaveFolderChanged);
+            };
+            void OnSaveFolderChanged()
             {
                 // Mehrere Änderungen kurz hintereinander zusammenfassen
                 _saveChangeDebounce?.Stop();
@@ -351,7 +361,7 @@ public partial class MainWindow : Window
                     RebuildDex();
                 };
                 _saveChangeDebounce.Start();
-            });
+            }
             _saveWatcher.Changed += changed;
             _saveWatcher.Created += changed;
             _saveWatcher.EnableRaisingEvents = true;
@@ -1000,6 +1010,370 @@ public partial class MainWindow : Window
     {
         _settings.Save();
         _runningGame?.ApplySettings();
+    }
+
+    // =====================================================================
+    // Tauschzentrale
+    // =====================================================================
+
+    /// <summary>Eine Seite der Tauschzentrale: Benutzer, Spiel und die Pokémon in dessen Boxen.</summary>
+    private sealed class TradeColumn
+    {
+        public required ComboBox ProfileBox { get; init; }
+        public required ComboBox GameBox { get; init; }
+        public required WrapPanel Tiles { get; init; }
+        public required TextBlock Info { get; init; }
+        public Dictionary<TradeSlot, Border> TileBySlot { get; } = [];
+        public TradeSlot? Selected { get; set; }
+
+        public TradeSide? Side =>
+            ProfileBox.SelectedItem is string profile && GameBox.SelectedItem is GameChoice game
+                ? new TradeSide(profile, game.Game)
+                : null;
+    }
+
+    /// <summary>Eintrag in der Spielauswahl (ToString für die Anzeige).</summary>
+    private sealed record GameChoice(GameEntry Game)
+    {
+        public override string ToString() => $"{Game.Title}  ({Game.FileName})";
+    }
+
+    private TradeColumn? _tradeA, _tradeB;
+    private CheckBox? _tradeEvolutionBox;
+    private TextBlock? _tradeResult;
+
+    private void BuildTradePanel()
+    {
+        TradePanel.Children.Clear();
+        TradePanel.Children.Add(Text(
+            "Tausche Pokémon zwischen zwei Benutzern oder zwischen zwei eigenen Spielen. Links und rechts je ein " +
+            "Pokémon aus den PC-Boxen anklicken, dann tauschen. Vorher werden beide Spielstände gesichert. " +
+            "Bisher für Gen 4 (Diamant, Perl, Platin, HeartGold, SoulSilver).", opacity: 0.8));
+
+        var games = _games.Where(g => Gen4Save.IsSupported(g.Info.SaveFormat)).ToList();
+        if (games.Count == 0)
+        {
+            TradePanel.Children.Add(Text("Keine Gen-4-Spiele in der Bibliothek gefunden.", opacity: 0.6));
+            return;
+        }
+
+        _tradeA = CreateTradeColumn(games, _settings.CurrentProfile);
+        _tradeB = CreateTradeColumn(games,
+            _settings.Profiles.FirstOrDefault(p => p != _settings.CurrentProfile) ?? _settings.CurrentProfile);
+
+        _tradeEvolutionBox = new CheckBox { Content = "Tausch-Entwicklungen (z. B. Kadabra → Simsala)", IsChecked = true };
+        _tradeResult = Text("", opacity: 0.9);
+        var tradeButton = new Button
+        {
+            Content = "⇄  Tauschen",
+            Classes = { "accent" },
+            FontSize = 18,
+            Padding = new Thickness(24, 10),
+            HorizontalAlignment = HorizontalAlignment.Center,
+        };
+        tradeButton.Click += async (_, _) => await ExecuteTradeAsync();
+
+        var middle = new StackPanel
+        {
+            Spacing = 12,
+            Width = 230,
+            Margin = new Thickness(12, 40, 12, 0),
+            Children = { tradeButton, _tradeEvolutionBox, _tradeResult },
+        };
+
+        var grid = new Grid { ColumnDefinitions = new ColumnDefinitions("*,Auto,*") };
+        grid.Children.Add(TradeColumnView(_tradeA, "Seite A"));
+        grid.Children.Add(WithColumn(middle, 1));
+        grid.Children.Add(WithColumn(TradeColumnView(_tradeB, "Seite B"), 2));
+        TradePanel.Children.Add(grid);
+
+        LoadTradeColumn(_tradeA);
+        LoadTradeColumn(_tradeB);
+    }
+
+    private TradeColumn CreateTradeColumn(List<GameEntry> games, string profile)
+    {
+        var column = new TradeColumn
+        {
+            ProfileBox = new ComboBox { ItemsSource = _settings.Profiles.ToList(), SelectedItem = profile, MinWidth = 200 },
+            GameBox = new ComboBox
+            {
+                ItemsSource = games.Select(g => new GameChoice(g)).ToList(),
+                SelectedIndex = 0,
+                HorizontalAlignment = HorizontalAlignment.Stretch,
+            },
+            Tiles = new WrapPanel(),
+            Info = Text("", 12, opacity: 0.7),
+        };
+        column.ProfileBox.SelectionChanged += (_, _) => LoadTradeColumn(column);
+        column.GameBox.SelectionChanged += (_, _) => LoadTradeColumn(column);
+        return column;
+    }
+
+    private static Control TradeColumnView(TradeColumn column, string title) => new Border
+    {
+        Background = TileBrush,
+        CornerRadius = new CornerRadius(8),
+        Padding = new Thickness(12),
+        Child = new StackPanel
+        {
+            Spacing = 8,
+            Children =
+            {
+                Text(title, 16, bold: true),
+                LabeledRow("Benutzer", column.ProfileBox, 90),
+                LabeledRow("Spiel", column.GameBox, 90),
+                column.Info,
+                new ScrollViewer { MaxHeight = 560, Content = column.Tiles },
+            },
+        },
+    };
+
+    private void LoadTradeColumn(TradeColumn column)
+    {
+        column.Tiles.Children.Clear();
+        column.TileBySlot.Clear();
+        column.Selected = null;
+
+        if (column.Side is not { } side) return;
+        var save = TradeService.Load(side, out var error);
+        if (save is null)
+        {
+            column.Info.Text = error;
+            return;
+        }
+
+        var mons = save.BoxPokemon();
+        column.Info.Text = $"{mons.Count} Pokémon in den Boxen. Eins anklicken.";
+        foreach (var (box, slot, pokemon) in mons)
+        {
+            if (_gameData is not null) pokemon.Level = _gameData.LevelFromExp(pokemon.Species, pokemon.Exp);
+            var tradeSlot = new TradeSlot(box, slot, pokemon);
+            var tile = CreateTradeTile(pokemon);
+            tile.PointerPressed += (_, _) => SelectTradeSlot(column, tradeSlot);
+            column.TileBySlot[tradeSlot] = tile;
+            column.Tiles.Children.Add(tile);
+        }
+    }
+
+    private Border CreateTradeTile(OwnedPokemon p)
+    {
+        var sprite = new Image { Width = 64, Height = 64 };
+        RenderOptions.SetBitmapInterpolationMode(sprite, BitmapInterpolationMode.None);
+        var tile = new Border
+        {
+            Width = 104,
+            Margin = new Thickness(3),
+            Padding = new Thickness(4),
+            CornerRadius = new CornerRadius(6),
+            Background = TileBrush,
+            BorderThickness = new Thickness(2),
+            BorderBrush = Brushes.Transparent,
+            Cursor = new Cursor(StandardCursorType.Hand),
+            Child = new StackPanel
+            {
+                Children =
+                {
+                    sprite,
+                    new TextBlock
+                    {
+                        Text = (p.IsEgg ? "Ei" : p.Nickname ?? SpeciesName(p.Species)) + (p.IsShiny ? " ✨" : ""),
+                        FontWeight = FontWeight.SemiBold,
+                        TextAlignment = TextAlignment.Center,
+                        TextTrimming = TextTrimming.CharacterEllipsis,
+                    },
+                    new TextBlock
+                    {
+                        Text = $"Lv. {p.Level} {p.Gender} · {p.Location}",
+                        FontSize = 11,
+                        Opacity = 0.6,
+                        TextAlignment = TextAlignment.Center,
+                    },
+                },
+            },
+        };
+        _ = LoadOwnedSpriteAsync(p, sprite);
+        return tile;
+    }
+
+    private static void SelectTradeSlot(TradeColumn column, TradeSlot slot)
+    {
+        column.Selected = slot;
+        foreach (var (s, tile) in column.TileBySlot)
+            tile.BorderBrush = s == slot ? SelectedBrush : Brushes.Transparent;
+        column.Info.Text = $"Ausgewählt: {slot.Pokemon.Nickname ?? "#" + slot.Pokemon.Species} (Lv. {slot.Pokemon.Level}, Box {slot.Box + 1})";
+    }
+
+    private async Task ExecuteTradeAsync()
+    {
+        if (_tradeA?.Side is not { } sideA || _tradeB?.Side is not { } sideB ||
+            _tradeA.Selected is not { } slotA || _tradeB.Selected is not { } slotB)
+        {
+            await ShowMessageAsync("Tauschen", "Bitte links und rechts je ein Pokémon auswählen.");
+            return;
+        }
+        if (_runningGame is not null)
+        {
+            await ShowMessageAsync("Tauschen", "Bitte zuerst das laufende Spiel beenden – sonst würde es den Tausch beim Speichern überschreiben.");
+            return;
+        }
+
+        var question = $"{DisplayName(slotA.Pokemon)} (Lv. {slotA.Pokemon.Level}) von {sideA.Profile} / {sideA.Game.Title}\n" +
+                       $"gegen\n{DisplayName(slotB.Pokemon)} (Lv. {slotB.Pokemon.Level}) von {sideB.Profile} / {sideB.Game.Title}\n\n" +
+                       "Beide Spielstände werden vorher gesichert. Tauschen?";
+        if (!await ConfirmAsync("Tausch bestätigen", question)) return;
+
+        try
+        {
+            var result = TradeService.Trade(sideA, slotA, sideB, slotB,
+                _tradeEvolutionBox?.IsChecked == true, SpeciesName);
+            if (_tradeResult is not null) _tradeResult.Text = "Getauscht: " + result;
+            SetStatus("Tausch abgeschlossen.");
+        }
+        catch (Exception ex)
+        {
+            await ShowMessageAsync("Tausch fehlgeschlagen", ex.Message + "\n\nEs wurde nichts verändert, falls der Fehler vor dem Speichern auftrat. Sicherungen liegen in:\n" + AppSettings.BackupsFolder);
+        }
+
+        // Alles neu einlesen
+        foreach (var g in _games) g.SavePath = SaveLocator.Find(g);
+        LoadTradeColumn(_tradeA);
+        LoadTradeColumn(_tradeB);
+        RefreshGamesList();
+        RebuildDex();
+    }
+
+    private async Task<bool> ConfirmAsync(string title, string message)
+    {
+        bool result = false;
+        var yes = new Button { Content = "Ja", Classes = { "accent" }, MinWidth = 80, IsDefault = true };
+        var no = new Button { Content = "Abbrechen", MinWidth = 80, IsCancel = true };
+        var dialog = new Window
+        {
+            Title = title,
+            Width = 480,
+            SizeToContent = SizeToContent.Height,
+            CanResize = false,
+            WindowStartupLocation = WindowStartupLocation.CenterOwner,
+            Content = new StackPanel
+            {
+                Margin = new Thickness(20),
+                Spacing = 16,
+                Children =
+                {
+                    new TextBlock { Text = message, TextWrapping = TextWrapping.Wrap },
+                    new StackPanel
+                    {
+                        Orientation = Orientation.Horizontal,
+                        Spacing = 8,
+                        HorizontalAlignment = HorizontalAlignment.Right,
+                        Children = { no, yes },
+                    },
+                },
+            },
+        };
+        yes.Click += (_, _) => { result = true; dialog.Close(); };
+        no.Click += (_, _) => dialog.Close();
+        await dialog.ShowDialog(this);
+        return result;
+    }
+
+    // =====================================================================
+    // Benutzer
+    // =====================================================================
+
+    private void FillProfiles()
+    {
+        ProfileBox.ItemsSource = _settings.Profiles.ToList();
+        ProfileBox.SelectedItem = _settings.CurrentProfile;
+    }
+
+    private void OnProfileChanged(object? sender, SelectionChangedEventArgs e)
+    {
+        if (!_ready || ProfileBox.SelectedItem is not string profile || profile == _settings.CurrentProfile) return;
+
+        if (_runningGame is not null)
+        {
+            SetStatus("Bitte zuerst das laufende Spiel beenden, dann den Benutzer wechseln.");
+            ProfileBox.SelectedItem = _settings.CurrentProfile;
+            return;
+        }
+        SwitchProfile(profile);
+    }
+
+    private void SwitchProfile(string profile)
+    {
+        _settings.CurrentProfile = profile;
+        AppSettings.ActiveProfile = profile;
+        _settings.Save();
+
+        foreach (var g in _games) g.SavePath = SaveLocator.Find(g);
+        RefreshGamesList();
+        RebuildDex();
+        BuildTradePanel();
+        SetStatus($"Benutzer gewechselt: {profile}");
+    }
+
+    private async void OnAddProfileClick(object? sender, RoutedEventArgs e)
+    {
+        var name = (await PromptAsync("Neuer Benutzer", "Name des Benutzers:"))?.Trim();
+        if (string.IsNullOrEmpty(name)) return;
+        if (_settings.Profiles.Contains(name, StringComparer.OrdinalIgnoreCase))
+        {
+            await ShowMessageAsync("Neuer Benutzer", $"Einen Benutzer „{name}“ gibt es schon.");
+            return;
+        }
+
+        _settings.Profiles.Add(name);
+        _settings.Save();
+        FillProfiles();
+        if (_runningGame is null)
+        {
+            _ready = false;
+            ProfileBox.SelectedItem = name;
+            _ready = true;
+            SwitchProfile(name);
+        }
+    }
+
+    /// <summary>Einfaches Eingabefenster.</summary>
+    private async Task<string?> PromptAsync(string title, string label)
+    {
+        var box = new TextBox { MinWidth = 300 };
+        var ok = new Button { Content = "OK", IsDefault = true, MinWidth = 80 };
+        var cancel = new Button { Content = "Abbrechen", IsCancel = true, MinWidth = 80 };
+        string? result = null;
+
+        var dialog = new Window
+        {
+            Title = title,
+            Width = 420,
+            SizeToContent = SizeToContent.Height,
+            CanResize = false,
+            WindowStartupLocation = WindowStartupLocation.CenterOwner,
+            Content = new StackPanel
+            {
+                Margin = new Thickness(20),
+                Spacing = 12,
+                Children =
+                {
+                    new TextBlock { Text = label },
+                    box,
+                    new StackPanel
+                    {
+                        Orientation = Orientation.Horizontal,
+                        Spacing = 8,
+                        HorizontalAlignment = HorizontalAlignment.Right,
+                        Children = { cancel, ok },
+                    },
+                },
+            },
+        };
+        ok.Click += (_, _) => { result = box.Text; dialog.Close(); };
+        cancel.Click += (_, _) => dialog.Close();
+        dialog.Opened += (_, _) => box.Focus();
+        await dialog.ShowDialog(this);
+        return result;
     }
 
     // =====================================================================

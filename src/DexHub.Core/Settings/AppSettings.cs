@@ -64,11 +64,50 @@ public sealed class AppSettings
     public static string AppDataFolder => Ensure(Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "DexHub"));
 
-    /// <summary>Spielstände (.srm), wie sie das Spiel selbst speichert.</summary>
-    public static string SavesFolder => Ensure(Path.Combine(AppDataFolder, "saves"));
+    // ---------- Benutzer ----------
 
-    /// <summary>Schnellspeicherungen (F5/F9).</summary>
-    public static string StatesFolder => Ensure(Path.Combine(AppDataFolder, "states"));
+    public const string DefaultProfile = "Standard";
+
+    /// <summary>Alle angelegten Benutzer.</summary>
+    public List<string> Profiles { get; set; } = [DefaultProfile];
+
+    /// <summary>Wer zuletzt gespielt hat.</summary>
+    public string CurrentProfile { get; set; } = DefaultProfile;
+
+    /// <summary>
+    /// Benutzer, dessen Spielstände gerade benutzt werden. Statisch, weil Emulator, Spielstand-Suche usw.
+    /// darauf zugreifen. Wird beim Start und beim Wechseln gesetzt.
+    /// </summary>
+    public static string ActiveProfile { get; set; } = DefaultProfile;
+
+    /// <summary>Ordner eines Benutzers. "Standard" nutzt die ursprünglichen Ordner (kompatibel zu älteren Versionen).</summary>
+    private static string ProfileFolder(string profile, string sub) =>
+        profile == DefaultProfile
+            ? Ensure(Path.Combine(AppDataFolder, sub))
+            : Ensure(Path.Combine(AppDataFolder, "profiles", SafeName(profile), sub));
+
+    /// <summary>Spielstände (.srm) eines Benutzers.</summary>
+    public static string SavesFolderFor(string profile) => ProfileFolder(profile, "saves");
+
+    /// <summary>Schnellspeicherungen eines Benutzers.</summary>
+    public static string StatesFolderFor(string profile) => ProfileFolder(profile, "states");
+
+    /// <summary>Spielstände (.srm) des aktiven Benutzers.</summary>
+    public static string SavesFolder => SavesFolderFor(ActiveProfile);
+
+    /// <summary>Schnellspeicherungen (F5/F9) des aktiven Benutzers.</summary>
+    public static string StatesFolder => StatesFolderFor(ActiveProfile);
+
+    /// <summary>Sicherungen vor einem Tausch.</summary>
+    public static string BackupsFolder => Ensure(Path.Combine(AppDataFolder, "backups"));
+
+    /// <summary>Entfernt Zeichen, die in Ordnernamen nicht erlaubt sind.</summary>
+    public static string SafeName(string name)
+    {
+        var invalid = Path.GetInvalidFileNameChars();
+        var cleaned = new string(name.Select(c => invalid.Contains(c) ? '_' : c).ToArray()).Trim();
+        return cleaned.Length == 0 ? "Benutzer" : cleaned;
+    }
 
     /// <summary>Optionale BIOS-/Firmware-Dateien für Cores, die so etwas wollen.</summary>
     public static string SystemFolder => Ensure(Path.Combine(AppDataFolder, "system"));
@@ -104,6 +143,9 @@ public sealed class AppSettings
         }
         settings.Input ??= new InputSettings();
         settings.Input.EnsureDefaults();
+        if (settings.Profiles.Count == 0) settings.Profiles.Add(DefaultProfile);
+        if (!settings.Profiles.Contains(settings.CurrentProfile)) settings.CurrentProfile = settings.Profiles[0];
+        ActiveProfile = settings.CurrentProfile;
         return settings;
     }
 

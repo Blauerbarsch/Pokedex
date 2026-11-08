@@ -18,9 +18,18 @@ public static class CollectionService
             try { data = File.ReadAllBytes(game.SavePath); }
             catch (IOException) { continue; }
 
+            // Bevorzugt: Kopien über Prüfsummen und Speicherzähler bestimmen (genau wie das Spiel)
+            var checkedSave = Trading.Gen4Save.Load(game.SavePath, game.Info.SaveFormat, game.Title, out _);
+            if (checkedSave is not null)
+            {
+                result.AddRange(Gen4PokemonReader.Read(data, game.Info.SaveFormat,
+                    checkedSave.GeneralPartition, game.Title, checkedSave.StoragePartition));
+                continue;
+            }
+
+            // Sonst: Kopie mit dem volleren Pokédex
             int partition = SaveReader.FindNewestGen4Partition(data, game.Info.SaveFormat);
             if (partition < 0) continue;
-
             result.AddRange(Gen4PokemonReader.Read(data, game.Info.SaveFormat, partition, game.Title));
         }
 
