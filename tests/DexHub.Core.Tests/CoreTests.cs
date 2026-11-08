@@ -2,6 +2,7 @@ using System.Text;
 using DexHub.Core.Detection;
 using DexHub.Core.Models;
 using DexHub.Core.Pokedex;
+using DexHub.Core.Pokemon;
 using DexHub.Core.Saves;
 
 namespace DexHub.Core.Tests;
@@ -130,5 +131,66 @@ public class CsvTests
         Assert.Equal(2, rows.Count);
         Assert.Equal("Mr. Mime, der Clown", rows[0]["name"]);
         Assert.Equal("Pikachu", rows[1]["name"]);
+    }
+}
+
+public class Gen4PokemonTests
+{
+    /// <summary>Baut ein verschlüsseltes PK4 genau so, wie das Spiel es speichert.</summary>
+    private static byte[] EncryptPk4(uint pid, Action<byte[]> fill)
+    {
+        var d = new byte[136]; // Blöcke A–D in Reihenfolge ab 0x08
+        fill(d);
+        BitConverter.GetBytes(pid).CopyTo(d, 0);
+
+        ushort sum = 0;
+        for (int i = 8; i < 136; i += 2) sum = unchecked((ushort)(sum + BitConverter.ToUInt16(d, i)));
+        BitConverter.GetBytes(sum).CopyTo(d, 6);
+
+        // PID 0 -> Reihenfolge ABCD, also nur verschlüsseln
+        uint seed = sum;
+        for (int i = 8; i < 136; i += 2)
+        {
+            seed = unchecked(seed * 0x41C64E6D + 0x6073);
+            ushort word = (ushort)(BitConverter.ToUInt16(d, i) ^ (seed >> 16));
+            BitConverter.GetBytes(word).CopyTo(d, i);
+        }
+        return d;
+    }
+
+    [Fact]
+    public void Reads_party_pokemon_from_platinum_save()
+    {
+        var pk4 = EncryptPk4(0, d =>
+        {
+            BitConverter.GetBytes((ushort)390).CopyTo(d, 0x08); // Panflam
+            BitConverter.GetBytes(135u).CopyTo(d, 0x10);         // EP
+            BitConverter.GetBytes((ushort)10).CopyTo(d, 0x28);  // Kratzer
+            d[0x7B] = 26; d[0x7C] = 11; d[0x7D] = 8;             // gefangen am 08.11.2026
+            d[0x83] = 4;                                          // Pokéball
+        });
+
+        var save = new byte[0x80000];
+        save[0x9C] = 1;                 // ein Pokémon im Team
+        pk4.CopyTo(save, 0xA0);
+
+        var list = Gen4PokemonReader.Read(save, SaveFormat.Gen4Platinum, 0, "Platin");
+
+        var p = Assert.Single(list);
+        Assert.Equal(390, p.Species);
+        Assert.Equal(135u, p.Exp);
+        Assert.Equal(10, p.Moves[0]);
+        Assert.Equal(new DateOnly(2026, 11, 8), p.MetDate);
+        Assert.Equal(4, p.Ball);
+        Assert.Equal("Team", p.Location);
+    }
+
+    [Fact]
+    public void Decodes_gen4_text()
+    {
+        // "Flammi" in der Gen-4-Zeichentabelle, dann Ende (0xFFFF)
+        ushort[] chars = [0x0130, 0x0150, 0x0145, 0x0151, 0x0151, 0x014D, 0xFFFF];
+        var bytes = chars.SelectMany(c => BitConverter.GetBytes(c)).ToArray();
+        Assert.Equal("Flammi", Gen4PokemonReader.DecodeString(bytes));
     }
 }

@@ -64,19 +64,66 @@ public sealed class PokeApiRepository
         return result.OrderBy(s => s.Id).ToList();
     }
 
+    /// <summary>Attacken, Wesen und Wachstumskurven – für die Anzeige einzelner Pokémon.</summary>
+    public async Task<GameData> LoadGameDataAsync(bool forceRefresh = false, CancellationToken ct = default)
+    {
+        async Task<List<Dictionary<string, string>>> Table(string name) =>
+            Csv.Parse(await File.ReadAllTextAsync(await GetCachedAsync(name, CsvBase + name, forceRefresh, ct), ct));
+
+        var languages = await Table("languages.csv");
+        int de = int.Parse(languages.First(r => r["identifier"] == "de")["id"]);
+
+        var moves = new Dictionary<int, string>();
+        foreach (var r in await Table("move_names.csv"))
+            if (int.Parse(r["local_language_id"]) == de) moves[int.Parse(r["move_id"])] = r["name"];
+
+        var natureNamesById = new Dictionary<int, string>();
+        foreach (var r in await Table("nature_names.csv"))
+            if (int.Parse(r["local_language_id"]) == de) natureNamesById[int.Parse(r["nature_id"])] = r["name"];
+        var natures = new string[25];
+        foreach (var r in await Table("natures.csv"))
+        {
+            int gameIndex = int.Parse(r["game_index"]);
+            if (gameIndex is >= 0 and < 25)
+                natures[gameIndex] = natureNamesById.GetValueOrDefault(int.Parse(r["id"]), r["identifier"]);
+        }
+
+        var growth = new Dictionary<int, int>();
+        foreach (var r in await Table("pokemon_species.csv"))
+            growth[int.Parse(r["id"])] = int.Parse(r["growth_rate_id"]);
+
+        var expTables = new Dictionary<int, int[]>();
+        foreach (var r in await Table("experience.csv"))
+        {
+            int rate = int.Parse(r["growth_rate_id"]), level = int.Parse(r["level"]);
+            if (!expTables.TryGetValue(rate, out var table)) expTables[rate] = table = new int[101];
+            if (level is >= 1 and <= 100) table[level] = int.Parse(r["experience"]);
+        }
+
+        return new GameData
+        {
+            MoveNames = moves,
+            NatureNames = natures,
+            GrowthRateBySpecies = growth,
+            ExpTables = expTables,
+        };
+    }
+
     /// <summary>Lädt das Bild eines Pokémon (einmalig) und gibt den lokalen Pfad zurück.</summary>
     /// <summary>Höchstens 6 Bilder gleichzeitig laden – der Pokédex fragt beim Aufklappen viele auf einmal an.</summary>
     private static readonly SemaphoreSlim SpriteDownloads = new(6);
 
-    public async Task<string?> GetSpritePathAsync(int id, CancellationToken ct = default)
+    public async Task<string?> GetSpritePathAsync(int id, CancellationToken ct = default, bool shiny = false)
     {
-        var local = Path.Combine(CacheFolder, "sprites", $"{id}.png");
+        var relative = Path.Combine(shiny ? "sprites-shiny" : "sprites", $"{id}.png");
+        var local = Path.Combine(CacheFolder, relative);
         if (File.Exists(local)) return local;
 
         await SpriteDownloads.WaitAsync(ct);
         try
         {
-            return await GetCachedAsync(Path.Combine("sprites", $"{id}.png"), $"{SpriteBase}{id}.png", false, ct);
+            var url = shiny ? $"{SpriteBase}shiny/{id}.png" : $"{SpriteBase}{id}.png";
+            return await GetCachedAsync(relative, url, false, ct);
         }
         catch (Exception ex) when (ex is HttpRequestException or IOException)
         {

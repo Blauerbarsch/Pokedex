@@ -70,6 +70,23 @@ public static class SaveReader
                 Console.WriteLine("[DexHub] " + message);
     }
 
+    /// <summary>Welche der beiden Gen-4-Spielstand-Kopien die neuere ist (0 oder 0x40000), -1 wenn keine gültig.</summary>
+    public static int FindNewestGen4Partition(byte[] data, SaveFormat format)
+    {
+        if (!Gen4DexOffsets.TryGetValue(format, out var dexOffset)) return -1;
+        int best = -1, bestCaught = -1, bestSeen = -1;
+        for (int partition = 0; partition < data.Length; partition += Gen4PartitionSize)
+        {
+            int offset = FindGen4Dex(data, partition, dexOffset);
+            if (offset < 0) continue;
+            int caught = ReadFlags(data, offset + 0x04, Gen4SpeciesCount).Count;
+            int seen = ReadFlags(data, offset + 0x44, Gen4SpeciesCount).Count;
+            if (caught > bestCaught || (caught == bestCaught && seen > bestSeen))
+                (best, bestCaught, bestSeen) = (partition, caught, seen);
+        }
+        return best;
+    }
+
     private static DexProgress? ParseGen4(byte[] data, int dexOffset, string source)
     {
         // Beide Kopien prüfen. Der Pokédex wird nie kleiner, also ist die Kopie mit
