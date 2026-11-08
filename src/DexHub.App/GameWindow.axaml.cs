@@ -1,11 +1,13 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
+using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
 using Avalonia.Threading;
 using DexHub.Core.Emulation;
 using DexHub.Core.Libretro;
+using DexHub.Core.Settings;
 using GamePlatform = DexHub.Core.Models.Platform;
 
 namespace DexHub.App;
@@ -13,31 +15,11 @@ namespace DexHub.App;
 /// <summary>Fenster, in dem ein Spiel läuft.</summary>
 public partial class GameWindow : Window
 {
-    /// <summary>
-    /// Tastaturbelegung. Y und Z sind beide B, damit es auf deutscher und englischer Tastatur passt.
-    /// </summary>
-    private static readonly Dictionary<Key, JoypadButton> KeyMap = new()
-    {
-        [Key.Up] = JoypadButton.Up,
-        [Key.Down] = JoypadButton.Down,
-        [Key.Left] = JoypadButton.Left,
-        [Key.Right] = JoypadButton.Right,
-        [Key.X] = JoypadButton.A,
-        [Key.Y] = JoypadButton.B,
-        [Key.Z] = JoypadButton.B,
-        [Key.S] = JoypadButton.X,
-        [Key.A] = JoypadButton.Y,
-        [Key.Q] = JoypadButton.L,
-        [Key.W] = JoypadButton.R,
-        [Key.Enter] = JoypadButton.Start,
-        [Key.Back] = JoypadButton.Select,
-        [Key.RightShift] = JoypadButton.Select,
-    };
-
     public const string ControlsHelp =
-        "Steuerung: Pfeiltasten · X = A · Y/Z = B · A = Y · S = X · Q/W = L/R · " +
-        "Enter = Start · Rücktaste = Select · P = Pause · F5 = Schnellspeichern · F9 = Laden";
+        "Steuerung: Pfeiltasten · X = A · Y = B · Enter = Start · Rücktaste = Select · Leertaste halten = Schnellvorlauf · " +
+        "P = Pause · F5/F9 = Schnellspeichern/-laden · F11 = Vollbild  (Belegung änderbar unter Einstellungen → Steuerung)";
 
+    private readonly AppSettings _settings;
     private readonly EmulatorSession _session;
     private WriteableBitmap? _bitmap;
     private long _lastFrameId = -1;
@@ -45,13 +27,16 @@ public partial class GameWindow : Window
     private DispatcherTimer? _osdTimer;
 
     // Nur für den XAML-Designer der IDE
-    public GameWindow() : this(null!) { }
+    public GameWindow() : this(null!, null!) { }
 
-    public GameWindow(EmulatorSession session)
+    public GameWindow(EmulatorSession session, AppSettings settings)
     {
         InitializeComponent();
         _session = session;
+        _settings = settings;
         if (session is null) return;
+
+        ApplySettings();
 
         Title = $"{session.Game.Title} – DexHub";
         if (session.Game.Info.Platform == GamePlatform.NintendoDS)
@@ -63,6 +48,7 @@ public partial class GameWindow : Window
 
         KeyDown += OnKeyDown;
         KeyUp += OnKeyUp;
+        Deactivated += (_, _) => ReleaseAllKeys();
 
         session.Message += msg => Dispatcher.UIThread.Post(() => ShowOsd(msg));
         session.Failed += msg => Dispatcher.UIThread.Post(() => ShowOsd("Fehler: " + msg, persistent: true));
@@ -115,6 +101,34 @@ public partial class GameWindow : Window
     // Eingabe
     // =====================================================================
 
+    /// <summary>Übernimmt Lautstärke, Skalierung usw. – auch während das Spiel läuft.</summary>
+    public void ApplySettings()
+    {
+        _session.Volume = _settings.Volume / 100f;
+        _session.FastForwardSpeed = _settings.FastForwardSpeed;
+        RenderOptions.SetBitmapInterpolationMode(Screen,
+            _settings.SmoothScaling ? BitmapInterpolationMode.HighQuality : BitmapInterpolationMode.None);
+    }
+
+    /// <summary>Welche Spieltaste liegt auf dieser Tastaturtaste? (laut Einstellungen)</summary>
+    private bool TryMapKey(Key key, out JoypadButton button)
+    {
+        foreach (var (b, keyName) in _settings.Input.Keyboard)
+        {
+            if (Enum.TryParse<Key>(keyName, out var bound) && bound == key)
+            {
+                button = b;
+                return true;
+            }
+        }
+        button = default;
+        return false;
+    }
+
+    private bool IsHotkey(Key key, HotkeyAction action) =>
+        _settings.Input.HotkeyKeyboard.TryGetValue(action, out var name)
+        && Enum.TryParse<Key>(name, out var bound) && bound == key;
+
     private void OnKeyDown(object? sender, KeyEventArgs e)
     {
         switch (e.Key)
@@ -125,13 +139,21 @@ public partial class GameWindow : Window
             case Key.F9:
                 _session.RequestLoadState();
                 break;
+            case Key.F11:
+                WindowState = WindowState == WindowState.FullScreen ? WindowState.Normal : WindowState.FullScreen;
+                break;
+            case Key.Escape when WindowState == WindowState.FullScreen:
+                WindowState = WindowState.Normal;
+                break;
             case Key.P:
                 _session.TogglePause();
                 ShowOsd(_session.IsPaused ? "Pausiert (P zum Fortsetzen)" : "Weiter", persistent: _session.IsPaused);
                 break;
             default:
-                if (KeyMap.TryGetValue(e.Key, out var button)) _session.SetButton(button, true);
-                else return;
+                bool handled = false;
+                if (TryMapKey(e.Key, out var button)) { _session.SetButton(button, true); handled = true; }
+                if (IsHotkey(e.Key, HotkeyAction.FastForward)) { _session.SetFastForward(true); handled = true; }
+                if (!handled) return;
                 break;
         }
         e.Handled = true;
@@ -139,11 +161,23 @@ public partial class GameWindow : Window
 
     private void OnKeyUp(object? sender, KeyEventArgs e)
     {
-        if (KeyMap.TryGetValue(e.Key, out var button))
+        if (TryMapKey(e.Key, out var button))
         {
             _session.SetButton(button, false);
             e.Handled = true;
         }
+        if (IsHotkey(e.Key, HotkeyAction.FastForward))
+        {
+            _session.SetFastForward(false);
+            e.Handled = true;
+        }
+    }
+
+    /// <summary>Fenster verliert den Fokus: alle Tasten loslassen, damit nichts "hängen" bleibt.</summary>
+    private void ReleaseAllKeys()
+    {
+        foreach (var b in Enum.GetValues<JoypadButton>()) _session.SetButton(b, false);
+        _session.SetFastForward(false);
     }
 
     private void OnPointerPressed(object? sender, PointerPressedEventArgs e) => UpdatePointer(e, true);

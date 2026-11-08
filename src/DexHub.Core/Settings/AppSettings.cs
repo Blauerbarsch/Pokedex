@@ -1,4 +1,5 @@
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace DexHub.Core.Settings;
 
@@ -7,6 +8,18 @@ public sealed class AppSettings
 {
     /// <summary>Ordner mit den eigenen ROMs.</summary>
     public string RomFolder { get; set; } = "";
+
+    /// <summary>Tastatur- und Controller-Belegung.</summary>
+    public InputSettings Input { get; set; } = new();
+
+    /// <summary>Lautstärke 0–100.</summary>
+    public int Volume { get; set; } = 80;
+
+    /// <summary>Wie schnell der Schnellvorlauf läuft (2 = doppelt so schnell). 0 = so schnell wie möglich.</summary>
+    public int FastForwardSpeed { get; set; } = 3;
+
+    /// <summary>false = scharfe Pixel (Originallook), true = weichgezeichnet.</summary>
+    public bool SmoothScaling { get; set; }
 
     // ---------- Feste Ordner im Benutzerverzeichnis ----------
 
@@ -33,21 +46,28 @@ public sealed class AppSettings
 
     private static string SettingsFile => Path.Combine(AppDataFolder, "settings.json");
 
-    private static readonly JsonSerializerOptions JsonOptions = new() { WriteIndented = true };
+    private static readonly JsonSerializerOptions JsonOptions = new()
+    {
+        WriteIndented = true,
+        Converters = { new JsonStringEnumConverter() }, // Enums als Text, damit die Datei lesbar bleibt
+    };
 
     public static AppSettings Load()
     {
+        var settings = new AppSettings();
         try
         {
             if (File.Exists(SettingsFile))
-                return JsonSerializer.Deserialize<AppSettings>(File.ReadAllText(SettingsFile), JsonOptions)
-                       ?? new AppSettings();
+                settings = JsonSerializer.Deserialize<AppSettings>(File.ReadAllText(SettingsFile), JsonOptions)
+                           ?? new AppSettings();
         }
         catch (JsonException)
         {
             // Kaputte Datei -> mit Standardwerten weitermachen
         }
-        return new AppSettings();
+        settings.Input ??= new InputSettings();
+        settings.Input.EnsureDefaults();
+        return settings;
     }
 
     public void Save() => File.WriteAllText(SettingsFile, JsonSerializer.Serialize(this, JsonOptions));

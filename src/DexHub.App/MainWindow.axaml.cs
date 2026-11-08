@@ -7,7 +7,10 @@ using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform.Storage;
 using Avalonia.Threading;
+using Avalonia.Controls.Primitives;
 using DexHub.App.Audio;
+using DexHub.App.Input;
+using DexHub.Core.Libretro;
 using DexHub.Core.Detection;
 using DexHub.Core.Emulation;
 using DexHub.Core.Models;
@@ -36,6 +39,9 @@ public partial class MainWindow : Window
         InitializeComponent();
         FillSettingsForm();
         _ready = true;
+
+        // Tastendrücke abfangen, bevor ein Steuerelement sie bekommt (für "Taste belegen")
+        AddHandler(KeyDownEvent, OnCaptureKeyDown, RoutingStrategies.Tunnel);
 
         Opened += async (_, _) =>
         {
@@ -136,6 +142,8 @@ public partial class MainWindow : Window
         }
 
         var session = new EmulatorSession(game, corePath, new SdlAudioSink());
+        SdlGamepad.Instance.Settings = _settings.Input;
+        session.InputProvider = SdlGamepad.Instance;
 
         // Speichert das Spiel, sofort den Pokédex aktualisieren
         session.SaveWritten += _ => Dispatcher.UIThread.Post(() =>
@@ -145,7 +153,7 @@ public partial class MainWindow : Window
             SetStatus($"Spielstand von {game.Title} gesichert – Pokédex aktualisiert.");
         });
 
-        var window = new GameWindow(session);
+        var window = new GameWindow(session, _settings);
         window.Closed += (_, _) =>
         {
             _runningGame = null;
@@ -257,10 +265,232 @@ public partial class MainWindow : Window
                 : $"✗ {CoreCatalog.Cores[p]} fehlt"));
         CoreStatusText.Text = string.Join("\n", lines);
 
+        VolumeSlider.Value = _settings.Volume;
+        VolumeText.Text = $"{_settings.Volume} %";
+        FastForwardBox.SelectedIndex = Math.Max(0, Array.IndexOf(FastForwardSpeeds, _settings.FastForwardSpeed));
+        SmoothBox.IsChecked = _settings.SmoothScaling;
+        BuildControlsPanel();
+
         FoldersText.Text =
             $"Spielstände: {AppSettings.SavesFolder}\n" +
             $"Schnellspeicherungen: {AppSettings.StatesFolder}\n" +
             $"BIOS/Firmware (optional): {AppSettings.SystemFolder}";
+    }
+
+    private static readonly int[] FastForwardSpeeds = [2, 3, 4, 8, 0];
+
+    private void OnVolumeChanged(object? sender, RangeBaseValueChangedEventArgs e)
+    {
+        if (!_ready) return;
+        _settings.Volume = (int)Math.Round(VolumeSlider.Value);
+        VolumeText.Text = $"{_settings.Volume} %";
+        SaveAndApply();
+    }
+
+    private void OnFastForwardChanged(object? sender, SelectionChangedEventArgs e)
+    {
+        if (!_ready || FastForwardBox.SelectedIndex < 0) return;
+        _settings.FastForwardSpeed = FastForwardSpeeds[FastForwardBox.SelectedIndex];
+        SaveAndApply();
+    }
+
+    private void OnSmoothChanged(object? sender, RoutedEventArgs e)
+    {
+        if (!_ready) return;
+        _settings.SmoothScaling = SmoothBox.IsChecked == true;
+        SaveAndApply();
+    }
+
+    /// <summary>Speichert und gibt Änderungen sofort an ein laufendes Spiel weiter.</summary>
+    private void SaveAndApply()
+    {
+        _settings.Save();
+        _runningGame?.ApplySettings();
+    }
+
+    // =====================================================================
+    // Steuerung belegen
+    // =====================================================================
+
+    private Action<string>? _keyCapture;
+    private DispatcherTimer? _padCaptureTimer;
+
+    private void BuildControlsPanel()
+    {
+        StopPadCapture();
+        _keyCapture = null;
+        var input = _settings.Input;
+        ControlsPanel.Children.Clear();
+
+        ControlsPanel.Children.Add(new TextBlock
+        {
+            Text = "Auf eine Belegung klicken und dann die gewünschte Taste drücken. " +
+                   "Esc bricht ab, Entf löscht eine Tastatur-Belegung. Änderungen gelten sofort, auch im laufenden Spiel.",
+            TextWrapping = TextWrapping.Wrap,
+            Opacity = 0.8,
+        });
+
+        var names = SdlGamepad.Instance.ConnectedNames();
+        ControlsPanel.Children.Add(new TextBlock
+        {
+            Text = names.Count == 0
+                ? "🎮 Kein Controller gefunden. Anschließen und auf „Controller suchen“ klicken."
+                : "🎮 Verbunden: " + string.Join(", ", names),
+            FontWeight = FontWeight.SemiBold,
+        });
+
+        var grid = new Grid { ColumnDefinitions = new ColumnDefinitions("170,200,250") };
+        int row = 0;
+
+        void AddCell(Control control, int column)
+        {
+            Grid.SetRow(control, row);
+            Grid.SetColumn(control, column);
+            control.Margin = new Thickness(0, 3, 10, 3);
+            grid.Children.Add(control);
+        }
+
+        void AddRow(string label, string keyText, Action<string> setKey, string padText, Action<PadControl> setPad)
+        {
+            grid.RowDefinitions.Add(new RowDefinition(GridLength.Auto));
+            AddCell(new TextBlock { Text = label, VerticalAlignment = VerticalAlignment.Center }, 0);
+
+            var keyButton = new Button { Content = keyText, HorizontalAlignment = HorizontalAlignment.Stretch };
+            keyButton.Click += (_, _) => StartKeyCapture(keyButton, setKey);
+            AddCell(keyButton, 1);
+
+            var padButton = new Button { Content = padText, HorizontalAlignment = HorizontalAlignment.Stretch };
+            padButton.Click += (_, _) => StartPadCapture(padButton, setPad);
+            AddCell(padButton, 2);
+            row++;
+        }
+
+        // Kopfzeile
+        grid.RowDefinitions.Add(new RowDefinition(GridLength.Auto));
+        AddCell(new TextBlock { Text = "Spieltaste", FontWeight = FontWeight.SemiBold }, 0);
+        AddCell(new TextBlock { Text = "Tastatur", FontWeight = FontWeight.SemiBold }, 1);
+        AddCell(new TextBlock { Text = "Controller", FontWeight = FontWeight.SemiBold }, 2);
+        row++;
+
+        // Neue Wörterbücher statt Änderungen an den alten: der Emulator-Thread liest gleichzeitig mit
+        foreach (var (button, label) in InputSettings.ButtonLabels)
+        {
+            AddRow(label,
+                InputSettings.KeyLabel(input.Keyboard.GetValueOrDefault(button, "")),
+                key => input.Keyboard = new(input.Keyboard) { [button] = key },
+                InputSettings.PadLabel(input.Gamepad.GetValueOrDefault(button, PadControl.None)),
+                pad => input.Gamepad = new(input.Gamepad) { [button] = pad });
+        }
+
+        foreach (var action in Enum.GetValues<HotkeyAction>())
+        {
+            AddRow(InputSettings.HotkeyLabel(action),
+                InputSettings.KeyLabel(input.HotkeyKeyboard.GetValueOrDefault(action, "")),
+                key => input.HotkeyKeyboard = new(input.HotkeyKeyboard) { [action] = key },
+                InputSettings.PadLabel(input.HotkeyGamepad.GetValueOrDefault(action, PadControl.None)),
+                pad => input.HotkeyGamepad = new(input.HotkeyGamepad) { [action] = pad });
+        }
+
+        ControlsPanel.Children.Add(grid);
+
+        var stickBox = new CheckBox
+        {
+            Content = "Linker Stick bewegt zusätzlich das Steuerkreuz",
+            IsChecked = input.LeftStickAsDpad,
+        };
+        stickBox.IsCheckedChanged += (_, _) =>
+        {
+            input.LeftStickAsDpad = stickBox.IsChecked == true;
+            _settings.Save();
+        };
+        ControlsPanel.Children.Add(stickBox);
+
+        var resetButton = new Button { Content = "Standardbelegung wiederherstellen" };
+        resetButton.Click += (_, _) =>
+        {
+            input.ResetToDefaults();
+            _settings.Save();
+            BuildControlsPanel();
+        };
+        var rescanButton = new Button { Content = "Controller suchen" };
+        rescanButton.Click += (_, _) => BuildControlsPanel();
+
+        ControlsPanel.Children.Add(new StackPanel
+        {
+            Orientation = Orientation.Horizontal,
+            Spacing = 8,
+            Children = { resetButton, rescanButton },
+        });
+
+        ControlsPanel.Children.Add(new TextBlock
+        {
+            Text = "Feste Tasten im Spiel: P = Pause · F5 = Schnellspeichern · F9 = Schnellladen · F11 = Vollbild",
+            Opacity = 0.6,
+            TextWrapping = TextWrapping.Wrap,
+        });
+    }
+
+    private void StartKeyCapture(Button button, Action<string> setKey)
+    {
+        StopPadCapture();
+        button.Content = "Taste drücken…";
+        _keyCapture = key =>
+        {
+            if (key == nameof(Key.Delete)) setKey("");
+            else if (key != nameof(Key.Escape)) setKey(key);
+            _settings.Save();
+            BuildControlsPanel();
+        };
+    }
+
+    private void OnCaptureKeyDown(object? sender, KeyEventArgs e)
+    {
+        if (_keyCapture is null) return;
+        var capture = _keyCapture;
+        _keyCapture = null;
+        e.Handled = true;
+        capture(e.Key.ToString());
+    }
+
+    private void StartPadCapture(Button button, Action<PadControl> setPad)
+    {
+        StopPadCapture();
+        _keyCapture = null;
+        button.Content = "Controller-Taste drücken…";
+
+        bool released = false;
+        var started = DateTime.UtcNow;
+        var timer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(30) };
+        timer.Tick += (_, _) =>
+        {
+            var pressed = SdlGamepad.Instance.FirstPressed();
+            if (!released)
+            {
+                released = pressed == PadControl.None; // erst warten, bis alles losgelassen ist
+            }
+            else if (pressed != PadControl.None)
+            {
+                StopPadCapture();
+                setPad(pressed);
+                _settings.Save();
+                BuildControlsPanel();
+                return;
+            }
+
+            if ((DateTime.UtcNow - started).TotalSeconds > 6)
+            {
+                StopPadCapture();
+                BuildControlsPanel(); // Zeit abgelaufen -> nichts ändern
+            }
+        };
+        _padCaptureTimer = timer;
+        timer.Start();
+    }
+
+    private void StopPadCapture()
+    {
+        _padCaptureTimer?.Stop();
+        _padCaptureTimer = null;
     }
 
     private async void OnSaveSettingsClick(object? sender, RoutedEventArgs e)

@@ -27,18 +27,19 @@ Kein RetroArch, keine Zusatzprogramme: einfach starten, ROM-Ordner wählen, spie
 
 ## Steuerung
 
-| Taste | Funktion |
-|---|---|
-| Pfeiltasten | Steuerkreuz |
-| X | A |
-| Y oder Z | B |
-| A / S | Y / X (DS) |
-| Q / W | L / R |
-| Enter | Start |
-| Rücktaste | Select |
-| P | Pause |
-| F5 / F9 | Schnellspeichern / Schnellladen |
-| Maus | DS-Touchscreen |
+Tastatur und Controller (Xbox, PlayStation, Switch Pro, Steam Deck …) lassen sich unter
+**Steuerung** frei belegen. Standard:
+
+| Spieltaste | Tastatur | Controller (nach Position wie bei Nintendo) |
+|---|---|---|
+| Steuerkreuz | Pfeiltasten | Steuerkreuz oder linker Stick |
+| A / B | X / Y | rechte / untere Taste |
+| X / Y (DS) | S / A | obere / linke Taste |
+| L / R | Q / W | LB / RB |
+| Start / Select | Enter / Rücktaste | Start / Back |
+| Schnellvorlauf (halten) | Leertaste | RT / R2 |
+
+Fest: P = Pause, F5/F9 = Schnellspeichern/-laden, F11 = Vollbild, Maus = DS-Touchscreen.
 
 ## Entwickeln (Windows & Mac)
 
@@ -95,7 +96,7 @@ beim ersten Start übernommen.
 - [x] Eingebaute Emulatoren für Pokémon Mini, GB/GBC, GBA, DS
 - [x] Pokédex mit deutschen Namen und Bildern
 - [x] Spielstände Gen 1 + 2 auslesen
-- [ ] Gamepad-Unterstützung und frei belegbare Tasten
+- [x] Controller-Unterstützung und frei belegbare Tasten
 - [ ] Spielstände Gen 3 (GBA, inkl. Prüfsummen und Sektorrotation)
 - [ ] Pokédex live aus dem Arbeitsspeicher, auch ohne Speichern im Spiel
 - [ ] Spielstände Gen 4/5 (DS)
