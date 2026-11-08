@@ -11,6 +11,7 @@ using Avalonia.Controls.Primitives;
 using DexHub.App.Audio;
 using DexHub.App.Input;
 using DexHub.Core.Libretro;
+using DexHub.Core.Covers;
 using DexHub.Core.Detection;
 using DexHub.Core.Emulation;
 using DexHub.Core.Models;
@@ -96,12 +97,151 @@ public partial class MainWindow : Window
         SetStatus($"{_games.Count} Spiel(e) gefunden.");
     }
 
+    // ---------- Kachel-Ansicht ----------
+
+    private readonly CoverService _covers = new();
+    private readonly Dictionary<GameEntry, Border> _tiles = [];
+    private GameEntry? _selectedGame;
+
+    private static readonly IBrush TileBrush = new SolidColorBrush(Color.FromArgb(28, 255, 255, 255));
+    private static readonly IBrush SelectedBrush = new SolidColorBrush(Color.Parse("#E3350D"));
+
+    /// <summary>Baut die Bibliothek neu auf: pro Konsole ein einklappbarer Bereich mit Spiel-Kacheln.</summary>
     private void RefreshGamesList()
     {
-        var selected = GamesList.SelectedItem;
-        GamesList.ItemsSource = null;
-        GamesList.ItemsSource = _games;
-        GamesList.SelectedItem = selected;
+        LibraryPanel.Children.Clear();
+        _tiles.Clear();
+
+        var query = LibrarySearchBox.Text?.Trim() ?? "";
+        var visible = _games.Where(g => query.Length == 0
+            || g.Title.Contains(query, StringComparison.OrdinalIgnoreCase)
+            || g.FileName.Contains(query, StringComparison.OrdinalIgnoreCase));
+
+        foreach (var group in visible.GroupBy(g => g.Info.Platform).OrderBy(g => g.Key))
+        {
+            var wrap = new WrapPanel();
+            foreach (var game in group.OrderBy(g => g.Info.Generation ?? 99).ThenBy(g => g.Title))
+                wrap.Children.Add(CreateTile(game));
+
+            var platform = group.Key;
+            var expander = new Expander
+            {
+                Header = $"{platform.DisplayName()}  ({group.Count()})",
+                Content = wrap,
+                IsExpanded = !_settings.CollapsedPlatforms.Contains(platform),
+                HorizontalAlignment = HorizontalAlignment.Stretch,
+            };
+            // Auf-/Zuklappen merken
+            expander.PropertyChanged += (_, e) =>
+            {
+                if (e.Property != Expander.IsExpandedProperty) return;
+                if (expander.IsExpanded) _settings.CollapsedPlatforms.Remove(platform);
+                else _settings.CollapsedPlatforms.Add(platform);
+                _settings.Save();
+            };
+            LibraryPanel.Children.Add(expander);
+        }
+
+        if (_selectedGame is not null && !_tiles.ContainsKey(_selectedGame)) _selectedGame = null;
+        SelectGame(_selectedGame);
+    }
+
+    private Border CreateTile(GameEntry game)
+    {
+        var cover = new Image { Width = 140, Height = 140, Stretch = Stretch.Uniform };
+        var placeholder = new TextBlock
+        {
+            Text = game.PlatformName,
+            Opacity = 0.4,
+            TextWrapping = TextWrapping.Wrap,
+            TextAlignment = TextAlignment.Center,
+            HorizontalAlignment = HorizontalAlignment.Center,
+            VerticalAlignment = VerticalAlignment.Center,
+        };
+        var coverHost = new Grid { Width = 140, Height = 140, Children = { placeholder, cover } };
+
+        var tile = new Border
+        {
+            Width = 170,
+            Margin = new Thickness(6),
+            Padding = new Thickness(10),
+            CornerRadius = new CornerRadius(8),
+            Background = TileBrush,
+            BorderThickness = new Thickness(2),
+            BorderBrush = Brushes.Transparent,
+            Cursor = new Cursor(StandardCursorType.Hand),
+            Child = new StackPanel
+            {
+                Spacing = 6,
+                Children =
+                {
+                    coverHost,
+                    new TextBlock
+                    {
+                        Text = game.Title,
+                        FontWeight = FontWeight.SemiBold,
+                        TextWrapping = TextWrapping.Wrap,
+                        TextAlignment = TextAlignment.Center,
+                    },
+                    new TextBlock
+                    {
+                        Text = game.StatusText,
+                        FontSize = 11,
+                        Opacity = 0.6,
+                        TextWrapping = TextWrapping.Wrap,
+                        TextAlignment = TextAlignment.Center,
+                    },
+                },
+            },
+        };
+
+        tile.PointerPressed += async (_, e) =>
+        {
+            SelectGame(game);
+            if (e.ClickCount == 2 && e.GetCurrentPoint(tile).Properties.IsLeftButtonPressed)
+                await LaunchGameAsync(game);
+        };
+
+        var play = new MenuItem { Header = "▶ Spielen" };
+        play.Click += async (_, _) => await LaunchGameAsync(game);
+        var fresh = new MenuItem { Header = "Ohne Fortsetzen starten" };
+        fresh.Click += async (_, _) => await LaunchGameAsync(game, resume: false);
+        var info = new MenuItem { Header = "Datei: " + game.FileName, IsEnabled = false };
+        tile.ContextMenu = new ContextMenu { ItemsSource = new object[] { play, fresh, new Separator(), info } };
+
+        _tiles[game] = tile;
+        _ = LoadCoverAsync(game, cover, placeholder);
+        return tile;
+    }
+
+    private async Task LoadCoverAsync(GameEntry game, Image target, TextBlock placeholder)
+    {
+        try
+        {
+            var path = await _covers.GetCoverPathAsync(game);
+            if (path is null) return;
+            target.Source = new Bitmap(path);
+            placeholder.IsVisible = false;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[DexHub] Cover für {game.Title} fehlgeschlagen: {ex.Message}");
+        }
+    }
+
+    private void SelectGame(GameEntry? game)
+    {
+        _selectedGame = game;
+        foreach (var (g, tile) in _tiles)
+            tile.BorderBrush = g == game ? SelectedBrush : Brushes.Transparent;
+        SelectedGameText.Text = game is null
+            ? "Doppelklick startet ein Spiel, Rechtsklick zeigt mehr."
+            : $"Ausgewählt: {game.Title}";
+    }
+
+    private void OnLibrarySearchChanged(object? sender, TextChangedEventArgs e)
+    {
+        if (_ready) RefreshGamesList();
     }
 
     private async void OnRescanClick(object? sender, RoutedEventArgs e) => await ScanLibraryAsync();
@@ -110,16 +250,18 @@ public partial class MainWindow : Window
 
     private async void OnPlayFreshClick(object? sender, RoutedEventArgs e) => await LaunchSelectedAsync(resume: false);
 
-    private async void OnGameDoubleTapped(object? sender, TappedEventArgs e) => await LaunchSelectedAsync();
-
     private async Task LaunchSelectedAsync(bool resume = true)
     {
-        if (GamesList.SelectedItem is not GameEntry game)
+        if (_selectedGame is null)
         {
             SetStatus("Bitte zuerst ein Spiel auswählen.");
             return;
         }
+        await LaunchGameAsync(_selectedGame, resume);
+    }
 
+    private async Task LaunchGameAsync(GameEntry game, bool resume = true)
+    {
         // Es kann immer nur ein Spiel gleichzeitig laufen (Einschränkung von libretro)
         if (_runningGame is not null)
         {
@@ -149,6 +291,7 @@ public partial class MainWindow : Window
         SdlGamepad.Instance.Settings = _settings.Input;
         session.InputProvider = SdlGamepad.Instance;
         session.AutoResume = resume && _settings.AutoResume;
+        session.CoreOptions = new(_settings.CoreOptions.GetValueOrDefault(session.CoreName) ?? []);
 
         // Speichert das Spiel, sofort den Pokédex aktualisieren
         session.SaveWritten += _ => Dispatcher.UIThread.Post(() =>
@@ -159,9 +302,11 @@ public partial class MainWindow : Window
         });
 
         var window = new GameWindow(session, _settings);
+        window.VideoSettingsChanged += BuildVideoPanel;
         window.Closed += (_, _) =>
         {
             _runningGame = null;
+            BuildVideoPanel(); // jetzt sind evtl. neue Emulator-Optionen bekannt
             game.SavePath = SaveLocator.Find(game);
             RefreshGamesList();
             RebuildDex();
@@ -312,7 +457,7 @@ public partial class MainWindow : Window
         VolumeSlider.Value = _settings.Volume;
         VolumeText.Text = $"{_settings.Volume} %";
         FastForwardBox.SelectedIndex = Math.Max(0, Array.IndexOf(FastForwardSpeeds, _settings.FastForwardSpeed));
-        SmoothBox.IsChecked = _settings.SmoothScaling;
+        BuildVideoPanel();
         AutoResumeBox.IsChecked = _settings.AutoResume;
         FastForwardModeBox.SelectedIndex = (int)_settings.FastForwardMode;
         BuildControlsPanel();
@@ -340,12 +485,6 @@ public partial class MainWindow : Window
         SaveAndApply();
     }
 
-    private void OnSmoothChanged(object? sender, RoutedEventArgs e)
-    {
-        if (!_ready) return;
-        _settings.SmoothScaling = SmoothBox.IsChecked == true;
-        SaveAndApply();
-    }
 
     private void OnFastForwardModeChanged(object? sender, SelectionChangedEventArgs e)
     {
@@ -366,6 +505,172 @@ public partial class MainWindow : Window
     {
         _settings.Save();
         _runningGame?.ApplySettings();
+    }
+
+    // =====================================================================
+    // Bild-Einstellungen pro Konsole
+    // =====================================================================
+
+    private readonly HashSet<GamePlatform> _expandedVideoSections = [];
+
+    private void BuildVideoPanel()
+    {
+        VideoPanel.Children.Clear();
+        VideoPanel.Children.Add(new TextBlock
+        {
+            Text = "Einstellungen pro Konsole. Änderungen wirken sofort, auch im laufenden Spiel. " +
+                   "Im Spiel: F4 = Bildeffekt wechseln, F2 = DS-Anordnung, F3 = DS-Bildschirme tauschen " +
+                   "(änderbar im Tab Steuerung).",
+            TextWrapping = TextWrapping.Wrap,
+            Opacity = 0.8,
+        });
+
+        foreach (var platform in CoreCatalog.Cores.Keys)
+        {
+            var video = _settings.VideoFor(platform);
+            var content = new StackPanel { Spacing = 10 };
+
+            var smooth = new CheckBox { Content = "Weichzeichnen (aus = scharfe Pixel wie im Original)", IsChecked = video.Smooth };
+            smooth.IsCheckedChanged += (_, _) => { video.Smooth = smooth.IsChecked == true; SaveAndApply(); };
+            content.Children.Add(LabeledRow("Pixel", smooth));
+
+            content.Children.Add(LabeledRow("Skalierung",
+                Choice(VideoSettings.ScalingLabels, (int)video.Scaling, i => video.Scaling = (ScalingMode)i)));
+            content.Children.Add(LabeledRow("Bildeffekt",
+                Choice(VideoSettings.EffectLabels, (int)video.Effect, i => video.Effect = (OverlayEffect)i)));
+
+            if (platform == GamePlatform.NintendoDS)
+            {
+                content.Children.Add(LabeledRow("Bildschirm-Anordnung",
+                    Choice(VideoSettings.DsLayoutLabels, (int)video.DsLayout, i => video.DsLayout = (DsLayout)i)));
+                var swap = new CheckBox { Content = "Oberen und unteren Bildschirm tauschen", IsChecked = video.DsSwapScreens };
+                swap.IsCheckedChanged += (_, _) => { video.DsSwapScreens = swap.IsChecked == true; SaveAndApply(); };
+                content.Children.Add(LabeledRow("Tauschen", swap));
+            }
+
+            content.Children.Add(BuildCoreOptionsExpander(CoreCatalog.Cores[platform]));
+
+            var section = new Expander
+            {
+                Header = platform.DisplayName(),
+                Content = content,
+                IsExpanded = _expandedVideoSections.Contains(platform),
+                HorizontalAlignment = HorizontalAlignment.Stretch,
+            };
+            section.PropertyChanged += (_, e) =>
+            {
+                if (e.Property != Expander.IsExpandedProperty) return;
+                if (section.IsExpanded) _expandedVideoSections.Add(platform);
+                else _expandedVideoSections.Remove(platform);
+            };
+            VideoPanel.Children.Add(section);
+        }
+
+        VideoPanel.Children.Add(new TextBlock
+        {
+            Text = "Hinweis: Echte Grafik-Shader und eine höhere interne Auflösung (z. B. DS in 2x) brauchen die " +
+                   "Grafikkarte. Das kommt zusammen mit N64, GameCube und 3DS.",
+            TextWrapping = TextWrapping.Wrap,
+            Opacity = 0.6,
+        });
+    }
+
+    /// <summary>Die Einstellungen, die der Emulator selbst anbietet (z. B. Farbkorrektur).</summary>
+    private Expander BuildCoreOptionsExpander(string coreName)
+    {
+        var panel = new StackPanel { Spacing = 6 };
+        var definitions = CoreOptionStore.Load(coreName);
+
+        if (definitions.Count == 0)
+        {
+            panel.Children.Add(new TextBlock
+            {
+                Text = "Starte einmal ein Spiel dieser Konsole – dann erscheinen hier die Einstellungen des Emulators.",
+                TextWrapping = TextWrapping.Wrap,
+                Opacity = 0.7,
+            });
+        }
+        else
+        {
+            var current = _settings.CoreOptions.GetValueOrDefault(coreName) ?? [];
+            foreach (var def in definitions.Where(d => d.Values.Length >= 2))
+            {
+                var values = def.Values;
+                int index = Math.Max(0, Array.IndexOf(values, current.GetValueOrDefault(def.Key, values[0])));
+                var box = new ComboBox { ItemsSource = values, SelectedIndex = index, Width = 260 };
+                box.SelectionChanged += (_, _) =>
+                {
+                    if (box.SelectedIndex >= 0) SetCoreOption(coreName, def.Key, values[box.SelectedIndex]);
+                };
+                panel.Children.Add(LabeledRow(def.Description, box, labelWidth: 380));
+            }
+
+            var reset = new Button { Content = "Emulator-Optionen zurücksetzen" };
+            reset.Click += (_, _) =>
+            {
+                _settings.CoreOptions.Remove(coreName);
+                _settings.Save();
+                SetStatus("Emulator-Optionen zurückgesetzt – wirkt beim nächsten Spielstart.");
+                BuildVideoPanel();
+            };
+            panel.Children.Add(reset);
+            panel.Children.Add(new TextBlock
+            {
+                Text = "Manche Optionen wirken erst nach einem Neustart des Spiels.",
+                Opacity = 0.6,
+            });
+        }
+
+        return new Expander
+        {
+            Header = $"Emulator-Optionen ({coreName.Replace("_libretro", "")})",
+            Content = panel,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+        };
+    }
+
+    private void SetCoreOption(string coreName, string key, string value)
+    {
+        if (!_settings.CoreOptions.TryGetValue(coreName, out var options))
+            _settings.CoreOptions[coreName] = options = [];
+        options[key] = value;
+        _settings.Save();
+
+        if (_runningGame?.Session.CoreName == coreName)
+            _runningGame.Session.RequestOptionChange(key, value);
+    }
+
+    private static Grid LabeledRow(string label, Control control, int labelWidth = 200)
+    {
+        Grid.SetColumn(control, 1);
+        control.VerticalAlignment = VerticalAlignment.Center;
+        return new Grid
+        {
+            ColumnDefinitions = new ColumnDefinitions($"{labelWidth},*"),
+            Children =
+            {
+                new TextBlock
+                {
+                    Text = label,
+                    VerticalAlignment = VerticalAlignment.Center,
+                    TextWrapping = TextWrapping.Wrap,
+                    Margin = new Thickness(0, 0, 10, 0),
+                },
+                control,
+            },
+        };
+    }
+
+    private ComboBox Choice(string[] labels, int selected, Action<int> onChange)
+    {
+        var box = new ComboBox { ItemsSource = labels, SelectedIndex = selected, Width = 300 };
+        box.SelectionChanged += (_, _) =>
+        {
+            if (box.SelectedIndex < 0) return;
+            onChange(box.SelectedIndex);
+            SaveAndApply();
+        };
+        return box;
     }
 
     // =====================================================================

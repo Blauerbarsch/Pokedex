@@ -1,5 +1,6 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using DexHub.Core.Models;
 
 namespace DexHub.Core.Settings;
 
@@ -35,8 +36,21 @@ public sealed class AppSettings
     /// <summary>Wie schnell der Schnellvorlauf läuft (2 = doppelt so schnell). 0 = so schnell wie möglich.</summary>
     public int FastForwardSpeed { get; set; } = 3;
 
-    /// <summary>false = scharfe Pixel (Originallook), true = weichgezeichnet.</summary>
-    public bool SmoothScaling { get; set; }
+    /// <summary>Bild-Einstellungen pro Konsole.</summary>
+    public Dictionary<Platform, VideoSettings> Video { get; set; } = [];
+
+    public VideoSettings VideoFor(Platform platform)
+    {
+        if (!Video.TryGetValue(platform, out var video))
+            Video[platform] = video = new VideoSettings();
+        return video;
+    }
+
+    /// <summary>Eigene Werte für Emulator-Optionen: Core-Name -> (Option -> Wert).</summary>
+    public Dictionary<string, Dictionary<string, string>> CoreOptions { get; set; } = [];
+
+    /// <summary>Eingeklappte Konsolen in der Bibliothek.</summary>
+    public HashSet<Platform> CollapsedPlatforms { get; set; } = [];
 
     /// <summary>Beim Schließen automatisch sichern und beim nächsten Start dort weitermachen.</summary>
     public bool AutoResume { get; set; } = true;

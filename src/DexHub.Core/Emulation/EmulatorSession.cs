@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Diagnostics;
 using DexHub.Core.Libretro;
 using DexHub.Core.Models;
@@ -29,6 +30,19 @@ public sealed unsafe class EmulatorSession : ICoreHost, IDisposable
     public event Action<string>? SaveWritten;
     /// <summary>Emulator-Thread ist beendet.</summary>
     public event Action? Stopped;
+    /// <summary>Eine Zusatztaste auf dem Controller wurde gedrückt, die das Fenster erledigen muss (z. B. DS-Layout).</summary>
+    public event Action<HotkeyAction>? HotkeyPressed;
+
+    /// <summary>Name des Cores, z. B. "melondsds_libretro" – Schlüssel für die Emulator-Optionen.</summary>
+    public string CoreName => Path.GetFileNameWithoutExtension(_corePath);
+
+    /// <summary>Eigene Werte für Emulator-Optionen, werden vor dem Spielstart gesetzt.</summary>
+    public Dictionary<string, string> CoreOptions { get; set; } = [];
+
+    private readonly ConcurrentQueue<(string Key, string Value)> _optionChanges = new();
+
+    /// <summary>Emulator-Option während des Spiels ändern (wird vor dem nächsten Bild übernommen).</summary>
+    public void RequestOptionChange(string key, string value) => _optionChanges.Enqueue((key, value));
 
     public EmulatorSession(GameEntry game, string corePath, IAudioSink audio)
     {
@@ -184,7 +198,9 @@ public sealed unsafe class EmulatorSession : ICoreHost, IDisposable
         try
         {
             _core = new LibretroCore(_corePath, this, AppSettings.SystemFolder, AppSettings.SavesFolder);
+            foreach (var (key, value) in CoreOptions) _core.OptionOverrides[key] = value;
             _core.LoadGame(Game.RomPath);
+            CoreOptionStore.Save(CoreName, _core.OptionDefinitions);
             LoadSram();
 
             var timing = _core.AvInfo.Timing;
@@ -203,6 +219,7 @@ public sealed unsafe class EmulatorSession : ICoreHost, IDisposable
             while (!_stopRequested && !_core.ShutdownRequested)
             {
                 HandleStateRequest();
+                while (_optionChanges.TryDequeue(out var change)) _core.SetOption(change.Key, change.Value);
 
                 if (_paused)
                 {
@@ -555,6 +572,9 @@ public sealed unsafe class EmulatorSession : ICoreHost, IDisposable
         _previousPadHotkeys = pad.Hotkeys;
         if ((newlyPressed & (1 << (int)HotkeyAction.SaveState)) != 0) RequestSaveState();
         if ((newlyPressed & (1 << (int)HotkeyAction.LoadState)) != 0) RequestLoadState();
+
+        foreach (var action in new[] { HotkeyAction.NextDsLayout, HotkeyAction.SwapDsScreens, HotkeyAction.NextEffect })
+            if ((newlyPressed & (1 << (int)action)) != 0) HotkeyPressed?.Invoke(action);
     }
 
     private InputSnapshot PollInputProvider()
