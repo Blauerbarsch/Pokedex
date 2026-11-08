@@ -72,6 +72,24 @@ public class GameDetectorTests
     }
 
     [Fact]
+    public void Only_pokemon_games_pass_the_filter()
+    {
+        var dir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+        Directory.CreateDirectory(dir);
+        File.WriteAllBytes(Path.Combine(dir, "Pokémon Platin (Germany).nds"), new byte[0x200]);
+        File.WriteAllBytes(Path.Combine(dir, "Mario Kart DS.nds"), new byte[0x200]);
+        var gba = new byte[0x200];
+        Encoding.ASCII.GetBytes("BPRD").CopyTo(gba, 0xAC); // Feuerrot, Dateiname egal
+        File.WriteAllBytes(Path.Combine(dir, "spiel123.gba"), gba);
+
+        var titles = GameDetector.ScanFolder(dir).Select(g => g.Title).ToList();
+
+        Assert.Equal(2, titles.Count);
+        Assert.Contains("Pokémon Feuerrote Edition", titles);
+        Assert.Contains("Pokémon Platin (Germany)", titles);
+    }
+
+    [Fact]
     public void Ignores_unsupported_files()
     {
         Assert.Null(GameDetector.Detect(WriteTemp([1, 2, 3], ".txt")));

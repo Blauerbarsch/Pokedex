@@ -50,9 +50,27 @@ public static class GameDetector
         foreach (var file in Directory.EnumerateFiles(folder, "*", ScanOptions))
         {
             var entry = Detect(file);
-            if (entry is not null) result.Add(entry);
+            if (entry is not null && IsPokemonGame(entry)) result.Add(entry);
         }
         return result.OrderBy(e => e.Info.Platform).ThenBy(e => e.Title).ToList();
+    }
+
+    /// <summary>
+    /// Nur Pokémon-Spiele kommen in die Bibliothek: entweder über den ROM-Header erkannt
+    /// oder „Pokémon“ bzw. „Pocket Monsters“ im Dateinamen (z. B. für 3DS-Spiele).
+    /// </summary>
+    public static bool IsPokemonGame(GameEntry entry)
+    {
+        if (entry.IsRecognized) return true;
+
+        var name = Path.GetFileNameWithoutExtension(entry.RomPath)
+            .Normalize(NormalizationForm.FormC) // macOS speichert „é“ intern als „e“ + Akzent
+            .ToLowerInvariant()
+            .Replace('é', 'e');
+        return name.Contains("pokemon")
+            || name.Contains("pocket monsters")
+            || name.Contains("ポケモン")
+            || name.Contains("ポケットモンスター");
     }
 
     /// <summary>Gibt null zurück, wenn die Datei keine unterstützte ROM ist.</summary>
