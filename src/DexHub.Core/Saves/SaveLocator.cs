@@ -3,31 +3,22 @@ using DexHub.Core.Settings;
 
 namespace DexHub.Core.Saves;
 
-/// <summary>Findet den Spielstand zu einer ROM (RetroArch speichert als .srm).</summary>
+/// <summary>Findet den Spielstand zu einer ROM.</summary>
 public static class SaveLocator
 {
-    private static readonly string[] SaveExtensions = [".srm", ".sav"];
-
-    public static string? Find(GameEntry game, AppSettings settings)
+    public static string? Find(GameEntry game)
     {
         var baseName = Path.GetFileNameWithoutExtension(game.RomPath);
-        var folders = new List<string>();
 
-        // 1. RetroArch-Spielstandordner (ggf. mit Unterordnern pro Core, z. B. "saves/Gambatte")
-        if (Directory.Exists(settings.SavesFolder))
-        {
-            folders.Add(settings.SavesFolder);
-            folders.AddRange(Directory.GetDirectories(settings.SavesFolder));
-        }
+        // 1. Eigener Spielstand-Ordner von DexHub
+        var own = Path.Combine(AppSettings.SavesFolder, baseName + ".srm");
+        if (File.Exists(own)) return own;
 
-        // 2. Neben der ROM
+        // 2. Neben der ROM (z. B. von anderen Emulatoren übernommen)
         if (Path.GetDirectoryName(game.RomPath) is { } romDir)
-            folders.Add(romDir);
-
-        foreach (var folder in folders)
-            foreach (var ext in SaveExtensions)
+            foreach (var ext in new[] { ".srm", ".sav" })
             {
-                var candidate = Path.Combine(folder, baseName + ext);
+                var candidate = Path.Combine(romDir, baseName + ext);
                 if (File.Exists(candidate)) return candidate;
             }
 

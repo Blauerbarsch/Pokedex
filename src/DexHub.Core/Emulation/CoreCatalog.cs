@@ -1,0 +1,46 @@
+using DexHub.Core.Models;
+using DexHub.Core.Settings;
+
+namespace DexHub.Core.Emulation;
+
+/// <summary>
+/// Welcher eingebaute Core für welche Konsole zuständig ist.
+/// Die Cores liegen im Ordner "cores" neben dem Programm (siehe scripts/FetchCores.cs).
+/// </summary>
+public static class CoreCatalog
+{
+    /// <summary>Konsolen, die bereits direkt im Programm laufen.</summary>
+    public static readonly Dictionary<Platform, string> Cores = new()
+    {
+        [Platform.PokemonMini]    = "pokemini_libretro",
+        [Platform.GameBoy]        = "gambatte_libretro",
+        [Platform.GameBoyColor]   = "gambatte_libretro",
+        [Platform.GameBoyAdvance] = "mgba_libretro",
+        [Platform.NintendoDS]     = "melondsds_libretro",
+        // N64, GameCube, Wii, 3DS brauchen 3D-Hardware-Rendering -> kommt in einem späteren Schritt
+    };
+
+    public static string Extension =>
+        OperatingSystem.IsWindows() ? ".dll" :
+        OperatingSystem.IsMacOS() ? ".dylib" : ".so";
+
+    /// <summary>Gesucht wird neben dem Programm und im Benutzerordner (für eigene Cores).</summary>
+    public static IEnumerable<string> SearchFolders =>
+    [
+        Path.Combine(AppContext.BaseDirectory, "cores"),
+        Path.Combine(AppSettings.AppDataFolder, "cores"),
+    ];
+
+    public static bool IsPlatformSupported(Platform platform) => Cores.ContainsKey(platform);
+
+    public static string? FindCore(Platform platform)
+    {
+        if (!Cores.TryGetValue(platform, out var name)) return null;
+        foreach (var folder in SearchFolders)
+        {
+            var path = Path.Combine(folder, name + Extension);
+            if (File.Exists(path)) return path;
+        }
+        return null;
+    }
+}

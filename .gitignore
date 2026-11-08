@@ -35,3 +35,6 @@ Thumbs.db
 *.srm
 *.sav
 *.bin
+
+# Heruntergeladene Emulator-Cores (scripts/FetchCores.cs)
+src/DexHub.App/cores/

@@ -7,12 +7,14 @@ using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform.Storage;
 using Avalonia.Threading;
+using DexHub.App.Audio;
 using DexHub.Core.Detection;
 using DexHub.Core.Emulation;
 using DexHub.Core.Models;
 using DexHub.Core.Pokedex;
 using DexHub.Core.Saves;
 using DexHub.Core.Settings;
+using GamePlatform = DexHub.Core.Models.Platform;
 
 namespace DexHub.App;
 
@@ -25,6 +27,7 @@ public partial class MainWindow : Window
     private List<PokemonSpecies> _species = [];
     private List<DexEntry> _dex = [];
 
+    private GameWindow? _runningGame;
     private CancellationTokenSource? _spriteCts;
     private bool _ready; // verhindert, dass Events beim Laden der Oberfläche zu früh feuern
 
@@ -39,6 +42,9 @@ public partial class MainWindow : Window
             await ScanLibraryAsync();
             await LoadPokedexAsync(forceRefresh: false);
         };
+
+        // Läuft beim Schließen noch ein Spiel, dieses zuerst sauber beenden (Spielstand speichern)
+        Closing += (_, _) => _runningGame?.Close();
     }
 
     // =====================================================================
@@ -49,17 +55,17 @@ public partial class MainWindow : Window
     {
         if (string.IsNullOrWhiteSpace(_settings.RomFolder))
         {
-            SetStatus("Bitte zuerst einen ROM-Ordner wählen.");
+            SetStatus("Bitte zuerst unter „Einstellungen“ einen ROM-Ordner wählen.");
             return;
         }
 
         SetStatus("Durchsuche ROM-Ordner…");
-        var settings = _settings;
+        var romFolder = _settings.RomFolder;
         _games = await Task.Run(() =>
         {
-            var games = GameDetector.ScanFolder(settings.RomFolder);
+            var games = GameDetector.ScanFolder(romFolder);
             foreach (var g in games)
-                g.SavePath = SaveLocator.Find(g, settings);
+                g.SavePath = SaveLocator.Find(g);
             return games;
         });
 
@@ -70,8 +76,10 @@ public partial class MainWindow : Window
 
     private void RefreshGamesList()
     {
+        var selected = GamesList.SelectedItem;
         GamesList.ItemsSource = null;
         GamesList.ItemsSource = _games;
+        GamesList.SelectedItem = selected;
     }
 
     private async void OnRescanClick(object? sender, RoutedEventArgs e) => await ScanLibraryAsync();
@@ -88,24 +96,54 @@ public partial class MainWindow : Window
             return;
         }
 
-        try
+        // Es kann immer nur ein Spiel gleichzeitig laufen (Einschränkung von libretro)
+        if (_runningGame is not null)
         {
-            var process = new EmulatorLauncher(_settings).Launch(game);
-            SetStatus($"{game.Title} läuft…");
+            _runningGame.Activate();
+            SetStatus("Es läuft bereits ein Spiel. Bitte zuerst dessen Fenster schließen.");
+            return;
+        }
 
-            // Nach dem Beenden den Spielstand neu einlesen, damit der Pokédex aktuell ist
-            process.Exited += (_, _) => Dispatcher.UIThread.Post(() =>
-            {
-                game.SavePath = SaveLocator.Find(game, _settings);
-                RefreshGamesList();
-                RebuildDex();
-                SetStatus($"{game.Title} beendet – Pokédex aktualisiert.");
-            });
-        }
-        catch (Exception ex)
+        var platform = game.Info.Platform;
+        if (!CoreCatalog.IsPlatformSupported(platform))
         {
-            await ShowMessageAsync("Spiel konnte nicht gestartet werden", ex.Message);
+            await ShowMessageAsync("Noch nicht spielbar",
+                $"{platform.DisplayName()}-Spiele werden in einem späteren Schritt eingebaut.");
+            return;
         }
+
+        var corePath = CoreCatalog.FindCore(platform);
+        if (corePath is null)
+        {
+            await ShowMessageAsync("Emulator fehlt",
+                $"Der Emulator für {platform.DisplayName()} ({CoreCatalog.Cores[platform]}) wurde nicht gefunden.\n\n" +
+                "Beim Entwickeln einmal im Projektordner ausführen:\n  dotnet run scripts/FetchCores.cs");
+            return;
+        }
+
+        var session = new EmulatorSession(game, corePath, new SdlAudioSink());
+
+        // Speichert das Spiel, sofort den Pokédex aktualisieren
+        session.SaveWritten += _ => Dispatcher.UIThread.Post(() =>
+        {
+            game.SavePath = SaveLocator.Find(game);
+            RebuildDex();
+            SetStatus($"Spielstand von {game.Title} gesichert – Pokédex aktualisiert.");
+        });
+
+        var window = new GameWindow(session);
+        window.Closed += (_, _) =>
+        {
+            _runningGame = null;
+            game.SavePath = SaveLocator.Find(game);
+            RefreshGamesList();
+            RebuildDex();
+            SetStatus($"{game.Title} beendet.");
+        };
+
+        _runningGame = window;
+        window.Show();
+        SetStatus($"{game.Title} läuft…");
     }
 
     // =====================================================================
@@ -196,75 +234,41 @@ public partial class MainWindow : Window
     private void FillSettingsForm()
     {
         RomFolderBox.Text = _settings.RomFolder;
-        RetroArchBox.Text = _settings.RetroArchPath;
-        CoresBox.Text = _settings.CoresFolder;
-        SavesBox.Text = _settings.SavesFolder;
-        UpdateCoreStatus();
-    }
 
-    private void ReadSettingsForm()
-    {
-        _settings.RomFolder = RomFolderBox.Text?.Trim() ?? "";
-        _settings.RetroArchPath = RetroArchBox.Text?.Trim() ?? "";
-        _settings.CoresFolder = CoresBox.Text?.Trim() ?? "";
-        _settings.SavesFolder = SavesBox.Text?.Trim() ?? "";
-    }
+        var lines = Enum.GetValues<GamePlatform>()
+            .Where(p => p != GamePlatform.Unknown)
+            .Select(p => (p.DisplayName() + ":").PadRight(20) + (
+                !CoreCatalog.IsPlatformSupported(p) ? "kommt später"
+                : CoreCatalog.FindCore(p) is not null ? $"✓ {CoreCatalog.Cores[p]}"
+                : $"✗ {CoreCatalog.Cores[p]} fehlt"));
+        CoreStatusText.Text = string.Join("\n", lines);
 
-    private void UpdateCoreStatus()
-    {
-        var launcher = new EmulatorLauncher(_settings);
-        var platforms = Enum.GetValues<Platform>().Where(p => p != Platform.Unknown).ToList();
-        var found = platforms.Count(p => launcher.FindCore(p) is not null);
-        CoreStatusText.Text = $"Cores gefunden für {found} von {platforms.Count} Konsolen.";
+        FoldersText.Text =
+            $"Spielstände: {AppSettings.SavesFolder}\n" +
+            $"Schnellspeicherungen: {AppSettings.StatesFolder}\n" +
+            $"BIOS/Firmware (optional): {AppSettings.SystemFolder}";
     }
 
     private async void OnSaveSettingsClick(object? sender, RoutedEventArgs e)
     {
-        ReadSettingsForm();
+        _settings.RomFolder = RomFolderBox.Text?.Trim() ?? "";
         _settings.Save();
-        UpdateCoreStatus();
         await ScanLibraryAsync();
     }
 
     private async void OnBrowseRomFolderClick(object? sender, RoutedEventArgs e)
     {
-        if (await PickFolderAsync("ROM-Ordner wählen") is { } path)
-        {
-            RomFolderBox.Text = path;
-            ReadSettingsForm();
-            _settings.Save();
-            await ScanLibraryAsync();
-        }
-    }
-
-    private async void OnBrowseCoresClick(object? sender, RoutedEventArgs e)
-    {
-        if (await PickFolderAsync("Cores-Ordner wählen") is { } path) CoresBox.Text = path;
-    }
-
-    private async void OnBrowseSavesClick(object? sender, RoutedEventArgs e)
-    {
-        if (await PickFolderAsync("Spielstand-Ordner wählen") is { } path) SavesBox.Text = path;
-    }
-
-    private async void OnBrowseRetroArchClick(object? sender, RoutedEventArgs e)
-    {
-        var files = await StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
-        {
-            Title = "RetroArch auswählen",
-            AllowMultiple = false,
-        });
-        if (files.Count > 0 && files[0].TryGetLocalPath() is { } path) RetroArchBox.Text = path;
-    }
-
-    private async Task<string?> PickFolderAsync(string title)
-    {
         var folders = await StorageProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions
         {
-            Title = title,
+            Title = "ROM-Ordner wählen",
             AllowMultiple = false,
         });
-        return folders.Count > 0 ? folders[0].TryGetLocalPath() : null;
+        if (folders.Count == 0 || folders[0].TryGetLocalPath() is not { } path) return;
+
+        RomFolderBox.Text = path;
+        _settings.RomFolder = path;
+        _settings.Save();
+        await ScanLibraryAsync();
     }
 
     // =====================================================================

@@ -1,0 +1,23 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="DexHub.App.GameWindow"
+        Title="DexHub"
+        Width="800" Height="640"
+        Background="Black">
+
+  <!-- Das Grid hat einen Hintergrund, damit Mausklicks überall ankommen (Touchscreen beim DS) -->
+  <Grid x:Name="Surface" Background="Black"
+        PointerPressed="OnPointerPressed"
+        PointerMoved="OnPointerMoved"
+        PointerReleased="OnPointerReleased">
+
+    <Image x:Name="Screen" Stretch="Uniform"
+           RenderOptions.BitmapInterpolationMode="None" />
+
+    <Border x:Name="OsdBorder" IsVisible="False"
+            VerticalAlignment="Bottom" HorizontalAlignment="Left"
+            Margin="10" Padding="10,5" CornerRadius="4" Background="#B0000000">
+      <TextBlock x:Name="OsdText" Foreground="White" TextWrapping="Wrap" />
+    </Border>
+  </Grid>
+</Window>
