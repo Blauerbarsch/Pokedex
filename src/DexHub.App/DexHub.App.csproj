@@ -9,6 +9,7 @@
     <AssemblyName>DexHub</AssemblyName>
     <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
     <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <ItemGroup>
@@ -16,10 +17,17 @@
     <PackageReference Include="Avalonia.Desktop" Version="11.3.0" />
     <PackageReference Include="Avalonia.Themes.Fluent" Version="11.3.0" />
     <PackageReference Include="Avalonia.Fonts.Inter" Version="11.3.0" />
+    <!-- Tonausgabe (bringt SDL2 für Windows und Mac gleich mit) -->
+    <PackageReference Include="Silk.NET.SDL" Version="2.22.0" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\DexHub.Core\DexHub.Core.csproj" />
+  </ItemGroup>
+
+  <!-- Die Emulator-Cores (von scripts/FetchCores.cs heruntergeladen) neben das Programm kopieren -->
+  <ItemGroup>
+    <None Include="cores\**\*" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
 </Project>

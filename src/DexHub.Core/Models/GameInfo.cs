@@ -41,6 +41,7 @@ public sealed class GameEntry
             var parts = new List<string>();
             if (Info.Generation is int gen) parts.Add($"Gen {gen}");
             if (!IsRecognized) parts.Add("nur am Dateinamen erkannt");
+            if (!Emulation.CoreCatalog.IsPlatformSupported(Info.Platform)) parts.Add("noch nicht spielbar");
             if (Info.SaveFormat != SaveFormat.None)
                 parts.Add(SavePath is null ? "kein Spielstand gefunden" : "Spielstand gefunden");
             return string.Join(" · ", parts);

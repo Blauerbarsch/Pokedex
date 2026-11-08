@@ -5,6 +5,8 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <RootNamespace>DexHub.Core</RootNamespace>
+    <!-- Für die direkte Anbindung der Emulator-Cores (Zeiger auf Bild- und Tondaten) -->
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
 </Project>
