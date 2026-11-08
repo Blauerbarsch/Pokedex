@@ -1,0 +1,37 @@
+# Build-Ausgaben
+bin/
+obj/
+publish/
+
+# IDEs
+.vs/
+.vscode/
+.idea/
+*.user
+*.suo
+
+# Betriebssystem
+.DS_Store
+Thumbs.db
+
+# Niemals Spiele, BIOS-Dateien oder Spielstände ins Repo laden
+*.gb
+*.gbc
+*.gba
+*.nds
+*.3ds
+*.cci
+*.cia
+*.cxi
+*.z64
+*.n64
+*.v64
+*.min
+*.iso
+*.gcm
+*.rvz
+*.ciso
+*.wbfs
+*.srm
+*.sav
+*.bin

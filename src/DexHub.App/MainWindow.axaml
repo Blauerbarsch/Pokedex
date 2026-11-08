@@ -1,0 +1,148 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:m="clr-namespace:DexHub.Core.Models;assembly=DexHub.Core"
+        xmlns:p="clr-namespace:DexHub.Core.Pokedex;assembly=DexHub.Core"
+        x:Class="DexHub.App.MainWindow"
+        Title="DexHub"
+        Width="1100" Height="720"
+        MinWidth="800" MinHeight="500">
+
+  <DockPanel>
+    <!-- Statuszeile unten -->
+    <Border DockPanel.Dock="Bottom" Padding="12,6" Background="{DynamicResource SystemControlBackgroundBaseLowBrush}">
+      <TextBlock x:Name="StatusText" Text="Bereit." />
+    </Border>
+
+    <TabControl Margin="8">
+
+      <!-- ============ Bibliothek ============ -->
+      <TabItem Header="Bibliothek">
+        <Grid RowDefinitions="Auto,*,Auto" Margin="0,8,0,0">
+          <StackPanel Orientation="Horizontal" Spacing="8">
+            <Button Content="ROM-Ordner wählen…" Click="OnBrowseRomFolderClick" />
+            <Button Content="Neu scannen" Click="OnRescanClick" />
+          </StackPanel>
+
+          <ListBox Grid.Row="1" x:Name="GamesList" Margin="0,8"
+                   DoubleTapped="OnGameDoubleTapped">
+            <ListBox.ItemTemplate>
+              <DataTemplate x:DataType="m:GameEntry">
+                <StackPanel Spacing="2" Margin="0,4">
+                  <TextBlock Text="{Binding Title}" FontWeight="SemiBold" FontSize="15" />
+                  <TextBlock Text="{Binding PlatformName}" Opacity="0.8" />
+                  <TextBlock Text="{Binding StatusText}" Opacity="0.6" FontSize="12" />
+                </StackPanel>
+              </DataTemplate>
+            </ListBox.ItemTemplate>
+          </ListBox>
+
+          <StackPanel Grid.Row="2" Orientation="Horizontal" Spacing="8">
+            <Button Content="▶ Spielen" Click="OnPlayClick" Classes="accent" />
+            <TextBlock VerticalAlignment="Center" Opacity="0.6"
+                       Text="Tipp: Doppelklick auf ein Spiel startet es ebenfalls." />
+          </StackPanel>
+        </Grid>
+      </TabItem>
+
+      <!-- ============ Pokédex ============ -->
+      <TabItem Header="Pokédex">
+        <Grid ColumnDefinitions="*,320" RowDefinitions="Auto,*" Margin="0,8,0,0">
+          <StackPanel Orientation="Horizontal" Spacing="8" Grid.ColumnSpan="2">
+            <TextBox x:Name="SearchBox" Width="220" Watermark="Name oder Nummer…"
+                     TextChanged="OnSearchChanged" />
+            <ComboBox x:Name="GenFilter" SelectedIndex="0" Width="110"
+                      SelectionChanged="OnGenFilterChanged">
+              <ComboBoxItem>Alle Gen.</ComboBoxItem>
+              <ComboBoxItem>Gen 1</ComboBoxItem>
+              <ComboBoxItem>Gen 2</ComboBoxItem>
+              <ComboBoxItem>Gen 3</ComboBoxItem>
+              <ComboBoxItem>Gen 4</ComboBoxItem>
+              <ComboBoxItem>Gen 5</ComboBoxItem>
+              <ComboBoxItem>Gen 6</ComboBoxItem>
+              <ComboBoxItem>Gen 7</ComboBoxItem>
+              <ComboBoxItem>Gen 8</ComboBoxItem>
+              <ComboBoxItem>Gen 9</ComboBoxItem>
+            </ComboBox>
+            <CheckBox x:Name="OnlyCaughtBox" Content="Nur gefangene"
+                      IsCheckedChanged="OnOnlyCaughtChanged" />
+            <TextBlock x:Name="DexCounter" VerticalAlignment="Center" Opacity="0.7" />
+            <Button Content="Daten neu laden" Click="OnReloadDexClick" />
+          </StackPanel>
+
+          <ListBox Grid.Row="1" x:Name="DexList" Margin="0,8,8,0"
+                   SelectionChanged="OnDexSelectionChanged">
+            <ListBox.ItemTemplate>
+              <DataTemplate x:DataType="p:DexEntry">
+                <Grid ColumnDefinitions="24,70,*,60">
+                  <TextBlock Text="{Binding CaughtMarker}" Foreground="#E3350D" />
+                  <TextBlock Grid.Column="1" Text="{Binding Number}" Opacity="0.6" />
+                  <TextBlock Grid.Column="2" Text="{Binding Name}" />
+                  <TextBlock Grid.Column="3" Text="{Binding GenerationText}" Opacity="0.6" />
+                </Grid>
+              </DataTemplate>
+            </ListBox.ItemTemplate>
+          </ListBox>
+
+          <!-- Detailansicht -->
+          <StackPanel Grid.Row="1" Grid.Column="1" Spacing="10" Margin="0,8,0,0">
+            <Border Height="200" CornerRadius="8" Background="{DynamicResource SystemControlBackgroundBaseLowBrush}">
+              <Image x:Name="SpriteImage" Width="192" Height="192"
+                     RenderOptions.BitmapInterpolationMode="None" />
+            </Border>
+            <TextBlock x:Name="DetailName" FontSize="20" FontWeight="SemiBold"
+                       Text="Pokémon auswählen" />
+            <TextBlock x:Name="DetailText" TextWrapping="Wrap" />
+            <TextBlock Opacity="0.5" FontSize="12" TextWrapping="Wrap"
+                       Text="● gefangen   ○ gesehen. Spielstände werden bisher für Gen 1 und 2 ausgelesen." />
+          </StackPanel>
+        </Grid>
+      </TabItem>
+
+      <!-- ============ Einstellungen ============ -->
+      <TabItem Header="Einstellungen">
+        <StackPanel Spacing="14" Margin="0,12,0,0" MaxWidth="760" HorizontalAlignment="Left">
+          <TextBlock TextWrapping="Wrap" Opacity="0.8"
+                     Text="DexHub startet die Spiele über RetroArch. Installiere RetroArch und lade dort unter „Online-Aktualisierung → Core-Downloader“ die Cores herunter (z. B. Gambatte, mGBA, melonDS DS, Mupen64Plus-Next, Dolphin, Citra, PokeMini)." />
+
+          <StackPanel Spacing="4">
+            <TextBlock Text="ROM-Ordner" FontWeight="SemiBold" />
+            <Grid ColumnDefinitions="*,Auto">
+              <TextBox x:Name="RomFolderBox" />
+              <Button Grid.Column="1" Content="…" Margin="6,0,0,0" Click="OnBrowseRomFolderClick" />
+            </Grid>
+          </StackPanel>
+
+          <StackPanel Spacing="4">
+            <TextBlock Text="RetroArch (retroarch.exe bzw. RetroArch.app)" FontWeight="SemiBold" />
+            <Grid ColumnDefinitions="*,Auto">
+              <TextBox x:Name="RetroArchBox" />
+              <Button Grid.Column="1" Content="…" Margin="6,0,0,0" Click="OnBrowseRetroArchClick" />
+            </Grid>
+          </StackPanel>
+
+          <StackPanel Spacing="4">
+            <TextBlock Text="Cores-Ordner" FontWeight="SemiBold" />
+            <Grid ColumnDefinitions="*,Auto">
+              <TextBox x:Name="CoresBox" />
+              <Button Grid.Column="1" Content="…" Margin="6,0,0,0" Click="OnBrowseCoresClick" />
+            </Grid>
+          </StackPanel>
+
+          <StackPanel Spacing="4">
+            <TextBlock Text="Spielstand-Ordner (RetroArch „saves“)" FontWeight="SemiBold" />
+            <Grid ColumnDefinitions="*,Auto">
+              <TextBox x:Name="SavesBox" />
+              <Button Grid.Column="1" Content="…" Margin="6,0,0,0" Click="OnBrowseSavesClick" />
+            </Grid>
+          </StackPanel>
+
+          <StackPanel Orientation="Horizontal" Spacing="8">
+            <Button Content="Speichern" Classes="accent" Click="OnSaveSettingsClick" />
+            <TextBlock x:Name="CoreStatusText" VerticalAlignment="Center" Opacity="0.7" />
+          </StackPanel>
+        </StackPanel>
+      </TabItem>
+
+    </TabControl>
+  </DockPanel>
+</Window>
