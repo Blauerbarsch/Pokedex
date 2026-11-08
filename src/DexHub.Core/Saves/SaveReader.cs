@@ -49,27 +49,39 @@ public static class SaveReader
         try { data = File.ReadAllBytes(savePath); }
         catch (IOException) { return null; }
 
-        return Parse(data, format);
+        return Parse(data, format, Path.GetFileName(savePath));
     }
 
     /// <summary>Reine Auswertung eines Speicherabbilds – nützlich für Tests.</summary>
-    public static DexProgress? Parse(byte[] data, SaveFormat format)
+    public static DexProgress? Parse(byte[] data, SaveFormat format, string? source = null)
     {
         if (Layouts.TryGetValue(format, out var layout)) return Parse(data, layout);
-        if (Gen4DexOffsets.TryGetValue(format, out var dexOffset)) return ParseGen4(data, dexOffset);
+        if (Gen4DexOffsets.TryGetValue(format, out var dexOffset)) return ParseGen4(data, dexOffset, source ?? "?");
         return null;
     }
 
-    private static DexProgress? ParseGen4(byte[] data, int dexOffset)
+    /// <summary>Damit dieselbe Meldung nicht bei jeder Aktualisierung erneut im Terminal landet.</summary>
+    private static readonly HashSet<string> LoggedOnce = [];
+
+    private static void LogOnce(string message)
+    {
+        lock (LoggedOnce)
+            if (LoggedOnce.Add(message))
+                Console.WriteLine("[DexHub] " + message);
+    }
+
+    private static DexProgress? ParseGen4(byte[] data, int dexOffset, string source)
     {
         // Beide Kopien prüfen. Der Pokédex wird nie kleiner, also ist die Kopie mit
         // mehr Einträgen die neuere – so müssen wir die Prüfsummen nicht auswerten.
         DexProgress? best = null;
-        for (int partition = 0; partition + Gen4PartitionSize <= data.Length; partition += Gen4PartitionSize)
+        var found = new List<string>();
+
+        for (int partition = 0; partition < data.Length; partition += Gen4PartitionSize)
         {
-            int offset = partition + dexOffset;
-            if (offset + 4 + 0x80 > data.Length) continue;
-            if (BitConverter.ToUInt32(data, offset) != Gen4DexMagic) continue;
+            int offset = FindGen4Dex(data, partition, dexOffset);
+            if (offset < 0) continue;
+            found.Add($"0x{offset:X}");
 
             var progress = new DexProgress(
                 ReadFlags(data, offset + 0x04, Gen4SpeciesCount),
@@ -81,10 +93,29 @@ public static class SaveReader
                 best = progress;
         }
 
-        if (best is null)
-            Console.WriteLine("[DexHub] Gen-4-Spielstand: Pokédex-Kennung nicht gefunden (Offsets prüfen)");
+        LogOnce(best is null
+            ? $"{source}: kein Gen-4-Pokédex gefunden ({data.Length} Bytes) – ist das ein Spielstand dieses Spiels?"
+            : $"{source}: Pokédex bei {string.Join(", ", found)}, {best.Caught.Count} gefangen, {best.Seen.Count} gesehen");
         return best;
     }
+
+    /// <summary>
+    /// Sucht die Pokédex-Kennung: zuerst an der bekannten Stelle, sonst im allgemeinen Block der Kopie.
+    /// Gibt -1 zurück, wenn nichts gefunden wurde.
+    /// </summary>
+    private static int FindGen4Dex(byte[] data, int partitionStart, int knownOffset)
+    {
+        int known = partitionStart + knownOffset;
+        if (IsGen4Dex(data, known)) return known;
+
+        int searchEnd = Math.Min(data.Length, partitionStart + 0x10000); // allgemeiner Block ist < 64 KB
+        for (int o = partitionStart; o < searchEnd; o += 4)
+            if (IsGen4Dex(data, o)) return o;
+        return -1;
+    }
+
+    private static bool IsGen4Dex(byte[] data, int offset) =>
+        offset >= 0 && offset + 0x84 <= data.Length && BitConverter.ToUInt32(data, offset) == Gen4DexMagic;
 
     private static DexProgress? Parse(byte[] data, Layout layout)
     {
