@@ -139,6 +139,13 @@
         </Grid>
       </TabItem>
 
+      <!-- ============ Spielstände (wird im Code aufgebaut) ============ -->
+      <TabItem x:Name="SavesTab" Header="Spielstände">
+        <ScrollViewer>
+          <StackPanel x:Name="SavesPanel" Spacing="8" Margin="0,12,12,12" />
+        </ScrollViewer>
+      </TabItem>
+
       <!-- ============ Tauschen (wird im Code aufgebaut) ============ -->
       <TabItem Header="Tauschen">
         <ScrollViewer>
