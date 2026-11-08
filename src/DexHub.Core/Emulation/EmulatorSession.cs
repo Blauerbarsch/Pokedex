@@ -362,6 +362,7 @@ public sealed unsafe class EmulatorSession : ICoreHost, IDisposable
         File.WriteAllBytes(tmp, copy);
         File.Move(tmp, SaveRamPath, overwrite: true);
         _lastWrittenSram = copy;
+        Log($"Spielstand geschrieben: {SaveRamPath} ({copy.Length} Bytes)");
         SaveWritten?.Invoke(SaveRamPath);
     }
 
