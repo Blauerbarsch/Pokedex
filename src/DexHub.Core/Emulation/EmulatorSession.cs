@@ -43,6 +43,13 @@ public sealed unsafe class EmulatorSession : ICoreHost, IDisposable
     public string StatePath => Path.Combine(AppSettings.StatesFolder,
         Path.GetFileNameWithoutExtension(Game.RomPath) + ".state");
 
+    /// <summary>Automatische Sicherung beim Schließen, wird beim nächsten Start geladen.</summary>
+    public string AutoStatePath => Path.Combine(AppSettings.StatesFolder,
+        Path.GetFileNameWithoutExtension(Game.RomPath) + ".auto.state");
+
+    /// <summary>Beim Start dort weitermachen, wo zuletzt aufgehört wurde.</summary>
+    public bool AutoResume { get; set; } = true;
+
     // =====================================================================
     // Steuerung von außen (UI-Thread)
     // =====================================================================
@@ -164,6 +171,7 @@ public sealed unsafe class EmulatorSession : ICoreHost, IDisposable
             int frameCounter = 0;
 
             Message?.Invoke($"{Game.Title} gestartet ({_core.LibraryName})");
+            TryAutoResume();
             Log($"Core {_core.LibraryName} {_core.LibraryVersion}, {fps:0.##} fps");
 
             while (!_stopRequested && !_core.ShutdownRequested)
@@ -180,8 +188,9 @@ public sealed unsafe class EmulatorSession : ICoreHost, IDisposable
                 // Eingaben sammeln: Tastatur (vom UI-Thread) + Controller
                 var pad = PollInputProvider();
                 Volatile.Write(ref _effectiveButtons, Volatile.Read(ref _buttons) | pad.Buttons);
-                bool fastForward = _fastForwardKey || pad.FastForward;
+                bool fastForward = _fastForwardKey || pad.Has(HotkeyAction.FastForward);
                 UpdateTouchCursor(pad, frameCounter);
+                HandlePadHotkeys(pad);
 
                 _core.RunFrame();
                 FlushAudio(fastForward);
@@ -200,6 +209,7 @@ public sealed unsafe class EmulatorSession : ICoreHost, IDisposable
             }
 
             WriteSramIfChanged();
+            if (frameCounter > 60) WriteAutoState(); // nicht sichern, wenn das Spiel gar nicht richtig lief
         }
         catch (Exception ex)
         {
@@ -256,7 +266,7 @@ public sealed unsafe class EmulatorSession : ICoreHost, IDisposable
             if (state is null) { Message?.Invoke("Schnellspeichern wird von diesem Core nicht unterstützt."); return; }
             Directory.CreateDirectory(AppSettings.StatesFolder);
             File.WriteAllBytes(StatePath, state);
-            Message?.Invoke("Schnellspeicherung gesichert (F9 zum Laden)");
+            Message?.Invoke("Schnellspeicherung gesichert");
         }
         else if (File.Exists(StatePath))
         {
@@ -266,7 +276,34 @@ public sealed unsafe class EmulatorSession : ICoreHost, IDisposable
         }
         else
         {
-            Message?.Invoke("Noch keine Schnellspeicherung vorhanden (F5 zum Speichern)");
+            Message?.Invoke("Noch keine Schnellspeicherung vorhanden");
+        }
+    }
+
+    // ---------- Automatisch fortsetzen ----------
+
+    private void TryAutoResume()
+    {
+        if (!AutoResume || _core is null || !File.Exists(AutoStatePath)) return;
+        if (_core.LoadState(File.ReadAllBytes(AutoStatePath)))
+            Message?.Invoke("Fortgesetzt, wo du aufgehört hast");
+        else
+            Log("Automatische Sicherung konnte nicht geladen werden: " + AutoStatePath);
+    }
+
+    private void WriteAutoState()
+    {
+        try
+        {
+            var state = _core?.SaveState();
+            if (state is null) return;
+            var tmp = AutoStatePath + ".tmp";
+            File.WriteAllBytes(tmp, state);
+            File.Move(tmp, AutoStatePath, overwrite: true);
+        }
+        catch (Exception ex)
+        {
+            Log("Automatische Sicherung fehlgeschlagen: " + ex.Message);
         }
     }
 
@@ -427,7 +464,7 @@ public sealed unsafe class EmulatorSession : ICoreHost, IDisposable
             _cursorLastMovedFrame = frame;
         }
 
-        bool touch = pad.Touch || _keyboardTouch;
+        bool touch = pad.Has(HotkeyAction.Touch) || _keyboardTouch;
         if (touch)
         {
             SetPointer(_cursorX, _cursorY, true);
@@ -442,6 +479,17 @@ public sealed unsafe class EmulatorSession : ICoreHost, IDisposable
 
         _cursorPressed = touch;
         _cursorVisible = frame - _cursorLastMovedFrame < 180; // nach ca. 3 s ohne Bewegung ausblenden
+    }
+
+    private int _previousPadHotkeys;
+
+    /// <summary>Speichern/Laden per Controller: nur beim Drücken auslösen, nicht solange gehalten.</summary>
+    private void HandlePadHotkeys(InputSnapshot pad)
+    {
+        int newlyPressed = pad.Hotkeys & ~_previousPadHotkeys;
+        _previousPadHotkeys = pad.Hotkeys;
+        if ((newlyPressed & (1 << (int)HotkeyAction.SaveState)) != 0) RequestSaveState();
+        if ((newlyPressed & (1 << (int)HotkeyAction.LoadState)) != 0) RequestLoadState();
     }
 
     private InputSnapshot PollInputProvider()

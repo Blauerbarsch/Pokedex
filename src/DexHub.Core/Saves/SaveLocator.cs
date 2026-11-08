@@ -10,9 +10,18 @@ public static class SaveLocator
     {
         var baseName = Path.GetFileNameWithoutExtension(game.RomPath);
 
-        // 1. Eigener Spielstand-Ordner von DexHub
+        // 1. Eigener Spielstand-Ordner von DexHub (manche Cores legen Unterordner an)
         var own = Path.Combine(AppSettings.SavesFolder, baseName + ".srm");
         if (File.Exists(own)) return own;
+
+        var options = new EnumerationOptions { RecurseSubdirectories = true, IgnoreInaccessible = true };
+        foreach (var ext in new[] { ".srm", ".sav", ".dsv" })
+        {
+            var match = Directory.EnumerateFiles(AppSettings.SavesFolder, baseName + ext, options)
+                .OrderByDescending(f => File.GetLastWriteTimeUtc(f))
+                .FirstOrDefault();
+            if (match is not null) return match;
+        }
 
         // 2. Neben der ROM (z. B. von anderen Emulatoren übernommen)
         if (Path.GetDirectoryName(game.RomPath) is { } romDir)

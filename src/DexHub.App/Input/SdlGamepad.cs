@@ -76,8 +76,9 @@ public sealed unsafe class SdlGamepad : IInputProvider
                 if (IsPressed(PadControl.LeftStickRight)) buttons |= 1 << (int)JoypadButton.Right;
             }
 
-            bool fastForward = settings.HotkeyGamepad.TryGetValue(HotkeyAction.FastForward, out var ff) && IsPressed(ff);
-            bool touch = settings.HotkeyGamepad.TryGetValue(HotkeyAction.Touch, out var t) && IsPressed(t);
+            int hotkeys = 0;
+            foreach (var (action, control) in settings.HotkeyGamepad)
+                if (IsPressed(control)) hotkeys |= 1 << (int)action;
 
             // Rechter Stick für den Touch-Zeiger: stärkste Auslenkung aller Controller
             float cx = 0, cy = 0;
@@ -89,7 +90,7 @@ public sealed unsafe class SdlGamepad : IInputProvider
                 if (Math.Abs(y) > Math.Abs(cy)) cy = y;
             }
 
-            return new InputSnapshot(buttons, fastForward, cx, cy, touch);
+            return new InputSnapshot(buttons, hotkeys, cx, cy);
         }
     }
 
