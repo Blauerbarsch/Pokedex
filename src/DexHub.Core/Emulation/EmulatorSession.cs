@@ -235,6 +235,9 @@ public sealed unsafe class EmulatorSession : ICoreHost, IDisposable
             }
 
             WriteSramIfChanged();
+            var finalSram = _core.SaveRam;
+            if (!finalSram.IsEmpty)
+                Log($"Spielstand beim Beenden: Prüfsumme {Checksum(finalSram)}");
             if (frameCounter > 60) WriteAutoState(); // nicht sichern, wenn das Spiel gar nicht richtig lief
         }
         catch (Exception ex)
@@ -347,13 +350,29 @@ public sealed unsafe class EmulatorSession : ICoreHost, IDisposable
         var data = File.ReadAllBytes(source);
         data.AsSpan(0, Math.Min(data.Length, sram.Length)).CopyTo(sram);
         _lastWrittenSram = sram.ToArray();
+        Log($"Spielstand übernommen aus {source} ({data.Length} Bytes), Prüfsumme {Checksum(sram)}");
     }
+
+    /// <summary>Kurze Prüfsumme für die Diagnose: ändert sich, sobald sich der Spielstand ändert.</summary>
+    private static string Checksum(ReadOnlySpan<byte> data)
+    {
+        uint hash = 2166136261;
+        foreach (var b in data) hash = (hash ^ b) * 16777619;
+        return hash.ToString("X8");
+    }
+
+    private bool _loggedNoSram;
 
     private void WriteSramIfChanged()
     {
         if (_core is null) return;
         var sram = _core.SaveRam;
-        if (sram.IsEmpty) return; // dieser Core verwaltet Spielstände selbst
+        if (sram.IsEmpty) // dieser Core verwaltet Spielstände selbst
+        {
+            if (!_loggedNoSram) Log("Core stellt keinen Spielstand-Speicher bereit");
+            _loggedNoSram = true;
+            return;
+        }
         if (_lastWrittenSram is not null && sram.SequenceEqual(_lastWrittenSram)) return;
 
         var copy = sram.ToArray();
@@ -362,7 +381,7 @@ public sealed unsafe class EmulatorSession : ICoreHost, IDisposable
         File.WriteAllBytes(tmp, copy);
         File.Move(tmp, SaveRamPath, overwrite: true);
         _lastWrittenSram = copy;
-        Log($"Spielstand geschrieben: {SaveRamPath} ({copy.Length} Bytes)");
+        Log($"Spielstand geschrieben: {SaveRamPath} ({copy.Length} Bytes, Prüfsumme {Checksum(copy)})");
         SaveWritten?.Invoke(SaveRamPath);
     }
 
