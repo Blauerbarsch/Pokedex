@@ -14,6 +14,9 @@ public enum PadControl
     LeftStickClick = 7, RightStickClick = 8,
     LeftShoulder = 9, RightShoulder = 10,
     DpadUp = 11, DpadDown = 12, DpadLeft = 13, DpadRight = 14,
+    Misc = 15,                                         // Share-/Aufnahme-Taste
+    Paddle1 = 16, Paddle2 = 17, Paddle3 = 18, Paddle4 = 19, // Rückseiten-Paddles (Xbox Elite, Steam Deck …)
+    Touchpad = 20,                                     // PlayStation-Touchpad drücken
     // Ab hier keine echten Tasten, sondern Achsen
     LeftStickUp = 100, LeftStickDown, LeftStickLeft, LeftStickRight,
     LeftTrigger, RightTrigger,
@@ -23,6 +26,8 @@ public enum PadControl
 public enum HotkeyAction
 {
     FastForward,
+    /// <summary>DS-Touchscreen antippen, an der Stelle des Controller-Zeigers (rechter Stick).</summary>
+    Touch,
 }
 
 public sealed class InputSettings
@@ -83,11 +88,13 @@ public sealed class InputSettings
     public static readonly Dictionary<HotkeyAction, string> DefaultHotkeyKeyboard = new()
     {
         [HotkeyAction.FastForward] = "Space",
+        [HotkeyAction.Touch] = "",
     };
 
     public static readonly Dictionary<HotkeyAction, PadControl> DefaultHotkeyGamepad = new()
     {
         [HotkeyAction.FastForward] = PadControl.RightTrigger,
+        [HotkeyAction.Touch] = PadControl.RightStickClick,
     };
 
     /// <summary>Ergänzt fehlende Einträge (z. B. nach einem Update) mit der Standardbelegung.</summary>
@@ -130,6 +137,7 @@ public sealed class InputSettings
     public static string HotkeyLabel(HotkeyAction action) => action switch
     {
         HotkeyAction.FastForward => "Schnellvorlauf (halten)",
+        HotkeyAction.Touch => "DS-Touch tippen",
         _ => action.ToString(),
     };
 
@@ -151,6 +159,12 @@ public sealed class InputSettings
         PadControl.DpadDown => "Steuerkreuz ↓",
         PadControl.DpadLeft => "Steuerkreuz ←",
         PadControl.DpadRight => "Steuerkreuz →",
+        PadControl.Misc => "Share-Taste",
+        PadControl.Paddle1 => "Paddle P1",
+        PadControl.Paddle2 => "Paddle P2",
+        PadControl.Paddle3 => "Paddle P3",
+        PadControl.Paddle4 => "Paddle P4",
+        PadControl.Touchpad => "Touchpad",
         PadControl.LeftStickUp => "Linker Stick ↑",
         PadControl.LeftStickDown => "Linker Stick ↓",
         PadControl.LeftStickLeft => "Linker Stick ←",

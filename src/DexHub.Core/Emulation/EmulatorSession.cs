@@ -181,6 +181,7 @@ public sealed unsafe class EmulatorSession : ICoreHost, IDisposable
                 var pad = PollInputProvider();
                 Volatile.Write(ref _effectiveButtons, Volatile.Read(ref _buttons) | pad.Buttons);
                 bool fastForward = _fastForwardKey || pad.FastForward;
+                UpdateTouchCursor(pad, frameCounter);
 
                 _core.RunFrame();
                 FlushAudio(fastForward);
@@ -383,6 +384,64 @@ public sealed unsafe class EmulatorSession : ICoreHost, IDisposable
                 samples[i] = (short)(samples[i] * volume);
 
         _audio.Push(samples);
+    }
+
+    // ---------- Touch-Zeiger für Controller (DS) ----------
+
+    /// <summary>Touch-Zeiger per rechtem Stick einschalten (für DS-Spiele).</summary>
+    public bool UseTouchCursor { get; set; }
+
+    /// <summary>
+    /// Bereich, in dem sich der Zeiger bewegen darf (0–1 über das ganze Bild).
+    /// Standard: untere Bildhälfte = unterer DS-Bildschirm.
+    /// </summary>
+    public double TouchAreaTop { get; set; } = 0.5;
+
+    private double _cursorX = 0.5, _cursorY = 0.75;
+    private volatile bool _cursorVisible, _cursorPressed;
+    private bool _padTouching;
+    private int _cursorLastMovedFrame = -1000;
+
+    /// <summary>Position des Controller-Zeigers für die Anzeige im Spielfenster.</summary>
+    public (double X, double Y, bool Visible, bool Pressed) TouchCursor =>
+        (Volatile.Read(ref _cursorX), Volatile.Read(ref _cursorY), _cursorVisible, _cursorPressed);
+
+    private volatile bool _keyboardTouch;
+    /// <summary>Touch-Taste auf der Tastatur (tippt an der Stelle des Controller-Zeigers).</summary>
+    public void SetKeyboardTouch(bool pressed) => _keyboardTouch = pressed;
+
+    private void UpdateTouchCursor(InputSnapshot pad, int frame)
+    {
+        if (!UseTouchCursor) return;
+
+        const float deadzone = 0.2f;
+        const double speed = 0.015; // Anteil des Bildes pro Bild bei voll ausgelenktem Stick
+
+        float sx = Math.Abs(pad.CursorX) > deadzone ? pad.CursorX : 0;
+        float sy = Math.Abs(pad.CursorY) > deadzone ? pad.CursorY : 0;
+        if (sx != 0 || sy != 0)
+        {
+            // Quadratische Kennlinie: kleine Auslenkung = feine Bewegung
+            Volatile.Write(ref _cursorX, Math.Clamp(_cursorX + Math.Sign(sx) * sx * sx * speed, 0, 1));
+            Volatile.Write(ref _cursorY, Math.Clamp(_cursorY + Math.Sign(sy) * sy * sy * speed, TouchAreaTop, 1));
+            _cursorLastMovedFrame = frame;
+        }
+
+        bool touch = pad.Touch || _keyboardTouch;
+        if (touch)
+        {
+            SetPointer(_cursorX, _cursorY, true);
+            _padTouching = true;
+            _cursorLastMovedFrame = frame;
+        }
+        else if (_padTouching)
+        {
+            SetPointer(_cursorX, _cursorY, false); // loslassen
+            _padTouching = false;
+        }
+
+        _cursorPressed = touch;
+        _cursorVisible = frame - _cursorLastMovedFrame < 180; // nach ca. 3 s ohne Bewegung ausblenden
     }
 
     private InputSnapshot PollInputProvider()
