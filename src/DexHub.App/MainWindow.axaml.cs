@@ -376,8 +376,8 @@ public partial class MainWindow : Window
 
         ControlsPanel.Children.Add(new TextBlock
         {
-            Text = "Auf eine Belegung klicken und dann die gewünschte Taste drücken. " +
-                   "Esc bricht ab, Entf löscht eine Tastatur-Belegung. Änderungen gelten sofort, auch im laufenden Spiel.",
+            Text = "Auf eine Belegung klicken und dann die gewünschte Taste drücken. Esc bricht ab, ✕ löscht eine Belegung. " +
+                   "Änderungen gelten sofort, auch im laufenden Spiel.",
             TextWrapping = TextWrapping.Wrap,
             Opacity = 0.8,
         });
@@ -394,7 +394,7 @@ public partial class MainWindow : Window
             FontWeight = FontWeight.SemiBold,
         });
 
-        var grid = new Grid { ColumnDefinitions = new ColumnDefinitions("170,200,250") };
+        var grid = new Grid { ColumnDefinitions = new ColumnDefinitions("170,200,40,250,40") };
         int row = 0;
 
         void AddCell(Control control, int column)
@@ -413,10 +413,12 @@ public partial class MainWindow : Window
             var keyButton = new Button { Content = keyText, HorizontalAlignment = HorizontalAlignment.Stretch };
             keyButton.Click += (_, _) => StartKeyCapture(keyButton, setKey);
             AddCell(keyButton, 1);
+            AddCell(ClearButton("Tastatur-Belegung löschen", () => setKey("")), 2);
 
             var padButton = new Button { Content = padText, HorizontalAlignment = HorizontalAlignment.Stretch };
             padButton.Click += (_, _) => StartPadCapture(padButton, setPad);
-            AddCell(padButton, 2);
+            AddCell(padButton, 3);
+            AddCell(ClearButton("Controller-Belegung löschen", () => setPad(PadControl.None)), 4);
             row++;
         }
 
@@ -424,7 +426,7 @@ public partial class MainWindow : Window
         grid.RowDefinitions.Add(new RowDefinition(GridLength.Auto));
         AddCell(new TextBlock { Text = "Spieltaste", FontWeight = FontWeight.SemiBold }, 0);
         AddCell(new TextBlock { Text = "Tastatur", FontWeight = FontWeight.SemiBold }, 1);
-        AddCell(new TextBlock { Text = "Controller", FontWeight = FontWeight.SemiBold }, 2);
+        AddCell(new TextBlock { Text = "Controller", FontWeight = FontWeight.SemiBold }, 3);
         row++;
 
         // Neue Wörterbücher statt Änderungen an den alten: der Emulator-Thread liest gleichzeitig mit
@@ -483,6 +485,20 @@ public partial class MainWindow : Window
             Opacity = 0.6,
             TextWrapping = TextWrapping.Wrap,
         });
+    }
+
+    /// <summary>Kleiner ✕-Knopf zum Löschen einer Belegung.</summary>
+    private Button ClearButton(string tooltip, Action clear)
+    {
+        var button = new Button { Content = "✕", HorizontalContentAlignment = HorizontalAlignment.Center };
+        ToolTip.SetTip(button, tooltip);
+        button.Click += (_, _) =>
+        {
+            clear();
+            _settings.Save();
+            BuildControlsPanel();
+        };
+        return button;
     }
 
     /// <summary>Eine Taste darf nur einmal belegt sein: alte Belegung entfernen.</summary>
