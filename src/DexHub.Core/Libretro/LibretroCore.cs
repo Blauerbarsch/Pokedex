@@ -191,28 +191,10 @@ public sealed unsafe class LibretroCore : IDisposable
     }
 
     /// <summary>
-    /// Spielstand-Speicher. Die Adresse merken wir uns, statt den Core jedes Mal zu fragen
-    /// (manche Cores schreiben bei jeder Abfrage eine Meldung ins Terminal).
-    /// Nach dem Laden eines Schnellspeicherstands kann sich die Adresse ändern, dann neu abfragen.
+    /// Spielstand-Speicher. Bewusst jedes Mal beim Core abfragen: Manche Cores (z. B. melonDS DS)
+    /// legen den Speicher neu an oder gleichen ihn erst bei dieser Abfrage ab.
     /// </summary>
-    public Span<byte> SaveRam
-    {
-        get
-        {
-            if (!_saveRamCached)
-            {
-                _saveRamPtr = _getMemoryData(Retro.MemorySaveRam);
-                _saveRamSize = (int)_getMemorySize(Retro.MemorySaveRam);
-                _saveRamCached = true;
-            }
-            return _saveRamPtr == IntPtr.Zero || _saveRamSize <= 0
-                ? Span<byte>.Empty
-                : new Span<byte>((void*)_saveRamPtr, _saveRamSize);
-        }
-    }
-    private IntPtr _saveRamPtr;
-    private int _saveRamSize;
-    private bool _saveRamCached;
+    public Span<byte> SaveRam => GetMemory(Retro.MemorySaveRam);
     public Span<byte> SystemRam => GetMemory(Retro.MemorySystemRam);
 
     public byte[]? SaveState()
@@ -226,7 +208,6 @@ public sealed unsafe class LibretroCore : IDisposable
 
     public bool LoadState(byte[] state)
     {
-        _saveRamCached = false;
         fixed (byte* p = state)
             return _unserialize((IntPtr)p, (nuint)state.Length);
     }
