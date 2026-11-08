@@ -11,6 +11,13 @@ Kein RetroArch, keine Zusatzprogramme: einfach starten, ROM-Ordner wählen, spie
 - **Fortschritt:** Sobald du im Spiel speicherst, markiert der Pokédex gefangene ● und gesehene ○ Pokémon
   (Gen 1, 2 und 4)
 
+- **Statistik & Rückblick:** einzelne Pokémon aus Team und Boxen (Gen 4), Fortschritt, Zeitleiste nach Fangdatum
+- **Benutzer:** mehrere Profile mit eigenen Spielständen; mehrere Spiele gleichzeitig (jedes in eigenem Fenster)
+- **Tauschen:** Tauschzentrale direkt zwischen Spielständen (Gen 4, inkl. Tausch-Entwicklungen) und
+  Linkkabel zwischen zwei Game-Boy-Fenstern
+- **Guide:** Typen, Schwächen, Basiswerte, Fähigkeiten, Entwicklungen und Attacken pro Edition, Typ-Tabelle
+- **Spielstände:** Übersicht pro Benutzer mit Import, Export (auch als ZIP) und Sicherungen
+
 > ROMs, BIOS-Dateien und Spielstände sind **nicht** enthalten und gehören nicht ins Repo.
 > Jeder nutzt seine eigenen Sicherungskopien.
 
