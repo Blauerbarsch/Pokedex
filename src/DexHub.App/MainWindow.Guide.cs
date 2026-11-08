@@ -42,6 +42,7 @@ public partial class MainWindow
     {
         if (!_ready || e.Source != MainTabs) return;
         if (MainTabs.SelectedItem == GuideTab) await EnsureGuideLoadedAsync();
+        if (MainTabs.SelectedItem == SavesTab) BuildSavesPanel();
     }
 
     private async Task EnsureGuideLoadedAsync()
