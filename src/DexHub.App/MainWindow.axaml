@@ -95,7 +95,7 @@
                        Text="Pokémon auswählen" />
             <TextBlock x:Name="DetailText" TextWrapping="Wrap" />
             <TextBlock Opacity="0.5" FontSize="12" TextWrapping="Wrap"
-                       Text="● gefangen   ○ gesehen. Spielstände werden bisher für Gen 1 und 2 ausgelesen." />
+                       Text="● gefangen   ○ gesehen. Zählt, was im Spiel gespeichert wurde. Bisher für Gen 1, 2 und 4 (Diamant bis SoulSilver)." />
           </StackPanel>
         </Grid>
       </TabItem>
