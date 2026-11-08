@@ -160,23 +160,34 @@ public sealed class CoverService
 
     // ---------- Passenden Namen finden ----------
 
-    /// <summary>"Pokemon - Black Version" soll nicht "Pokemon - Black Version 2" treffen.</summary>
+    /// <summary>
+    /// "Pokemon - Black Version" soll nicht "Pokemon - Black Version 2" treffen,
+    /// aber "Pokemon - Yellow Version - Special Pikachu Edition (USA, Europe)" schon.
+    /// </summary>
     private static string? FindByKey(List<string> index, string key) =>
-        index.Where(n => n == key || n.StartsWith(key + " (", StringComparison.OrdinalIgnoreCase))
+        index.Where(n => n == key
+                         || n.StartsWith(key + " (", StringComparison.OrdinalIgnoreCase)
+                         || n.StartsWith(key + " - ", StringComparison.OrdinalIgnoreCase))
              .OrderBy(RegionScore)
              .FirstOrDefault();
 
     /// <summary>Für Spiele ohne Header-Erkennung (z. B. 3DS): über den Dateinamen.</summary>
     private static string? FindByFileName(List<string> index, string romPath)
     {
-        var name = Path.GetFileNameWithoutExtension(romPath);
+        var name = Path.GetFileNameWithoutExtension(romPath).Replace('_', ' ');
         var cut = name.IndexOfAny(['(', '[']);
         if (cut > 0) name = name[..cut];
         var wanted = Normalize(name);
         if (wanted.Length < 6) return null;
 
-        return index.Where(n => Normalize(n).StartsWith(wanted, StringComparison.Ordinal))
-                    .OrderBy(RegionScore)
+        // Erst Namen, die so anfangen, dann solche, die es enthalten
+        // (z. B. "Pokemon - Volume 1" -> "Game Boy Advance Video - Pokemon - Volume 1 (USA)")
+        return index.Select(n => (Name: n, Norm: Normalize(n)))
+                    .Where(n => n.Norm.Contains(wanted, StringComparison.Ordinal))
+                    .OrderBy(n => n.Norm.StartsWith(wanted, StringComparison.Ordinal) ? 0 : 1)
+                    .ThenBy(n => n.Norm.Length - wanted.Length) // möglichst wenig "Rest" im Namen
+                    .ThenBy(n => RegionScore(n.Name))
+                    .Select(n => n.Name)
                     .FirstOrDefault();
     }
 

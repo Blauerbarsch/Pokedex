@@ -52,6 +52,9 @@ public sealed class AppSettings
     /// <summary>Eingeklappte Konsolen in der Bibliothek.</summary>
     public HashSet<Platform> CollapsedPlatforms { get; set; } = [];
 
+    /// <summary>Aufgeklappte Generationen im Pokédex (Standard: nur Gen 1).</summary>
+    public HashSet<int> ExpandedGenerations { get; set; } = [1];
+
     /// <summary>Beim Schließen automatisch sichern und beim nächsten Start dort weitermachen.</summary>
     public bool AutoResume { get; set; } = true;
 
