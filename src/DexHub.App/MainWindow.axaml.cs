@@ -314,6 +314,7 @@ public partial class MainWindow : Window
         FastForwardBox.SelectedIndex = Math.Max(0, Array.IndexOf(FastForwardSpeeds, _settings.FastForwardSpeed));
         SmoothBox.IsChecked = _settings.SmoothScaling;
         AutoResumeBox.IsChecked = _settings.AutoResume;
+        FastForwardModeBox.SelectedIndex = (int)_settings.FastForwardMode;
         BuildControlsPanel();
 
         FoldersText.Text =
@@ -343,6 +344,13 @@ public partial class MainWindow : Window
     {
         if (!_ready) return;
         _settings.SmoothScaling = SmoothBox.IsChecked == true;
+        SaveAndApply();
+    }
+
+    private void OnFastForwardModeChanged(object? sender, SelectionChangedEventArgs e)
+    {
+        if (!_ready || FastForwardModeBox.SelectedIndex < 0) return;
+        _settings.FastForwardMode = (FastForwardMode)FastForwardModeBox.SelectedIndex;
         SaveAndApply();
     }
 
