@@ -143,7 +143,7 @@ public sealed class InputSettings
 
     public static string HotkeyLabel(HotkeyAction action) => action switch
     {
-        HotkeyAction.FastForward => "Schnellvorlauf (halten)",
+        HotkeyAction.FastForward => "Schnellvorlauf",
         HotkeyAction.Touch => "DS-Touch tippen",
         HotkeyAction.SaveState => "Schnellspeichern",
         HotkeyAction.LoadState => "Schnellladen",

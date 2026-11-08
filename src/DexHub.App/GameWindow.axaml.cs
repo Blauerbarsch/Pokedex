@@ -16,7 +16,7 @@ namespace DexHub.App;
 public partial class GameWindow : Window
 {
     public const string ControlsHelp =
-        "Steuerung: Pfeiltasten · X = A · Y = B · Enter = Start · Rücktaste = Select · Leertaste halten = Schnellvorlauf · " +
+        "Steuerung: Pfeiltasten · X = A · Y = B · Enter = Start · Rücktaste = Select · Leertaste = Schnellvorlauf · " +
         "P = Pause · F5/F9 = Schnellspeichern/-laden · F11 = Vollbild · DS-Touch: Maus/Finger oder rechter Stick + Stick drücken · " +
         "Beim Schließen wird automatisch gesichert " +
         "(Belegung änderbar im Tab Steuerung)";
@@ -125,8 +125,9 @@ public partial class GameWindow : Window
     /// <summary>Übernimmt Lautstärke, Skalierung usw. – auch während das Spiel läuft.</summary>
     public void ApplySettings()
     {
-        _session.Volume = _settings.Volume / 100f;
+        _session.Volume = _settings.VolumeGain;
         _session.FastForwardSpeed = _settings.FastForwardSpeed;
+        _session.FastForwardMode = _settings.FastForwardMode;
         RenderOptions.SetBitmapInterpolationMode(Screen,
             _settings.SmoothScaling ? BitmapInterpolationMode.HighQuality : BitmapInterpolationMode.None);
     }

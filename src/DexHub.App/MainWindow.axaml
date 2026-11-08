@@ -123,7 +123,7 @@
           </StackPanel>
 
           <TextBlock Text="Bild &amp; Ton" FontWeight="SemiBold" Margin="0,10,0,0" />
-          <Grid ColumnDefinitions="180,*" RowDefinitions="44,44,44,44">
+          <Grid ColumnDefinitions="180,*" RowDefinitions="44,44,44,44,44">
             <TextBlock Text="Lautstärke" VerticalAlignment="Center" />
             <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10">
               <Slider x:Name="VolumeSlider" Minimum="0" Maximum="100" Width="260"
@@ -139,6 +139,13 @@
               <ComboBoxItem>4-fach</ComboBoxItem>
               <ComboBoxItem>8-fach</ComboBoxItem>
               <ComboBoxItem>Unbegrenzt</ComboBoxItem>
+            </ComboBox>
+
+            <TextBlock Grid.Row="4" Text="Vorspul-Modus" VerticalAlignment="Center" />
+            <ComboBox Grid.Row="4" Grid.Column="1" x:Name="FastForwardModeBox" Width="320"
+                      SelectionChanged="OnFastForwardModeChanged">
+              <ComboBoxItem>Halten (läuft, solange gedrückt)</ComboBoxItem>
+              <ComboBoxItem>Umschalten (Druck an, Druck aus)</ComboBoxItem>
             </ComboBox>
 
             <TextBlock Grid.Row="2" Text="Bild" VerticalAlignment="Center" />

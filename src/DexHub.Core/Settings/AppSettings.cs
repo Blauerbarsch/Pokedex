@@ -3,6 +3,14 @@ using System.Text.Json.Serialization;
 
 namespace DexHub.Core.Settings;
 
+public enum FastForwardMode
+{
+    /// <summary>Läuft schnell, solange die Taste gedrückt ist.</summary>
+    Hold,
+    /// <summary>Ein Druck schaltet ein, der nächste wieder aus.</summary>
+    Toggle,
+}
+
 /// <summary>Einstellungen, gespeichert als JSON im Benutzerordner.</summary>
 public sealed class AppSettings
 {
@@ -12,8 +20,17 @@ public sealed class AppSettings
     /// <summary>Tastatur- und Controller-Belegung.</summary>
     public InputSettings Input { get; set; } = new();
 
-    /// <summary>Lautstärke 0–100.</summary>
-    public int Volume { get; set; } = 80;
+    /// <summary>Lautstärke 0–100 (wird gehörrichtig umgerechnet, siehe VolumeGain).</summary>
+    public int Volume { get; set; } = 50;
+
+    /// <summary>
+    /// Das Ohr empfindet Lautstärke nicht linear. Mit dem Quadrat fühlt sich der Regler gleichmäßig an:
+    /// 50 % auf dem Regler = 25 % Signal.
+    /// </summary>
+    public float VolumeGain => (Volume / 100f) * (Volume / 100f);
+
+    /// <summary>Schnellvorlauf: gedrückt halten oder per Tastendruck an/aus schalten.</summary>
+    public FastForwardMode FastForwardMode { get; set; } = FastForwardMode.Hold;
 
     /// <summary>Wie schnell der Schnellvorlauf läuft (2 = doppelt so schnell). 0 = so schnell wie möglich.</summary>
     public int FastForwardSpeed { get; set; } = 3;

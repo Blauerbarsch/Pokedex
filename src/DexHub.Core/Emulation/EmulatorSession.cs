@@ -75,8 +75,34 @@ public sealed unsafe class EmulatorSession : ICoreHost, IDisposable
     /// <summary>Faktor für den Schnellvorlauf, 0 = so schnell wie möglich.</summary>
     public int FastForwardSpeed { get; set; } = 3;
 
+    /// <summary>Halten oder Umschalten.</summary>
+    public FastForwardMode FastForwardMode { get; set; } = FastForwardMode.Hold;
+
     private volatile bool _fastForwardKey;
-    public void SetFastForward(bool active) => _fastForwardKey = active;
+    private bool _fastForwardPressedBefore, _fastForwardToggled;
+
+    /// <summary>Zustand der Schnellvorlauf-Taste (Tastatur). Was das bedeutet, hängt vom Modus ab.</summary>
+    public void SetFastForward(bool pressed) => _fastForwardKey = pressed;
+
+    /// <summary>Berechnet, ob gerade vorgespult wird (einmal pro Bild im Emulator-Thread).</summary>
+    private bool ResolveFastForward(bool pressed)
+    {
+        bool risingEdge = pressed && !_fastForwardPressedBefore;
+        _fastForwardPressedBefore = pressed;
+
+        if (FastForwardMode == FastForwardMode.Hold)
+        {
+            _fastForwardToggled = false;
+            return pressed;
+        }
+
+        if (risingEdge)
+        {
+            _fastForwardToggled = !_fastForwardToggled;
+            Message?.Invoke(_fastForwardToggled ? "Schnellvorlauf an" : "Schnellvorlauf aus");
+        }
+        return _fastForwardToggled;
+    }
 
     public bool IsPaused => _paused;
     public void TogglePause() => _paused = !_paused;
@@ -188,7 +214,7 @@ public sealed unsafe class EmulatorSession : ICoreHost, IDisposable
                 // Eingaben sammeln: Tastatur (vom UI-Thread) + Controller
                 var pad = PollInputProvider();
                 Volatile.Write(ref _effectiveButtons, Volatile.Read(ref _buttons) | pad.Buttons);
-                bool fastForward = _fastForwardKey || pad.Has(HotkeyAction.FastForward);
+                bool fastForward = ResolveFastForward(_fastForwardKey || pad.Has(HotkeyAction.FastForward));
                 UpdateTouchCursor(pad, frameCounter);
                 HandlePadHotkeys(pad);
 
@@ -410,10 +436,29 @@ public sealed unsafe class EmulatorSession : ICoreHost, IDisposable
     {
         var samples = _audioBuffer.AsSpan(0, _audioCount);
         _audioCount = 0;
+        if (samples.IsEmpty) return;
 
-        // Beim Schnellvorlauf stumm. Liegt schon zu viel Ton in der Warteschlange,
-        // verwerfen wir etwas, damit der Ton nicht hinterherhinkt.
-        if (samples.IsEmpty || fastForward || _audio.QueuedSeconds > 0.15) return;
+        if (fastForward)
+        {
+            // Beim Vorspulen nur jedes n-te Sample abspielen: der Ton läuft schneller (und höher),
+            // passt aber zur Geschwindigkeit des Bildes – wie bei einer schnell abgespielten Kassette.
+            int factor = FastForwardSpeed > 0 ? FastForwardSpeed : 4;
+            int frames = samples.Length / 2, kept = 0;
+            for (int f = 0; f < frames; f += factor, kept++)
+            {
+                samples[kept * 2] = samples[f * 2];
+                samples[kept * 2 + 1] = samples[f * 2 + 1];
+            }
+            samples = samples[..(kept * 2)];
+
+            // Bei "unbegrenzt" läuft das Bild evtl. noch schneller: dann einfach Überschuss verwerfen
+            if (_audio.QueuedSeconds > 0.1) return;
+        }
+        else if (_audio.QueuedSeconds > 0.15)
+        {
+            // Liegt schon zu viel Ton in der Warteschlange: verwerfen, damit der Ton nicht hinterherhinkt
+            return;
+        }
 
         float volume = _volume;
         if (volume < 0.999f)
