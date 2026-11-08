@@ -2,6 +2,12 @@ using System.Runtime.InteropServices;
 
 namespace DexHub.Core.Libretro;
 
+/// <summary>Eine Einstellung, die ein Core anbietet (z. B. Farbkorrektur).</summary>
+/// <param name="Key">Interner Name, z. B. "mgba_color_correction".</param>
+/// <param name="Description">Beschreibung vom Core (meist Englisch).</param>
+/// <param name="Values">Mögliche Werte, der erste ist der Standard.</param>
+public sealed record CoreOptionDefinition(string Key, string Description, string[] Values);
+
 /// <summary>Was der Core von seiner Umgebung (dem "Frontend", also uns) braucht.</summary>
 public interface ICoreHost
 {
@@ -66,8 +72,21 @@ public sealed unsafe class LibretroCore : IDisposable
     public RetroSystemAvInfo AvInfo { get; private set; }
     public bool ShutdownRequested { get; private set; }
 
-    /// <summary>Optionen, die wir abweichend vom Standard setzen wollen.</summary>
+    /// <summary>Optionen, die wir abweichend vom Standard setzen wollen (vor LoadGame füllen).</summary>
     public Dictionary<string, string> OptionOverrides { get; } = [];
+
+    private readonly List<CoreOptionDefinition> _optionDefinitions = [];
+
+    /// <summary>Alle Optionen, die der Core angemeldet hat.</summary>
+    public IReadOnlyList<CoreOptionDefinition> OptionDefinitions => _optionDefinitions;
+
+    /// <summary>Option während des Spiels ändern (nur aus dem Emulator-Thread aufrufen).</summary>
+    public void SetOption(string key, string value)
+    {
+        OptionOverrides[key] = value;
+        _variables[key] = value;
+        _variablesChanged = true;
+    }
 
     public LibretroCore(string corePath, ICoreHost host, string systemDirectory, string saveDirectory)
     {
@@ -385,8 +404,13 @@ public sealed unsafe class LibretroCore : IDisposable
             var desc = Marshal.PtrToStringUTF8(v->Value) ?? "";
             var semicolon = desc.IndexOf(';');
             var options = semicolon >= 0 ? desc[(semicolon + 1)..] : desc;
-            var defaultValue = options.Split('|')[0].Trim();
+            var values = options.Split('|').Select(o => o.Trim()).Where(o => o.Length > 0).ToArray();
+            var defaultValue = values.Length > 0 ? values[0] : "";
             _variables[key] = OptionOverrides.GetValueOrDefault(key, defaultValue);
+
+            var description = semicolon >= 0 ? desc[..semicolon].Trim() : key;
+            _optionDefinitions.RemoveAll(d => d.Key == key);
+            _optionDefinitions.Add(new CoreOptionDefinition(key, description, values));
         }
     }
 

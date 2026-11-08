@@ -5,7 +5,8 @@ Kein RetroArch, keine Zusatzprogramme: einfach starten, ROM-Ordner wählen, spie
 
 - **Eingebaute Emulatoren:** Die Spiele laufen direkt im Programm. Dafür nutzt DexHub bewährte
   Open-Source-Emulatorkerne (libretro-Cores), die mit dem Programm ausgeliefert werden.
-- **Bibliothek:** erkennt Pokémon-Spiele anhand des ROM-Headers
+- **Bibliothek:** erkennt Pokémon-Spiele anhand des ROM-Headers, zeigt sie mit Cover nach Konsolen sortiert
+  (Cover aus [libretro-thumbnails](https://github.com/libretro-thumbnails))
 - **Pokédex:** alle Pokémon mit deutschen Namen, Bildern und Filtern (Daten von [PokéAPI](https://pokeapi.co))
 - **Fortschritt:** Sobald du im Spiel speicherst, markiert der Pokédex gefangene ● und gesehene ○ Pokémon
   (Gen 1, 2 und 4)
@@ -52,6 +53,14 @@ Fest: P = Pause, F11 = Vollbild.
 **Speichern unabhängig vom Spiel:** Schnellspeichern sichert den kompletten Zustand, egal ob das
 Spiel gerade speichern kann. Beim Schließen sichert DexHub automatisch und macht beim nächsten Start
 dort weiter (abschaltbar; „Ohne Fortsetzen starten“ startet frisch).
+
+## Bild
+
+Pro Konsole einstellbar (Tab **Bild**): scharfe oder weiche Pixel, Skalierung (Seitenverhältnis,
+ganzzahlig, Fenster füllen), Bildeffekte (Scanlines, LCD-Raster) und beim DS die Anordnung der
+Bildschirme (übereinander, nebeneinander, groß + klein, nur einer, getauscht). Dazu die Optionen,
+die der jeweilige Emulator selbst anbietet (z. B. Farbkorrektur). Hotkeys im Spiel: F2 = DS-Anordnung,
+F3 = DS-Bildschirme tauschen, F4 = Bildeffekt, F11 = Vollbild.
 
 ## Entwickeln (Windows & Mac)
 
@@ -110,6 +119,7 @@ beim ersten Start übernommen.
 - [x] Spielstände Gen 1 + 2 auslesen
 - [x] Spielstände Gen 4 auslesen (Diamant, Perl, Platin, HeartGold, SoulSilver)
 - [x] Automatisch sichern und fortsetzen
+- [x] Cover, Bibliothek nach Konsolen, Bild-Einstellungen pro Konsole
 - [x] Controller-Unterstützung und frei belegbare Tasten
 - [ ] Spielstände Gen 3 (GBA, inkl. Prüfsummen und Sektorrotation)
 - [ ] Pokédex live aus dem Arbeitsspeicher, auch ohne Speichern im Spiel

@@ -1,5 +1,6 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="using:DexHub.App"
         x:Class="DexHub.App.GameWindow"
         Title="DexHub"
         Width="800" Height="640"
@@ -11,10 +12,16 @@
         PointerMoved="OnPointerMoved"
         PointerReleased="OnPointerReleased">
 
-    <Image x:Name="Screen" Stretch="Uniform"
-           RenderOptions.BitmapInterpolationMode="None" />
+    <!-- Spielbild; beim DS zwei Bildschirme, die im Code angeordnet werden -->
+    <Canvas x:Name="ScreenCanvas" ClipToBounds="True">
+      <Image x:Name="ScreenA" Stretch="Fill" />
+      <Image x:Name="ScreenB" Stretch="Fill" IsVisible="False" />
+    </Canvas>
 
-    <!-- Touch-Zeiger für den Controller (DS), wird im Code positioniert -->
+    <!-- Scanlines / LCD-Raster -->
+    <local:EffectOverlay x:Name="Effects" IsHitTestVisible="False" />
+
+    <!-- Touch-Zeiger für den Controller (DS) -->
     <Canvas IsHitTestVisible="False">
       <Ellipse x:Name="TouchCursor" Width="20" Height="20" IsVisible="False"
                Stroke="White" StrokeThickness="2" Fill="#66E3350D" />
