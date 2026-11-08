@@ -16,6 +16,7 @@ using DexHub.Core.Detection;
 using DexHub.Core.Emulation;
 using DexHub.Core.Models;
 using DexHub.Core.Pokedex;
+using DexHub.Core.Pokemon;
 using DexHub.Core.Saves;
 using DexHub.Core.Settings;
 using GamePlatform = DexHub.Core.Models.Platform;
@@ -367,6 +368,14 @@ public partial class MainWindow : Window
         try
         {
             _species = await _pokeApi.LoadSpeciesAsync(forceRefresh);
+            try
+            {
+                _gameData = await _pokeApi.LoadGameDataAsync(forceRefresh);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("[DexHub] Spieldaten (Attacken, Wesen) nicht ladbar: " + ex.Message);
+            }
             RebuildDex();
             SetStatus($"Pokédex geladen: {_species.Count} Pokémon.");
         }
@@ -402,6 +411,8 @@ public partial class MainWindow : Window
     {
         _dex = PokedexService.Build(_species, _games);
         _dexById = _dex.ToDictionary(d => d.Id);
+        _collection = CollectionService.Load(_games, _gameData);
+        BuildStats();
 
         // Gruppen nur einmal anlegen (bzw. wenn sich die Anzahl Generationen ändert)
         var generations = _dex.Select(d => d.Species.Generation).Distinct().Order().ToList();
@@ -414,7 +425,7 @@ public partial class MainWindow : Window
         ApplyDexFilter();
 
         // Detailansicht aktuell halten
-        if (_dexById.TryGetValue(_selectedDexId, out var selected)) DetailText.Text = selected.DetailText;
+        if (_dexById.TryGetValue(_selectedDexId, out var selected)) DetailText.Text = selected.DetailText + OwnedSummary(_selectedDexId);
     }
 
     private void BuildDexGroups(List<int> generations)
@@ -592,7 +603,7 @@ public partial class MainWindow : Window
             if (_dexTiles.TryGetValue(other, out var t) && _dexById.TryGetValue(other, out var e)) StyleDexTile(t, e);
 
         DetailName.Text = $"{entry.Number} {entry.Name}";
-        DetailText.Text = entry.DetailText;
+        DetailText.Text = entry.DetailText + OwnedSummary(id);
         SpriteImage.Source = null;
 
         // Bild nachladen; ältere Ladevorgänge abbrechen, wenn man schnell weiterklickt
@@ -610,6 +621,316 @@ public partial class MainWindow : Window
         {
             // Absichtlich ignoriert
         }
+    }
+
+    // =====================================================================
+    // Statistik, eigene Pokémon und Rückblick
+    // =====================================================================
+
+    private GameData? _gameData;
+    private List<OwnedPokemon> _collection = [];
+
+    private string SpeciesName(int id) => _dexById.TryGetValue(id, out var e) ? e.Name : $"#{id}";
+
+    private string DisplayName(OwnedPokemon p) => p.Nickname is { Length: > 0 } nick && nick != SpeciesName(p.Species)
+        ? $"{nick} ({SpeciesName(p.Species)})"
+        : SpeciesName(p.Species);
+
+    /// <summary>Für die Pokédex-Details: alle eigenen Exemplare dieser Art.</summary>
+    private string OwnedSummary(int species)
+    {
+        var own = _collection.Where(p => p.Species == species && !p.IsEgg).OrderByDescending(p => p.Level).ToList();
+        if (own.Count == 0) return "";
+        var lines = own.Select(p =>
+            $"• Lv. {p.Level} {p.Nickname ?? SpeciesName(p.Species)} {p.Gender}{(p.IsShiny ? " ✨" : "")} – {p.GameTitle}, {p.Location}");
+        return $"\n\nDeine Exemplare ({own.Count}):\n" + string.Join("\n", lines);
+    }
+
+    private void BuildStats()
+    {
+        StatsPanel.Children.Clear();
+        var mons = _collection.Where(p => !p.IsEgg).ToList();
+
+        StatsPanel.Children.Add(StatsSection("Überblick", BuildOverview(mons), expanded: true));
+        StatsPanel.Children.Add(StatsSection($"Meine Pokémon ({mons.Count})", BuildMyPokemon(mons), expanded: true));
+        StatsPanel.Children.Add(StatsSection("Rückblick", BuildTimeline(mons), expanded: false));
+    }
+
+    private static Expander StatsSection(string title, Control content, bool expanded) => new()
+    {
+        Header = title,
+        Content = content,
+        IsExpanded = expanded,
+        HorizontalAlignment = HorizontalAlignment.Stretch,
+    };
+
+    private static TextBlock Text(string text, double size = 14, bool bold = false, double opacity = 1) => new()
+    {
+        Text = text,
+        FontSize = size,
+        FontWeight = bold ? FontWeight.SemiBold : FontWeight.Normal,
+        Opacity = opacity,
+        TextWrapping = TextWrapping.Wrap,
+    };
+
+    private static Control StatCard(string value, string label) => new Border
+    {
+        Background = TileBrush,
+        CornerRadius = new CornerRadius(8),
+        Padding = new Thickness(14, 10),
+        Margin = new Thickness(0, 0, 8, 8),
+        MinWidth = 150,
+        Child = new StackPanel { Children = { Text(value, 26, bold: true), Text(label, 12, opacity: 0.7) } },
+    };
+
+    private Control BuildOverview(List<OwnedPokemon> mons)
+    {
+        var panel = new StackPanel { Spacing = 12 };
+        int caughtSpecies = _dex.Count(d => d.IsCaught);
+
+        panel.Children.Add(new WrapPanel
+        {
+            Children =
+            {
+                StatCard($"{caughtSpecies} / {_dex.Count}", "Arten gefangen (alle Spiele)"),
+                StatCard($"{_dex.Count(d => d.SeenIn.Count > 0 || d.IsCaught)}", "Arten gesehen"),
+                StatCard($"{mons.Count}", "Pokémon in Team & Boxen (Gen 4)"),
+                StatCard($"{mons.Count(p => p.IsShiny)}", "Schillernde ✨"),
+            },
+        });
+
+        // Fortschritt pro Generation
+        panel.Children.Add(Text("Fortschritt pro Generation", bold: true));
+        foreach (var gen in _dex.GroupBy(d => d.Species.Generation).OrderBy(g => g.Key))
+        {
+            int total = gen.Count(), caught = gen.Count(d => d.IsCaught);
+            panel.Children.Add(ProgressRow($"Gen {gen.Key} – {Regions.ElementAtOrDefault(gen.Key)}", caught, total));
+        }
+
+        // Fortschritt pro Spiel
+        var games = _games.Where(g => g.SavePath is not null && g.Info.SaveFormat != SaveFormat.None).ToList();
+        if (games.Count > 0)
+        {
+            panel.Children.Add(Text("Pokédex pro Spiel", bold: true));
+            foreach (var game in games)
+            {
+                var progress = SaveReader.Read(game.SavePath!, game.Info.SaveFormat);
+                if (progress is null) continue;
+                int max = game.Info.Generation switch { 1 => 151, 2 => 251, 3 => 386, 4 => 493, _ => _dex.Count };
+                panel.Children.Add(ProgressRow(game.Title, progress.Caught.Count, max, $" · {progress.Seen.Count} gesehen"));
+            }
+        }
+
+        // Highlights
+        if (mons.Count > 0)
+        {
+            panel.Children.Add(Text("Highlights", bold: true));
+            var strongest = mons.MaxBy(p => p.Level)!;
+            panel.Children.Add(Text($"Höchstes Level: {DisplayName(strongest)} mit Lv. {strongest.Level} ({strongest.GameTitle})"));
+
+            var favorites = mons.GroupBy(p => p.Species)
+                .Where(g => g.Count() > 1)
+                .OrderByDescending(g => g.Count())
+                .Take(5)
+                .Select(g => $"{SpeciesName(g.Key)} ×{g.Count()}")
+                .ToList();
+            if (favorites.Count > 0) panel.Children.Add(Text("Am häufigsten: " + string.Join(", ", favorites)));
+
+            var balls = mons.GroupBy(p => p.Ball).OrderByDescending(g => g.Count()).Take(3)
+                .Select(g => $"{GameData.Ball(g.Key)} ×{g.Count()}");
+            panel.Children.Add(Text("Lieblingsbälle: " + string.Join(", ", balls)));
+
+            var perfect = mons.Where(p => p.Ivs.Length == 6 && p.Ivs.Count(iv => iv == 31) >= 3).ToList();
+            if (perfect.Count > 0)
+                panel.Children.Add(Text($"Mit mindestens 3 perfekten IVs: {string.Join(", ", perfect.Select(DisplayName))}"));
+        }
+        else
+        {
+            panel.Children.Add(Text("Einzelne Pokémon werden bisher aus Gen-4-Spielständen gelesen (Diamant bis SoulSilver).", opacity: 0.6));
+        }
+
+        return panel;
+    }
+
+    private static Control ProgressRow(string label, int value, int max, string extra = "")
+    {
+        var grid = new Grid { ColumnDefinitions = new ColumnDefinitions("260,*,190") };
+        grid.Children.Add(Text(label));
+        grid.Children.Add(WithColumn(new ProgressBar
+        {
+            Minimum = 0,
+            Maximum = Math.Max(1, max),
+            Value = value,
+            Height = 10,
+            VerticalAlignment = VerticalAlignment.Center,
+            Margin = new Thickness(10, 0),
+        }, 1));
+        var percent = max > 0 ? 100.0 * value / max : 0;
+        grid.Children.Add(WithColumn(Text($"{value} / {max} ({percent:0} %){extra}", 12, opacity: 0.8), 2));
+        return grid;
+    }
+
+    private Control BuildMyPokemon(List<OwnedPokemon> mons)
+    {
+        var panel = new StackPanel { Spacing = 6 };
+        if (mons.Count == 0)
+        {
+            panel.Children.Add(Text("Noch keine Pokémon gefunden. Spiele ein Gen-4-Spiel und speichere im Spiel.", opacity: 0.6));
+            return panel;
+        }
+
+        foreach (var game in mons.GroupBy(p => p.GameTitle).OrderBy(g => g.Key))
+        {
+            int team = game.Count(p => p.Location == "Team");
+            var wrap = new WrapPanel();
+            var ordered = game
+                .OrderBy(p => p.Location == "Team" ? 0 : int.TryParse(p.Location.Replace("Box ", ""), out var b) ? b : 99)
+                .ThenBy(p => p.Species);
+            foreach (var p in ordered) wrap.Children.Add(CreatePokemonTile(p));
+
+            panel.Children.Add(new Expander
+            {
+                Header = $"{game.Key} – {team} im Team, {game.Count() - team} in Boxen",
+                Content = wrap,
+                IsExpanded = true,
+                HorizontalAlignment = HorizontalAlignment.Stretch,
+            });
+        }
+        return panel;
+    }
+
+    private Border CreatePokemonTile(OwnedPokemon p)
+    {
+        var sprite = new Image { Width = 80, Height = 80, Stretch = Stretch.Uniform };
+        RenderOptions.SetBitmapInterpolationMode(sprite, BitmapInterpolationMode.None);
+
+        var tile = new Border
+        {
+            Width = 124,
+            Margin = new Thickness(4),
+            Padding = new Thickness(6),
+            CornerRadius = new CornerRadius(8),
+            Background = TileBrush,
+            BorderThickness = new Thickness(2),
+            BorderBrush = p.IsShiny ? new SolidColorBrush(Color.Parse("#F5C542")) : Brushes.Transparent,
+            Cursor = new Cursor(StandardCursorType.Hand),
+            Child = new StackPanel
+            {
+                Spacing = 2,
+                Children =
+                {
+                    new Grid
+                    {
+                        ColumnDefinitions = new ColumnDefinitions("*,Auto"),
+                        Children =
+                        {
+                            Text($"Lv. {p.Level}", 12, opacity: 0.7),
+                            WithColumn(Text(p.Gender + (p.IsShiny ? " ✨" : ""), 12), 1),
+                        },
+                    },
+                    sprite,
+                    new TextBlock
+                    {
+                        Text = p.Nickname ?? SpeciesName(p.Species),
+                        FontWeight = FontWeight.SemiBold,
+                        TextAlignment = TextAlignment.Center,
+                        TextTrimming = TextTrimming.CharacterEllipsis,
+                    },
+                    new TextBlock { Text = p.Location, FontSize = 11, Opacity = 0.6, TextAlignment = TextAlignment.Center },
+                },
+            },
+        };
+        tile.PointerPressed += async (_, _) => await ShowPokemonDetailAsync(p);
+        _ = LoadOwnedSpriteAsync(p, sprite);
+        return tile;
+    }
+
+    private async Task LoadOwnedSpriteAsync(OwnedPokemon p, Image target)
+    {
+        var path = await _pokeApi.GetSpritePathAsync(p.Species, shiny: p.IsShiny)
+                   ?? await _pokeApi.GetSpritePathAsync(p.Species);
+        if (path is null) return;
+        try { target.Source = new Bitmap(path); }
+        catch (Exception ex) { Console.WriteLine($"[DexHub] Bild #{p.Species} fehlerhaft: {ex.Message}"); }
+    }
+
+    private async Task ShowPokemonDetailAsync(OwnedPokemon p)
+    {
+        var panel = PokemonDetailPanel;
+        panel.Children.Clear();
+
+        var sprite = new Image { Width = 160, Height = 160, HorizontalAlignment = HorizontalAlignment.Center };
+        RenderOptions.SetBitmapInterpolationMode(sprite, BitmapInterpolationMode.None);
+        panel.Children.Add(sprite);
+
+        panel.Children.Add(Text(p.Nickname ?? SpeciesName(p.Species), 22, bold: true));
+        panel.Children.Add(Text($"#{p.Species:0000} {SpeciesName(p.Species)} {p.Gender}{(p.IsShiny ? "  ✨ schillernd" : "")}", opacity: 0.8));
+        panel.Children.Add(Text($"Level {p.Level} · Wesen: {_gameData?.Nature(p.Nature) ?? p.Nature.ToString()}"));
+        panel.Children.Add(Text($"{p.GameTitle} · {p.Location}", opacity: 0.8));
+
+        var met = p.MetDate is { } date ? $"Gefangen am {date:dd.MM.yyyy}" : "Fangdatum unbekannt";
+        panel.Children.Add(Text($"{met} mit Lv. {p.MetLevel} im {GameData.Ball(p.Ball)}"));
+        panel.Children.Add(Text($"Trainer: {p.TrainerName} (ID {p.TrainerId:00000}) · Freundschaft {p.Friendship}/255", 12, opacity: 0.7));
+
+        panel.Children.Add(Text("Attacken", bold: true));
+        foreach (var move in p.Moves.Where(m => m != 0))
+            panel.Children.Add(Text("• " + (_gameData?.Move(move) ?? $"Attacke #{move}")));
+
+        panel.Children.Add(Text("Werte (IV / EV)", bold: true));
+        for (int i = 0; i < 6 && i < p.Ivs.Length; i++)
+        {
+            var row = new Grid { ColumnDefinitions = new ColumnDefinitions("80,*,70") };
+            row.Children.Add(Text(GameData.StatNames[i], 12));
+            row.Children.Add(WithColumn(new ProgressBar
+            {
+                Minimum = 0, Maximum = 31, Value = p.Ivs[i], Height = 8,
+                VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(6, 0),
+            }, 1));
+            row.Children.Add(WithColumn(Text($"{p.Ivs[i]} / {p.Evs.ElementAtOrDefault(i)}", 12), 2));
+            panel.Children.Add(row);
+        }
+        panel.Children.Add(Text("IV: 0–31 (angeboren), EV: Fleißpunkte (max. 255 pro Wert)", 11, opacity: 0.5));
+
+        var path = await _pokeApi.GetSpritePathAsync(p.Species, shiny: p.IsShiny);
+        if (path is not null) sprite.Source = new Bitmap(path);
+    }
+
+    private Control BuildTimeline(List<OwnedPokemon> mons)
+    {
+        var panel = new StackPanel { Spacing = 10 };
+        var dated = mons.Where(p => p.MetDate is not null).OrderByDescending(p => p.MetDate).ToList();
+        if (dated.Count == 0)
+        {
+            panel.Children.Add(Text("Noch keine Fangdaten vorhanden.", opacity: 0.6));
+            return panel;
+        }
+
+        var culture = new System.Globalization.CultureInfo("de-DE");
+        var first = dated[^1];
+        panel.Children.Add(Text($"Erster Fang: {DisplayName(first)} am {first.MetDate:dd.MM.yyyy} ({first.GameTitle})", opacity: 0.8));
+
+        // Pro Monat zusammenfassen, darin pro Tag
+        foreach (var month in dated.GroupBy(p => new DateOnly(p.MetDate!.Value.Year, p.MetDate.Value.Month, 1)).Take(24))
+        {
+            var monthPanel = new StackPanel { Spacing = 6 };
+            foreach (var day in month.GroupBy(p => p.MetDate!.Value))
+            {
+                monthPanel.Children.Add(Text(day.Key.ToString("dddd, d. MMMM", culture), 13, bold: true));
+                foreach (var p in day)
+                    monthPanel.Children.Add(Text(
+                        $"   {DisplayName(p)}{(p.IsShiny ? " ✨" : "")} – mit Lv. {p.MetLevel} im {GameData.Ball(p.Ball)}, heute Lv. {p.Level} · {p.GameTitle}",
+                        13));
+            }
+
+            panel.Children.Add(new Expander
+            {
+                Header = $"{month.Key.ToString("MMMM yyyy", culture)} – {month.Count()} Pokémon",
+                Content = monthPanel,
+                IsExpanded = month.Key == new DateOnly(dated[0].MetDate!.Value.Year, dated[0].MetDate!.Value.Month, 1),
+                HorizontalAlignment = HorizontalAlignment.Stretch,
+            });
+        }
+        return panel;
     }
 
     // =====================================================================
