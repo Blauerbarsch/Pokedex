@@ -122,6 +122,9 @@ public sealed class AppSettings
 
     private static string SettingsFile => Path.Combine(AppDataFolder, "settings.json");
 
+    /// <summary>Pfad der Einstellungsdatei (Spiel-Prozesse beobachten sie auf Änderungen).</summary>
+    public static string SettingsFilePath => SettingsFile;
+
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
         WriteIndented = true,
@@ -145,7 +148,6 @@ public sealed class AppSettings
         settings.Input.EnsureDefaults();
         if (settings.Profiles.Count == 0) settings.Profiles.Add(DefaultProfile);
         if (!settings.Profiles.Contains(settings.CurrentProfile)) settings.CurrentProfile = settings.Profiles[0];
-        ActiveProfile = settings.CurrentProfile;
         return settings;
     }
 

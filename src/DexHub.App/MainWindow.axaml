@@ -24,7 +24,7 @@
       </StackPanel>
     </Border>
 
-    <TabControl Margin="8">
+    <TabControl x:Name="MainTabs" Margin="8" SelectionChanged="OnMainTabChanged">
 
       <!-- ============ Bibliothek ============ -->
       <TabItem Header="Bibliothek">
@@ -90,10 +90,36 @@
             <TextBlock x:Name="DetailName" FontSize="20" FontWeight="SemiBold"
                        Text="Pokémon auswählen" />
             <TextBlock x:Name="DetailText" TextWrapping="Wrap" />
+            <Button x:Name="OpenInGuideButton" Content="📖 Im Guide öffnen" Click="OnOpenInGuideClick" IsVisible="False" />
             <TextBlock Opacity="0.5" FontSize="12" TextWrapping="Wrap"
                        Text="● gefangen   ○ gesehen. Zählt, was im Spiel gespeichert wurde. Bisher für Gen 1, 2 und 4 (Diamant bis SoulSilver)." />
           </StackPanel>
         </Grid>
+      </TabItem>
+
+      <!-- ============ Guide ============ -->
+      <TabItem x:Name="GuideTab" Header="Guide">
+        <DockPanel Margin="0,8,0,0">
+          <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Spacing="8" Margin="0,0,0,8">
+            <Button x:Name="GuideBackButton" Content="← Zurück" Click="OnGuideBackClick" IsEnabled="False" />
+            <Button x:Name="GuideModePokemon" Content="Pokémon" Click="OnGuideModeClick" Tag="pokemon" />
+            <Button x:Name="GuideModeTypes" Content="Typen" Click="OnGuideModeClick" Tag="types" />
+            <Button x:Name="GuideModeMoves" Content="Attacken" Click="OnGuideModeClick" Tag="moves" />
+            <TextBlock Text="Edition:" VerticalAlignment="Center" Margin="12,0,0,0" Opacity="0.8" />
+            <ComboBox x:Name="GuideVersionBox" Width="280" SelectionChanged="OnGuideVersionChanged" />
+            <TextBlock x:Name="GuideStatus" VerticalAlignment="Center" Opacity="0.7" />
+          </StackPanel>
+          <Grid ColumnDefinitions="260,*">
+            <DockPanel>
+              <TextBox x:Name="GuideSearchBox" DockPanel.Dock="Top" Watermark="Suchen (Name oder Nummer)…"
+                       TextChanged="OnGuideSearchChanged" Margin="0,0,0,6" />
+              <ListBox x:Name="GuideList" SelectionChanged="OnGuideListSelectionChanged" />
+            </DockPanel>
+            <ScrollViewer x:Name="GuideScroll" Grid.Column="1" Margin="12,0,0,0">
+              <StackPanel x:Name="GuideContent" Spacing="10" Margin="0,0,12,12" />
+            </ScrollViewer>
+          </Grid>
+        </DockPanel>
       </TabItem>
 
       <!-- ============ Statistik (wird im Code aufgebaut) ============ -->

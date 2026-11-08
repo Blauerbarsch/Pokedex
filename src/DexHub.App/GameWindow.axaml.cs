@@ -20,7 +20,7 @@ public partial class GameWindow : Window
         "P = Pause · F5/F9 = Schnellspeichern/-laden · F11 = Vollbild · F4 = Bildeffekt · DS: F2 = Anordnung, F3 = tauschen, " +
         "Touch per Maus/Finger oder rechtem Stick · Beim Schließen wird automatisch gesichert (Belegung änderbar im Tab Steuerung)";
 
-    private readonly AppSettings _settings;
+    private AppSettings _settings;
     private readonly EmulatorSession _session;
     private readonly GamePlatform _platform;
     private WriteableBitmap? _bitmap;
@@ -60,7 +60,12 @@ public partial class GameWindow : Window
 
         KeyDown += OnKeyDown;
         KeyUp += OnKeyUp;
-        Deactivated += (_, _) => ReleaseAllKeys();
+        Deactivated += (_, _) =>
+        {
+            ReleaseAllKeys();
+            session.AcceptControllerInput = false; // Controller gehört dem Fenster im Vordergrund
+        };
+        Activated += (_, _) => session.AcceptControllerInput = true;
 
         session.Message += msg => Dispatcher.UIThread.Post(() => ShowOsd(msg));
         session.Failed += msg => Dispatcher.UIThread.Post(() => ShowOsd("Fehler: " + msg, persistent: true));
@@ -81,6 +86,19 @@ public partial class GameWindow : Window
     }
 
     private VideoSettings Video => _settings.VideoFor(_platform);
+
+    /// <summary>Neue Einstellungen übernehmen (Spiel-Prozess: settings.json wurde geändert).</summary>
+    public void ReplaceSettings(AppSettings fresh)
+    {
+        // Geänderte Emulator-Optionen an den laufenden Core weitergeben
+        var oldOptions = _settings.CoreOptions.GetValueOrDefault(_session.CoreName) ?? [];
+        foreach (var (key, value) in fresh.CoreOptions.GetValueOrDefault(_session.CoreName) ?? [])
+            if (oldOptions.GetValueOrDefault(key) != value) _session.RequestOptionChange(key, value);
+
+        _settings = fresh;
+        Input.SdlGamepad.Instance.Settings = fresh.Input;
+        ApplySettings();
+    }
 
     /// <summary>Übernimmt Lautstärke, Schnellvorlauf, Bildglättung – auch während das Spiel läuft.</summary>
     public void ApplySettings()
