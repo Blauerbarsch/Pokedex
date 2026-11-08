@@ -380,7 +380,7 @@ public partial class MainWindow : Window
         {
             AddRow(label,
                 InputSettings.KeyLabel(input.Keyboard.GetValueOrDefault(button, "")),
-                key => input.Keyboard = new(input.Keyboard) { [button] = key },
+                key => { ClearKey(key); input.Keyboard = new(input.Keyboard) { [button] = key }; },
                 InputSettings.PadLabel(input.Gamepad.GetValueOrDefault(button, PadControl.None)),
                 pad => input.Gamepad = new(input.Gamepad) { [button] = pad });
         }
@@ -389,7 +389,7 @@ public partial class MainWindow : Window
         {
             AddRow(InputSettings.HotkeyLabel(action),
                 InputSettings.KeyLabel(input.HotkeyKeyboard.GetValueOrDefault(action, "")),
-                key => input.HotkeyKeyboard = new(input.HotkeyKeyboard) { [action] = key },
+                key => { ClearKey(key); input.HotkeyKeyboard = new(input.HotkeyKeyboard) { [action] = key }; },
                 InputSettings.PadLabel(input.HotkeyGamepad.GetValueOrDefault(action, PadControl.None)),
                 pad => input.HotkeyGamepad = new(input.HotkeyGamepad) { [action] = pad });
         }
@@ -431,6 +431,15 @@ public partial class MainWindow : Window
             Opacity = 0.6,
             TextWrapping = TextWrapping.Wrap,
         });
+    }
+
+    /// <summary>Eine Taste darf nur einmal belegt sein: alte Belegung entfernen.</summary>
+    private void ClearKey(string key)
+    {
+        if (string.IsNullOrEmpty(key)) return;
+        var input = _settings.Input;
+        input.Keyboard = input.Keyboard.ToDictionary(p => p.Key, p => p.Value == key ? "" : p.Value);
+        input.HotkeyKeyboard = input.HotkeyKeyboard.ToDictionary(p => p.Key, p => p.Value == key ? "" : p.Value);
     }
 
     private void StartKeyCapture(Button button, Action<string> setKey)
