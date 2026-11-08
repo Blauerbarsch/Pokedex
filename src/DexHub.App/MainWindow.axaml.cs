@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
@@ -33,7 +34,6 @@ public partial class MainWindow : Window
     private List<PokemonSpecies> _species = [];
     private List<DexEntry> _dex = [];
 
-    private GameWindow? _runningGame;
     private CancellationTokenSource? _spriteCts;
     private bool _ready; // verhindert, dass Events beim Laden der Oberfläche zu früh feuern
 
@@ -56,7 +56,7 @@ public partial class MainWindow : Window
         };
 
         // Läuft beim Schließen noch ein Spiel, dieses zuerst sauber beenden (Spielstand speichern)
-        Closing += (_, _) => _runningGame?.Close();
+        // Spiele laufen als eigene Prozesse weiter, auch wenn das Hauptfenster geschlossen wird
     }
 
     // =====================================================================
@@ -211,7 +211,20 @@ public partial class MainWindow : Window
         var fresh = new MenuItem { Header = "Ohne Fortsetzen starten" };
         fresh.Click += async (_, _) => await LaunchGameAsync(game, resume: false);
         var info = new MenuItem { Header = "Datei: " + game.FileName, IsEnabled = false };
-        tile.ContextMenu = new ContextMenu { ItemsSource = new object[] { play, fresh, new Separator(), info } };
+        var menu = new List<object> { play, fresh };
+        if (game.Info.Platform is GamePlatform.GameBoy or GamePlatform.GameBoyColor)
+        {
+            var host = new MenuItem { Header = "🔗 Linkkabel: als Gastgeber starten" };
+            host.Click += async (_, _) => await LaunchWithLinkAsync(game, host: true);
+            var join = new MenuItem { Header = "🔗 Linkkabel: mit Gastgeber verbinden" };
+            join.Click += async (_, _) => await LaunchWithLinkAsync(game, host: false);
+            menu.Add(new Separator());
+            menu.Add(host);
+            menu.Add(join);
+        }
+        menu.Add(new Separator());
+        menu.Add(info);
+        tile.ContextMenu = new ContextMenu { ItemsSource = menu };
 
         _tiles[game] = tile;
         _ = LoadCoverAsync(game, cover, placeholder);
@@ -264,13 +277,23 @@ public partial class MainWindow : Window
         await LaunchGameAsync(_selectedGame, resume);
     }
 
-    private async Task LaunchGameAsync(GameEntry game, bool resume = true)
+    /// <summary>Laufende Spiele (jedes in einem eigenen Prozess).</summary>
+    private sealed record RunningGame(GameEntry Game, string Profile, Process Process);
+    private readonly List<RunningGame> _running = [];
+
+    private bool AnyGameRunning => _running.Any(r => !r.Process.HasExited);
+
+    private bool IsRunning(GameEntry game, string profile) =>
+        _running.Any(r => !r.Process.HasExited && r.Game.RomPath == game.RomPath && r.Profile == profile);
+
+    private async Task LaunchGameAsync(GameEntry game, bool resume = true, Dictionary<string, string>? options = null)
     {
-        // Es kann immer nur ein Spiel gleichzeitig laufen (Einschränkung von libretro)
-        if (_runningGame is not null)
+        var profile = _settings.CurrentProfile;
+        if (IsRunning(game, profile))
         {
-            _runningGame.Activate();
-            SetStatus("Es läuft bereits ein Spiel. Bitte zuerst dessen Fenster schließen.");
+            await ShowMessageAsync("Läuft bereits",
+                $"{game.Title} läuft für {profile} schon. Für ein zweites Fenster oben einen anderen Benutzer wählen – " +
+                "zwei Fenster mit demselben Spielstand würden sich gegenseitig überschreiben.");
             return;
         }
 
@@ -282,8 +305,7 @@ public partial class MainWindow : Window
             return;
         }
 
-        var corePath = CoreCatalog.FindCore(platform);
-        if (corePath is null)
+        if (CoreCatalog.FindCore(platform) is null)
         {
             await ShowMessageAsync("Emulator fehlt",
                 $"Der Emulator für {platform.DisplayName()} ({CoreCatalog.Cores[platform]}) wurde nicht gefunden.\n\n" +
@@ -291,36 +313,92 @@ public partial class MainWindow : Window
             return;
         }
 
-        var session = new EmulatorSession(game, corePath, new SdlAudioSink());
-        SdlGamepad.Instance.Settings = _settings.Input;
-        session.InputProvider = SdlGamepad.Instance;
-        session.AutoResume = resume && _settings.AutoResume;
-        session.CoreOptions = new(_settings.CoreOptions.GetValueOrDefault(session.CoreName) ?? []);
-
-        // Speichert das Spiel, sofort den Pokédex aktualisieren
-        session.SaveWritten += _ => Dispatcher.UIThread.Post(() =>
+        Process process;
+        try
         {
-            game.SavePath = SaveLocator.Find(game);
-            RebuildDex();
-            SetStatus($"Spielstand von {game.Title} gesichert – Pokédex aktualisiert.");
-        });
-
-        var window = new GameWindow(session, _settings);
-        window.VideoSettingsChanged += BuildVideoPanel;
-        window.Closed += (_, _) =>
+            process = Process.Start(PlayerHost.CreateStartInfo(game.RomPath, profile, resume && _settings.AutoResume, options))
+                      ?? throw new InvalidOperationException("Prozess konnte nicht gestartet werden.");
+        }
+        catch (Exception ex)
         {
-            _runningGame = null;
+            await ShowMessageAsync("Spiel konnte nicht gestartet werden", ex.Message);
+            return;
+        }
+
+        var running = new RunningGame(game, profile, process);
+        _running.Add(running);
+        process.EnableRaisingEvents = true;
+        process.Exited += (_, _) => Dispatcher.UIThread.Post(() =>
+        {
+            _running.Remove(running);
             BuildVideoPanel(); // jetzt sind evtl. neue Emulator-Optionen bekannt
-            game.SavePath = SaveLocator.Find(game);
+            foreach (var g in _games) g.SavePath = SaveLocator.Find(g);
             RefreshGamesList();
             RebuildDex();
-            SetStatus($"{game.Title} beendet.");
-        };
+            SetStatus($"{game.Title} ({running.Profile}) beendet.");
+        });
 
-        _runningGame = window;
-        window.Show();
-        SetStatus($"{game.Title} läuft…");
+        SetStatus($"{game.Title} läuft für {profile}…");
     }
+
+    /// <summary>
+    /// Linkkabel für Game Boy/Color: Gambatte kann zwei Spiele über das Netzwerk verbinden.
+    /// Das erste Fenster ist Gastgeber, das zweite verbindet sich mit 127.0.0.1 (derselbe PC).
+    /// Die genauen Options-Namen liest DexHub aus dem Core, sobald einmal ein GB-Spiel lief.
+    /// </summary>
+    private Dictionary<string, string>? GameBoyLinkOptions(bool host, out string error)
+    {
+        error = "";
+        var definitions = CoreOptionStore.Load("gambatte_libretro");
+        var options = new Dictionary<string, string>();
+
+        if (definitions.Count == 0)
+        {
+            // Noch nie ein GB-Spiel gestartet: Standardnamen des Gambatte-Cores verwenden
+            options["gambatte_gb_link_mode"] = host ? "Network Server" : "Network Client";
+            if (!host)
+            {
+                options["gambatte_gb_link_network_server_ip_octet1"] = "127";
+                options["gambatte_gb_link_network_server_ip_octet2"] = "0";
+                options["gambatte_gb_link_network_server_ip_octet3"] = "0";
+                options["gambatte_gb_link_network_server_ip_octet4"] = "1";
+            }
+            return options;
+        }
+
+        var mode = definitions.FirstOrDefault(d => d.Key.Contains("link_mode", StringComparison.OrdinalIgnoreCase));
+        var value = mode?.Values.FirstOrDefault(v => v.Contains(host ? "Server" : "Client", StringComparison.OrdinalIgnoreCase));
+        if (mode is null || value is null)
+        {
+            error = "Dieser Game-Boy-Emulator wurde ohne Linkkabel-Unterstützung gebaut.";
+            return null;
+        }
+        options[mode.Key] = value;
+
+        if (!host)
+        {
+            string[] localhost = ["127", "0", "0", "1"];
+            foreach (var def in definitions.Where(d => d.Key.Contains("ip_octet", StringComparison.OrdinalIgnoreCase)))
+                if (int.TryParse(def.Key[^1..], out var n) && n is >= 1 and <= 4)
+                    options[def.Key] = localhost[n - 1];
+        }
+        return options;
+    }
+
+    private async Task LaunchWithLinkAsync(GameEntry game, bool host)
+    {
+        var options = GameBoyLinkOptions(host, out var error);
+        if (options is null)
+        {
+            await ShowMessageAsync("Linkkabel", error);
+            return;
+        }
+        await LaunchGameAsync(game, resume: true, options);
+        SetStatus(host
+            ? $"Linkkabel-Gastgeber gestartet ({_settings.CurrentProfile}). Jetzt oben einen anderen Benutzer wählen und „Linkkabel: verbinden“ starten."
+            : $"Verbinde mit dem Gastgeber ({_settings.CurrentProfile})… Im Spiel dann im Pokémon-Center zum Kabel-Club gehen.");
+    }
+
 
     // =====================================================================
     // Pokédex
@@ -613,6 +691,7 @@ public partial class MainWindow : Window
             if (_dexTiles.TryGetValue(other, out var t) && _dexById.TryGetValue(other, out var e)) StyleDexTile(t, e);
 
         DetailName.Text = $"{entry.Number} {entry.Name}";
+        OpenInGuideButton.IsVisible = true;
         DetailText.Text = entry.DetailText + OwnedSummary(id);
         SpriteImage.Source = null;
 
@@ -1009,7 +1088,7 @@ public partial class MainWindow : Window
     private void SaveAndApply()
     {
         _settings.Save();
-        _runningGame?.ApplySettings();
+        // Laufende Spiele übernehmen Änderungen selbst (sie beobachten settings.json)
     }
 
     // =====================================================================
@@ -1212,9 +1291,9 @@ public partial class MainWindow : Window
             await ShowMessageAsync("Tauschen", "Bitte links und rechts je ein Pokémon auswählen.");
             return;
         }
-        if (_runningGame is not null)
+        if (IsRunning(sideA.Game, sideA.Profile) || IsRunning(sideB.Game, sideB.Profile))
         {
-            await ShowMessageAsync("Tauschen", "Bitte zuerst das laufende Spiel beenden – sonst würde es den Tausch beim Speichern überschreiben.");
+            await ShowMessageAsync("Tauschen", "Bitte zuerst die beteiligten Spiele beenden – sonst würden sie den Tausch beim Speichern überschreiben.");
             return;
         }
 
@@ -1292,12 +1371,7 @@ public partial class MainWindow : Window
     {
         if (!_ready || ProfileBox.SelectedItem is not string profile || profile == _settings.CurrentProfile) return;
 
-        if (_runningGame is not null)
-        {
-            SetStatus("Bitte zuerst das laufende Spiel beenden, dann den Benutzer wechseln.");
-            ProfileBox.SelectedItem = _settings.CurrentProfile;
-            return;
-        }
+        // Laufende Spiele behalten ihren Benutzer – wechseln ist jederzeit möglich
         SwitchProfile(profile);
     }
 
@@ -1327,13 +1401,10 @@ public partial class MainWindow : Window
         _settings.Profiles.Add(name);
         _settings.Save();
         FillProfiles();
-        if (_runningGame is null)
-        {
-            _ready = false;
-            ProfileBox.SelectedItem = name;
-            _ready = true;
-            SwitchProfile(name);
-        }
+        _ready = false;
+        ProfileBox.SelectedItem = name;
+        _ready = true;
+        SwitchProfile(name);
     }
 
     /// <summary>Einfaches Eingabefenster.</summary>
@@ -1505,8 +1576,7 @@ public partial class MainWindow : Window
         options[key] = value;
         _settings.Save();
 
-        if (_runningGame?.Session.CoreName == coreName)
-            _runningGame.Session.RequestOptionChange(key, value);
+        // Laufende Spiele übernehmen die Änderung über settings.json
     }
 
     private static Grid LabeledRow(string label, Control control, int labelWidth = 200)

@@ -577,9 +577,20 @@ public sealed unsafe class EmulatorSession : ICoreHost, IDisposable
             if ((newlyPressed & (1 << (int)action)) != 0) HotkeyPressed?.Invoke(action);
     }
 
+    /// <summary>
+    /// Controller nur auswerten, wenn das Spielfenster vorne ist – sonst würden bei mehreren
+    /// gleichzeitig laufenden Spielen alle auf denselben Controller reagieren.
+    /// </summary>
+    public bool AcceptControllerInput
+    {
+        get => _acceptControllerInput;
+        set => _acceptControllerInput = value;
+    }
+    private volatile bool _acceptControllerInput = true;
+
     private InputSnapshot PollInputProvider()
     {
-        if (InputProvider is null) return default;
+        if (InputProvider is null || !_acceptControllerInput) return default;
         try
         {
             return InputProvider.Poll();
