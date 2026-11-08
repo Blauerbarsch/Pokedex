@@ -47,6 +47,8 @@ public sealed unsafe class LibretroCore : IDisposable
     private readonly List<IntPtr> _allocations = [];
     private readonly Dictionary<string, IntPtr> _stringCache = [];
     private IntPtr _romData;
+    private IntPtr _gameInfoExt;
+    private readonly HashSet<uint> _loggedUnknown = [];
 
     // Core-Optionen ("Variablen")
     private readonly Dictionary<string, string> _variables = [];
@@ -57,6 +59,7 @@ public sealed unsafe class LibretroCore : IDisposable
     private bool _initialized, _gameLoaded;
 
     public string LibraryName { get; }
+    private string LibraryNameOrPath => LibraryName ?? Path.GetFileName(_corePath);
     public string LibraryVersion { get; }
     public bool NeedFullPath { get; }
     public RetroPixelFormat PixelFormat { get; private set; } = RetroPixelFormat.XRGB1555;
@@ -148,6 +151,20 @@ public sealed unsafe class LibretroCore : IDisposable
             game.Data = _romData;
             game.Size = (nuint)bytes.Length;
         }
+
+        // Erweiterte Infos für Cores, die danach fragen (z. B. melonDS DS für den Spielstand-Namen)
+        var ext = new RetroGameInfoExt
+        {
+            FullPath = game.Path,
+            Dir = Utf8(Path.GetDirectoryName(romPath) ?? ""),
+            Name = Utf8(Path.GetFileNameWithoutExtension(romPath)),
+            Ext = Utf8(Path.GetExtension(romPath).TrimStart('.').ToLowerInvariant()),
+            Data = game.Data,
+            Size = game.Size,
+            PersistentData = (byte)(game.Data != IntPtr.Zero ? 1 : 0), // unser ROM-Speicher bleibt gültig
+        };
+        _gameInfoExt = Marshal.AllocHGlobal(Marshal.SizeOf<RetroGameInfoExt>());
+        Marshal.StructureToPtr(ext, _gameInfoExt, false);
 
         if (!_loadGame(ref game))
             throw new InvalidOperationException($"Der Core „{LibraryName}“ konnte das Spiel nicht laden.");
@@ -313,6 +330,11 @@ public sealed unsafe class LibretroCore : IDisposable
                     if (Marshal.PtrToStringUTF8(*(IntPtr*)data) is { } msg) _host.OnCoreMessage(msg);
                     return true;
 
+                case Retro.EnvGetGameInfoExt:
+                    if (_gameInfoExt == IntPtr.Zero) return false;
+                    *(IntPtr*)data = _gameInfoExt;
+                    return true;
+
                 case Retro.EnvShutdown:
                     ShutdownRequested = true;
                     return true;
@@ -335,7 +357,10 @@ public sealed unsafe class LibretroCore : IDisposable
                     return true;
 
                 default:
-                    // Alles andere (z. B. Hardware-3D-Rendering) unterstützen wir noch nicht
+                    // Alles andere (z. B. Hardware-3D-Rendering) unterstützen wir noch nicht.
+                    // Einmal pro Befehl ins Terminal schreiben – hilft bei der Fehlersuche.
+                    if (_loggedUnknown.Add(cmd))
+                        Console.WriteLine($"[DexHub] Core {LibraryNameOrPath} fragt nach nicht unterstützter Funktion {cmd & ~Retro.Experimental}");
                     return false;
             }
         }
@@ -399,5 +424,6 @@ public sealed unsafe class LibretroCore : IDisposable
         _allocations.Clear();
         _stringCache.Clear();
         if (_romData != IntPtr.Zero) { Marshal.FreeHGlobal(_romData); _romData = IntPtr.Zero; }
+        if (_gameInfoExt != IntPtr.Zero) { Marshal.FreeHGlobal(_gameInfoExt); _gameInfoExt = IntPtr.Zero; }
     }
 }

@@ -21,6 +21,9 @@ public sealed class AppSettings
     /// <summary>false = scharfe Pixel (Originallook), true = weichgezeichnet.</summary>
     public bool SmoothScaling { get; set; }
 
+    /// <summary>Beim Schließen automatisch sichern und beim nächsten Start dort weitermachen.</summary>
+    public bool AutoResume { get; set; } = true;
+
     // ---------- Feste Ordner im Benutzerverzeichnis ----------
 
     /// <summary>Windows: %APPDATA%\DexHub, Mac: ~/Library/Application Support/DexHub</summary>

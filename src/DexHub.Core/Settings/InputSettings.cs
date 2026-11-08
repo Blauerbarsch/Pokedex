@@ -28,6 +28,9 @@ public enum HotkeyAction
     FastForward,
     /// <summary>DS-Touchscreen antippen, an der Stelle des Controller-Zeigers (rechter Stick).</summary>
     Touch,
+    /// <summary>Schnellspeichern – unabhängig davon, ob das Spiel selbst speichern kann.</summary>
+    SaveState,
+    LoadState,
 }
 
 public sealed class InputSettings
@@ -89,12 +92,16 @@ public sealed class InputSettings
     {
         [HotkeyAction.FastForward] = "Space",
         [HotkeyAction.Touch] = "",
+        [HotkeyAction.SaveState] = "F5",
+        [HotkeyAction.LoadState] = "F9",
     };
 
     public static readonly Dictionary<HotkeyAction, PadControl> DefaultHotkeyGamepad = new()
     {
         [HotkeyAction.FastForward] = PadControl.RightTrigger,
         [HotkeyAction.Touch] = PadControl.RightStickClick,
+        [HotkeyAction.SaveState] = PadControl.None,
+        [HotkeyAction.LoadState] = PadControl.None,
     };
 
     /// <summary>Ergänzt fehlende Einträge (z. B. nach einem Update) mit der Standardbelegung.</summary>
@@ -138,6 +145,8 @@ public sealed class InputSettings
     {
         HotkeyAction.FastForward => "Schnellvorlauf (halten)",
         HotkeyAction.Touch => "DS-Touch tippen",
+        HotkeyAction.SaveState => "Schnellspeichern",
+        HotkeyAction.LoadState => "Schnellladen",
         _ => action.ToString(),
     };
 

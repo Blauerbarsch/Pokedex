@@ -67,6 +67,7 @@ internal static class Retro
     public const uint EnvSetFastForwardingOverride = 64;
     public const uint EnvSetContentInfoOverride = 65;
     public const uint EnvSetCoreOptionsUpdateDisplayCallback = 69;
+    public const uint EnvGetGameInfoExt = 66;
     public const uint EnvSetVariable = 70;
 
     public const uint LanguageGerman = 4;
@@ -113,6 +114,23 @@ internal struct RetroGameInfo
     public IntPtr Data;
     public nuint Size;
     public IntPtr Meta;
+}
+
+/// <summary>Erweiterte Spielinfos (Pfad, Name, Endung) – manche Cores bilden daraus den Spielstand-Namen.</summary>
+[StructLayout(LayoutKind.Sequential)]
+internal struct RetroGameInfoExt
+{
+    public IntPtr FullPath;
+    public IntPtr ArchivePath;
+    public IntPtr ArchiveFile;
+    public IntPtr Dir;
+    public IntPtr Name;
+    public IntPtr Ext;
+    public IntPtr Meta;
+    public IntPtr Data;
+    public nuint Size;
+    public byte FileInArchive;
+    public byte PersistentData;
 }
 
 [StructLayout(LayoutKind.Sequential)]

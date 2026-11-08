@@ -43,6 +43,8 @@ public partial class MainWindow : Window
         // Tastendrücke abfangen, bevor ein Steuerelement sie bekommt (für "Taste belegen")
         AddHandler(KeyDownEvent, OnCaptureKeyDown, RoutingStrategies.Tunnel);
 
+        WatchSaveFolder();
+
         Opened += async (_, _) =>
         {
             await ScanLibraryAsync();
@@ -106,9 +108,11 @@ public partial class MainWindow : Window
 
     private async void OnPlayClick(object? sender, RoutedEventArgs e) => await LaunchSelectedAsync();
 
+    private async void OnPlayFreshClick(object? sender, RoutedEventArgs e) => await LaunchSelectedAsync(resume: false);
+
     private async void OnGameDoubleTapped(object? sender, TappedEventArgs e) => await LaunchSelectedAsync();
 
-    private async Task LaunchSelectedAsync()
+    private async Task LaunchSelectedAsync(bool resume = true)
     {
         if (GamesList.SelectedItem is not GameEntry game)
         {
@@ -144,6 +148,7 @@ public partial class MainWindow : Window
         var session = new EmulatorSession(game, corePath, new SdlAudioSink());
         SdlGamepad.Instance.Settings = _settings.Input;
         session.InputProvider = SdlGamepad.Instance;
+        session.AutoResume = resume && _settings.AutoResume;
 
         // Speichert das Spiel, sofort den Pokédex aktualisieren
         session.SaveWritten += _ => Dispatcher.UIThread.Post(() =>
@@ -171,6 +176,45 @@ public partial class MainWindow : Window
     // =====================================================================
     // Pokédex
     // =====================================================================
+
+    private FileSystemWatcher? _saveWatcher;
+    private DispatcherTimer? _saveChangeDebounce;
+
+    /// <summary>
+    /// Manche Emulatoren (z. B. DS) schreiben ihre Spielstände selbst. Ändert sich eine Datei im
+    /// Spielstand-Ordner, wird der Pokédex kurz darauf neu eingelesen.
+    /// </summary>
+    private void WatchSaveFolder()
+    {
+        try
+        {
+            _saveWatcher = new FileSystemWatcher(AppSettings.SavesFolder)
+            {
+                IncludeSubdirectories = true,
+                NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName | NotifyFilters.Size,
+            };
+            FileSystemEventHandler changed = (_, _) => Dispatcher.UIThread.Post(() =>
+            {
+                // Mehrere Änderungen kurz hintereinander zusammenfassen
+                _saveChangeDebounce?.Stop();
+                _saveChangeDebounce = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
+                _saveChangeDebounce.Tick += (_, _) =>
+                {
+                    _saveChangeDebounce?.Stop();
+                    foreach (var g in _games) g.SavePath = SaveLocator.Find(g);
+                    RebuildDex();
+                };
+                _saveChangeDebounce.Start();
+            });
+            _saveWatcher.Changed += changed;
+            _saveWatcher.Created += changed;
+            _saveWatcher.EnableRaisingEvents = true;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("[DexHub] Spielstand-Ordner kann nicht überwacht werden: " + ex.Message);
+        }
+    }
 
     private async Task LoadPokedexAsync(bool forceRefresh)
     {
@@ -269,6 +313,7 @@ public partial class MainWindow : Window
         VolumeText.Text = $"{_settings.Volume} %";
         FastForwardBox.SelectedIndex = Math.Max(0, Array.IndexOf(FastForwardSpeeds, _settings.FastForwardSpeed));
         SmoothBox.IsChecked = _settings.SmoothScaling;
+        AutoResumeBox.IsChecked = _settings.AutoResume;
         BuildControlsPanel();
 
         FoldersText.Text =
@@ -299,6 +344,13 @@ public partial class MainWindow : Window
         if (!_ready) return;
         _settings.SmoothScaling = SmoothBox.IsChecked == true;
         SaveAndApply();
+    }
+
+    private void OnAutoResumeChanged(object? sender, RoutedEventArgs e)
+    {
+        if (!_ready) return;
+        _settings.AutoResume = AutoResumeBox.IsChecked == true;
+        _settings.Save();
     }
 
     /// <summary>Speichert und gibt Änderungen sofort an ein laufendes Spiel weiter.</summary>
@@ -427,7 +479,7 @@ public partial class MainWindow : Window
 
         ControlsPanel.Children.Add(new TextBlock
         {
-            Text = "Feste Tasten im Spiel: P = Pause · F5 = Schnellspeichern · F9 = Schnellladen · F11 = Vollbild",
+            Text = "Feste Tasten im Spiel: P = Pause · F11 = Vollbild · Esc = Vollbild verlassen",
             Opacity = 0.6,
             TextWrapping = TextWrapping.Wrap,
         });

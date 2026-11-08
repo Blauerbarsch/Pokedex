@@ -8,7 +8,7 @@ Kein RetroArch, keine Zusatzprogramme: einfach starten, ROM-Ordner wählen, spie
 - **Bibliothek:** erkennt Pokémon-Spiele anhand des ROM-Headers
 - **Pokédex:** alle Pokémon mit deutschen Namen, Bildern und Filtern (Daten von [PokéAPI](https://pokeapi.co))
 - **Fortschritt:** Sobald du im Spiel speicherst, markiert der Pokédex gefangene ● und gesehene ○ Pokémon
-  (bisher Gen 1 + 2)
+  (Gen 1, 2 und 4)
 
 > ROMs, BIOS-Dateien und Spielstände sind **nicht** enthalten und gehören nicht ins Repo.
 > Jeder nutzt seine eigenen Sicherungskopien.
@@ -45,7 +45,13 @@ Tastatur und Controller (Xbox, PlayStation, Switch Pro, Steam Deck …) lassen s
 bewegt einen Zeiger auf dem unteren Bildschirm, Stick drücken tippt. Die Paddles eines
 Elite-Controllers oder Steam Decks lassen sich ebenfalls belegen.
 
-Fest: P = Pause, F5/F9 = Schnellspeichern/-laden, F11 = Vollbild.
+| Schnellspeichern / -laden | F5 / F9 | frei belegbar (z. B. Paddles) |
+
+Fest: P = Pause, F11 = Vollbild.
+
+**Speichern unabhängig vom Spiel:** Schnellspeichern sichert den kompletten Zustand, egal ob das
+Spiel gerade speichern kann. Beim Schließen sichert DexHub automatisch und macht beim nächsten Start
+dort weiter (abschaltbar; „Ohne Fortsetzen starten“ startet frisch).
 
 ## Entwickeln (Windows & Mac)
 
@@ -102,10 +108,12 @@ beim ersten Start übernommen.
 - [x] Eingebaute Emulatoren für Pokémon Mini, GB/GBC, GBA, DS
 - [x] Pokédex mit deutschen Namen und Bildern
 - [x] Spielstände Gen 1 + 2 auslesen
+- [x] Spielstände Gen 4 auslesen (Diamant, Perl, Platin, HeartGold, SoulSilver)
+- [x] Automatisch sichern und fortsetzen
 - [x] Controller-Unterstützung und frei belegbare Tasten
 - [ ] Spielstände Gen 3 (GBA, inkl. Prüfsummen und Sektorrotation)
 - [ ] Pokédex live aus dem Arbeitsspeicher, auch ohne Speichern im Spiel
-- [ ] Spielstände Gen 4/5 (DS)
+- [ ] Spielstände Gen 5 (DS)
 - [ ] N64, GameCube/Wii, 3DS (OpenGL-Rendering für die Cores)
 - [ ] Fertige Downloads für Windows und Mac (GitHub Actions)
 - [ ] Android-Version

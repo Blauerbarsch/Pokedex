@@ -17,7 +17,8 @@ public partial class GameWindow : Window
 {
     public const string ControlsHelp =
         "Steuerung: Pfeiltasten · X = A · Y = B · Enter = Start · Rücktaste = Select · Leertaste halten = Schnellvorlauf · " +
-        "P = Pause · F5/F9 = Schnellspeichern/-laden · F11 = Vollbild · DS-Touch: Maus/Finger oder rechter Stick + Stick drücken  " +
+        "P = Pause · F5/F9 = Schnellspeichern/-laden · F11 = Vollbild · DS-Touch: Maus/Finger oder rechter Stick + Stick drücken · " +
+        "Beim Schließen wird automatisch gesichert " +
         "(Belegung änderbar im Tab Steuerung)";
 
     private readonly AppSettings _settings;
@@ -153,12 +154,6 @@ public partial class GameWindow : Window
     {
         switch (e.Key)
         {
-            case Key.F5:
-                _session.RequestSaveState();
-                break;
-            case Key.F9:
-                _session.RequestLoadState();
-                break;
             case Key.F11:
                 WindowState = WindowState == WindowState.FullScreen ? WindowState.Normal : WindowState.FullScreen;
                 break;
@@ -174,6 +169,8 @@ public partial class GameWindow : Window
                 if (TryMapKey(e.Key, out var button)) { _session.SetButton(button, true); handled = true; }
                 if (IsHotkey(e.Key, HotkeyAction.FastForward)) { _session.SetFastForward(true); handled = true; }
                 if (IsHotkey(e.Key, HotkeyAction.Touch)) { _session.SetKeyboardTouch(true); handled = true; }
+                if (IsHotkey(e.Key, HotkeyAction.SaveState)) { _session.RequestSaveState(); handled = true; }
+                if (IsHotkey(e.Key, HotkeyAction.LoadState)) { _session.RequestLoadState(); handled = true; }
                 if (!handled) return;
                 break;
         }

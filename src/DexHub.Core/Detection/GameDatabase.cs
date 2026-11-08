@@ -36,11 +36,11 @@ public static class GameDatabase
     // NDS: 4-stelliger Spielcode ab 0x0C.
     public static readonly Dictionary<string, GameInfo> NintendoDS = new()
     {
-        ["ADA"] = new("Pokémon Diamant-Edition",   Platform.NintendoDS, 4),
-        ["APA"] = new("Pokémon Perl-Edition",      Platform.NintendoDS, 4),
-        ["CPU"] = new("Pokémon Platin-Edition",    Platform.NintendoDS, 4),
-        ["IPK"] = new("Pokémon HeartGold",         Platform.NintendoDS, 4),
-        ["IPG"] = new("Pokémon SoulSilver",        Platform.NintendoDS, 4),
+        ["ADA"] = new("Pokémon Diamant-Edition",   Platform.NintendoDS, 4, SaveFormat.Gen4DiamondPearl),
+        ["APA"] = new("Pokémon Perl-Edition",      Platform.NintendoDS, 4, SaveFormat.Gen4DiamondPearl),
+        ["CPU"] = new("Pokémon Platin-Edition",    Platform.NintendoDS, 4, SaveFormat.Gen4Platinum),
+        ["IPK"] = new("Pokémon HeartGold",         Platform.NintendoDS, 4, SaveFormat.Gen4HeartGoldSoulSilver),
+        ["IPG"] = new("Pokémon SoulSilver",        Platform.NintendoDS, 4, SaveFormat.Gen4HeartGoldSoulSilver),
         ["IRB"] = new("Pokémon Schwarze Edition",  Platform.NintendoDS, 5),
         ["IRA"] = new("Pokémon Weiße Edition",     Platform.NintendoDS, 5),
         ["IRE"] = new("Pokémon Schwarze Edition 2",Platform.NintendoDS, 5),

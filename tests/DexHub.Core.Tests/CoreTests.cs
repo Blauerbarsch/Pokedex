@@ -26,6 +26,24 @@ public class SaveReaderTests
     }
 
     [Fact]
+    public void Gen4_uses_the_newer_partition()
+    {
+        var save = new byte[0x80000];
+        const int dex = 0x12B8; // HeartGold/SoulSilver
+
+        // Alte Kopie: nur Endivie (#152)
+        BitConverter.GetBytes(0xBEEFCAFE).CopyTo(save, dex);
+        SetFlag(save, dex + 0x04, 152);
+        // Neue Kopie: Endivie und Lugia (#249)
+        BitConverter.GetBytes(0xBEEFCAFE).CopyTo(save, 0x40000 + dex);
+        SetFlag(save, 0x40000 + dex + 0x04, 152);
+        SetFlag(save, 0x40000 + dex + 0x04, 249);
+
+        var result = SaveReader.Parse(save, SaveFormat.Gen4HeartGoldSoulSilver)!;
+        Assert.Equal(new[] { 152, 249 }, result.Caught.Order().ToArray());
+    }
+
+    [Fact]
     public void Too_small_file_returns_null()
     {
         Assert.Null(SaveReader.Parse(new byte[100], SaveFormat.Gen1));
