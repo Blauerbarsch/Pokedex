@@ -14,6 +14,12 @@
     <Image x:Name="Screen" Stretch="Uniform"
            RenderOptions.BitmapInterpolationMode="None" />
 
+    <!-- Touch-Zeiger für den Controller (DS), wird im Code positioniert -->
+    <Canvas IsHitTestVisible="False">
+      <Ellipse x:Name="TouchCursor" Width="20" Height="20" IsVisible="False"
+               Stroke="White" StrokeThickness="2" Fill="#66E3350D" />
+    </Canvas>
+
     <Border x:Name="OsdBorder" IsVisible="False"
             VerticalAlignment="Bottom" HorizontalAlignment="Left"
             Margin="10" Padding="10,5" CornerRadius="4" Background="#B0000000">

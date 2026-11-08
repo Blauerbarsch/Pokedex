@@ -17,7 +17,8 @@ public partial class GameWindow : Window
 {
     public const string ControlsHelp =
         "Steuerung: Pfeiltasten · X = A · Y = B · Enter = Start · Rücktaste = Select · Leertaste halten = Schnellvorlauf · " +
-        "P = Pause · F5/F9 = Schnellspeichern/-laden · F11 = Vollbild  (Belegung änderbar unter Einstellungen → Steuerung)";
+        "P = Pause · F5/F9 = Schnellspeichern/-laden · F11 = Vollbild · DS-Touch: Maus/Finger oder rechter Stick + Stick drücken  " +
+        "(Belegung änderbar im Tab Steuerung)";
 
     private readonly AppSettings _settings;
     private readonly EmulatorSession _session;
@@ -41,6 +42,7 @@ public partial class GameWindow : Window
         Title = $"{session.Game.Title} – DexHub";
         if (session.Game.Info.Platform == GamePlatform.NintendoDS)
         {
+            session.UseTouchCursor = true;
             // Zwei Bildschirme übereinander
             Width = 540;
             Height = 800;
@@ -92,9 +94,27 @@ public partial class GameWindow : Window
                 updated = _session.CopyFrame(ref _lastFrameId, fb.Address, fb.RowBytes, w, h);
 
             if (updated) Screen.InvalidateVisual();
+            UpdateTouchCursor(w, h);
         }
 
         RequestAnimationFrame(OnAnimationFrame);
+    }
+
+    /// <summary>Zeichnet den Controller-Zeiger an die passende Stelle über dem Spielbild.</summary>
+    private void UpdateTouchCursor(int w, int h)
+    {
+        var (x, y, visible, pressed) = _session.TouchCursor;
+        TouchCursor.IsVisible = visible;
+        if (!visible) return;
+
+        var bounds = Screen.Bounds;
+        double scale = Math.Min(bounds.Width / w, bounds.Height / h);
+        double left = bounds.X + (bounds.Width - w * scale) / 2 + x * w * scale;
+        double top = bounds.Y + (bounds.Height - h * scale) / 2 + y * h * scale;
+
+        Canvas.SetLeft(TouchCursor, left - TouchCursor.Width / 2);
+        Canvas.SetTop(TouchCursor, top - TouchCursor.Height / 2);
+        TouchCursor.Opacity = pressed ? 1.0 : 0.75;
     }
 
     // =====================================================================
@@ -153,6 +173,7 @@ public partial class GameWindow : Window
                 bool handled = false;
                 if (TryMapKey(e.Key, out var button)) { _session.SetButton(button, true); handled = true; }
                 if (IsHotkey(e.Key, HotkeyAction.FastForward)) { _session.SetFastForward(true); handled = true; }
+                if (IsHotkey(e.Key, HotkeyAction.Touch)) { _session.SetKeyboardTouch(true); handled = true; }
                 if (!handled) return;
                 break;
         }
@@ -171,6 +192,11 @@ public partial class GameWindow : Window
             _session.SetFastForward(false);
             e.Handled = true;
         }
+        if (IsHotkey(e.Key, HotkeyAction.Touch))
+        {
+            _session.SetKeyboardTouch(false);
+            e.Handled = true;
+        }
     }
 
     /// <summary>Fenster verliert den Fokus: alle Tasten loslassen, damit nichts "hängen" bleibt.</summary>
@@ -178,6 +204,7 @@ public partial class GameWindow : Window
     {
         foreach (var b in Enum.GetValues<JoypadButton>()) _session.SetButton(b, false);
         _session.SetFastForward(false);
+        _session.SetKeyboardTouch(false);
     }
 
     private void OnPointerPressed(object? sender, PointerPressedEventArgs e) => UpdatePointer(e, true);

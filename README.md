@@ -39,7 +39,13 @@ Tastatur und Controller (Xbox, PlayStation, Switch Pro, Steam Deck …) lassen s
 | Start / Select | Enter / Rücktaste | Start / Back |
 | Schnellvorlauf (halten) | Leertaste | RT / R2 |
 
-Fest: P = Pause, F5/F9 = Schnellspeichern/-laden, F11 = Vollbild, Maus = DS-Touchscreen.
+| DS-Touch tippen | frei belegbar | rechten Stick drücken |
+
+**DS-Touchscreen:** mit Maus oder Finger direkt antippen, oder mit dem Controller: Der rechte Stick
+bewegt einen Zeiger auf dem unteren Bildschirm, Stick drücken tippt. Die Paddles eines
+Elite-Controllers oder Steam Decks lassen sich ebenfalls belegen.
+
+Fest: P = Pause, F5/F9 = Schnellspeichern/-laden, F11 = Vollbild.
 
 ## Entwickeln (Windows & Mac)
 
