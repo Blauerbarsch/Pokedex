@@ -25,6 +25,12 @@ public sealed unsafe class SdlGamepad : IInputProvider
     private bool _initFailed;
     private int _lastJoystickCount = -1;
 
+    /// <summary>Geräte, die SDL sieht, aber nicht als Controller zuordnen kann (für die Diagnose).</summary>
+    public List<string> UnmappedDevices { get; } = [];
+
+    /// <summary>Warum kein Controller verfügbar ist, falls SDL nicht startet.</summary>
+    public string? InitError { get; private set; }
+
     /// <summary>Belegung, die beim Spielen benutzt wird.</summary>
     public InputSettings? Settings { get; set; }
 
@@ -102,7 +108,8 @@ public sealed unsafe class SdlGamepad : IInputProvider
             var sdl = SdlApi.Get();
             if (sdl.InitSubSystem(InitGameController) < 0)
             {
-                Console.WriteLine("[DexHub] Controller-Unterstützung nicht verfügbar: " + sdl.GetErrorS());
+                InitError = sdl.GetErrorS();
+                Console.WriteLine("[DexHub] Controller-Unterstützung nicht verfügbar: " + InitError);
                 _initFailed = true;
                 return false;
             }
@@ -111,7 +118,8 @@ public sealed unsafe class SdlGamepad : IInputProvider
         }
         catch (Exception ex)
         {
-            Console.WriteLine("[DexHub] SDL konnte nicht geladen werden: " + ex.Message);
+            InitError = ex.Message;
+            Console.WriteLine("[DexHub] SDL konnte nicht geladen werden: " + ex);
             _initFailed = true;
             return false;
         }
@@ -135,9 +143,18 @@ public sealed unsafe class SdlGamepad : IInputProvider
         foreach (var c in _controllers) _sdl.GameControllerClose((GameController*)c);
         _controllers.Clear();
 
+        Console.WriteLine($"[DexHub] SDL sieht {count} Eingabegerät(e)");
+        UnmappedDevices.Clear();
         for (int i = 0; i < count; i++)
         {
-            if (_sdl.IsGameController(i) != SdlBool.True) continue;
+            var deviceName = Marshal.PtrToStringUTF8((IntPtr)_sdl.JoystickNameForIndex(i)) ?? "?";
+            bool isController = _sdl.IsGameController(i) == SdlBool.True;
+            Console.WriteLine($"[DexHub]   #{i}: {deviceName} – {(isController ? "Controller erkannt" : "keine Tastenzuordnung bekannt")}");
+            if (!isController)
+            {
+                UnmappedDevices.Add(deviceName);
+                continue;
+            }
             var controller = _sdl.GameControllerOpen(i);
             if (controller != null)
             {

@@ -333,9 +333,12 @@ public partial class MainWindow : Window
         var names = SdlGamepad.Instance.ConnectedNames();
         ControlsPanel.Children.Add(new TextBlock
         {
-            Text = names.Count == 0
-                ? "🎮 Kein Controller gefunden. Anschließen und auf „Controller suchen“ klicken."
-                : "🎮 Verbunden: " + string.Join(", ", names),
+            Text = names.Count > 0 ? "🎮 Verbunden: " + string.Join(", ", names)
+                : SdlGamepad.Instance.InitError is { } err ? "🎮 Controller-Unterstützung nicht verfügbar: " + err
+                : SdlGamepad.Instance.UnmappedDevices.Count > 0
+                    ? "🎮 Gerät gefunden, aber ohne Tastenzuordnung: " + string.Join(", ", SdlGamepad.Instance.UnmappedDevices)
+                : "🎮 Kein Controller gefunden. Anschließen und auf „Controller suchen“ klicken.",
+            TextWrapping = TextWrapping.Wrap,
             FontWeight = FontWeight.SemiBold,
         });
 
