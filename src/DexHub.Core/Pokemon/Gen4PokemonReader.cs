@@ -44,9 +44,12 @@ public static class Gen4PokemonReader
         "DABC", "DACB", "DBAC", "DBCA", "DCAB", "DCBA",
     ];
 
-    /// <param name="partitionStart">0 oder 0x40000 – welche Spielstand-Kopie die neuere ist (vom Pokédex bestimmt).</param>
-    public static List<OwnedPokemon> Read(byte[] save, SaveFormat format, int partitionStart, string gameTitle)
+    /// <param name="partitionStart">0 oder 0x40000 – Kopie mit dem neuesten Team (allgemeiner Block).</param>
+    /// <param name="storagePartition">Kopie mit den neuesten Boxen; -1 = wie partitionStart.</param>
+    public static List<OwnedPokemon> Read(byte[] save, SaveFormat format, int partitionStart, string gameTitle,
+        int storagePartition = -1)
     {
+        if (storagePartition < 0) storagePartition = partitionStart;
         var result = new List<OwnedPokemon>();
         if (!Layouts.TryGetValue(format, out var layout)) return result;
         if (partitionStart + PartitionSize > save.Length) return result;
@@ -67,7 +70,7 @@ public static class Gen4PokemonReader
         {
             for (int slot = 0; slot < SlotsPerBox; slot++)
             {
-                int offset = partitionStart + layout.Boxes + box * layout.BoxStride + slot * PokemonSize;
+                int offset = storagePartition + layout.Boxes + box * layout.BoxStride + slot * PokemonSize;
                 if (offset + PokemonSize > save.Length) break;
                 var raw = save.AsSpan(offset, PokemonSize);
                 if (IsEmpty(raw)) continue;
@@ -89,8 +92,11 @@ public static class Gen4PokemonReader
         return true;
     }
 
-    /// <summary>Entschlüsselt ein Pokémon; null, wenn die Prüfsumme nicht stimmt.</summary>
-    private static OwnedPokemon? Parse(ReadOnlySpan<byte> raw, string gameTitle, string location)
+    /// <summary>
+    /// Entschlüsselt ein Pokémon. Ergebnis: 136 Byte, Blöcke in Reihenfolge A–D ab 0x08
+    /// (Offsets wie in der offiziellen Beschreibung). null, wenn die Prüfsumme nicht stimmt.
+    /// </summary>
+    public static byte[]? Decrypt(ReadOnlySpan<byte> raw)
     {
         uint pid = BinaryPrimitives.ReadUInt32LittleEndian(raw);
         ushort checksum = BinaryPrimitives.ReadUInt16LittleEndian(raw[6..]);
@@ -111,11 +117,52 @@ public static class Gen4PokemonReader
         // 2. Blöcke in die Reihenfolge A, B, C, D bringen
         var order = BlockOrders[(int)((pid >> 13) & 31) % 24];
         var d = new byte[136]; // Index wie im offiziellen Aufbau (Block A beginnt bei 0x08)
+        raw[..8].CopyTo(d);
         for (int position = 0; position < 4; position++)
         {
             int block = order[position] - 'A';
             encrypted.AsSpan(position * 32, 32).CopyTo(d.AsSpan(8 + block * 32));
         }
+        return d;
+    }
+
+    /// <summary>Gegenstück zu Decrypt: Prüfsumme neu berechnen, Blöcke mischen, verschlüsseln.</summary>
+    public static byte[] Encrypt(byte[] decrypted)
+    {
+        var d = (byte[])decrypted.Clone();
+        uint pid = BinaryPrimitives.ReadUInt32LittleEndian(d);
+
+        ushort checksum = 0;
+        for (int i = 8; i < 136; i += 2)
+            checksum = unchecked((ushort)(checksum + BinaryPrimitives.ReadUInt16LittleEndian(d.AsSpan(i))));
+        BinaryPrimitives.WriteUInt16LittleEndian(d.AsSpan(6), checksum);
+
+        var result = new byte[136];
+        d.AsSpan(0, 8).CopyTo(result);
+        var order = BlockOrders[(int)((pid >> 13) & 31) % 24];
+        for (int position = 0; position < 4; position++)
+        {
+            int block = order[position] - 'A';
+            d.AsSpan(8 + block * 32, 32).CopyTo(result.AsSpan(8 + position * 32));
+        }
+
+        uint seed = checksum;
+        for (int i = 8; i < 136; i += 2)
+        {
+            seed = unchecked(seed * 0x41C64E6D + 0x6073);
+            ushort word = (ushort)(BinaryPrimitives.ReadUInt16LittleEndian(result.AsSpan(i)) ^ (seed >> 16));
+            BinaryPrimitives.WriteUInt16LittleEndian(result.AsSpan(i), word);
+        }
+        return result;
+    }
+
+    /// <summary>Entschlüsselt und liest ein Pokémon; null, wenn die Daten ungültig sind.</summary>
+    public static OwnedPokemon? Parse(ReadOnlySpan<byte> raw, string gameTitle, string location)
+    {
+        if (raw.Length < PokemonSize) return null;
+        var d = Decrypt(raw);
+        if (d is null) return null;
+        uint pid = BinaryPrimitives.ReadUInt32LittleEndian(d);
 
         ushort U16(int o) => BinaryPrimitives.ReadUInt16LittleEndian(d.AsSpan(o));
         uint U32(int o) => BinaryPrimitives.ReadUInt32LittleEndian(d.AsSpan(o));
@@ -163,6 +210,31 @@ public static class Gen4PokemonReader
     {
         try { return new DateOnly(year, month, day); }
         catch (ArgumentOutOfRangeException) { return null; }
+    }
+
+    /// <summary>Gegenstück zu DecodeString (für Namen nach einer Entwicklung). Füllt bis maxBytes auf.</summary>
+    public static byte[] EncodeString(string text, int maxBytes)
+    {
+        var result = new byte[maxBytes];
+        int pos = 0;
+        foreach (var ch in text)
+        {
+            if (pos + 4 > maxBytes) break; // Platz für Endezeichen lassen
+            int code = ch switch
+            {
+                >= '0' and <= '9' => 0x0121 + (ch - '0'),
+                >= 'A' and <= 'Z' => 0x012B + (ch - 'A'),
+                >= 'a' and <= 'z' => 0x0145 + (ch - 'a'),
+                >= '\u00C0' and <= '\u00FF' => 0x015F + (ch - '\u00C0'),
+                '!' => 0x01AB, '?' => 0x01AC, ',' => 0x01AD, '.' => 0x01AE, '-' => 0x01BE,
+                '♂' => 0x01BB, '♀' => 0x01BC, ' ' => 0x01DE,
+                _ => 0x01AC,
+            };
+            BinaryPrimitives.WriteUInt16LittleEndian(result.AsSpan(pos), (ushort)code);
+            pos += 2;
+        }
+        BinaryPrimitives.WriteUInt16LittleEndian(result.AsSpan(pos), 0xFFFF);
+        return result;
     }
 
     /// <summary>

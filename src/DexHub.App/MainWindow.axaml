@@ -13,6 +13,17 @@
       <TextBlock x:Name="StatusText" Text="Bereit." />
     </Border>
 
+    <!-- Benutzer -->
+    <Border DockPanel.Dock="Top" Padding="16,10,16,0">
+      <StackPanel Orientation="Horizontal" Spacing="8">
+        <TextBlock Text="Benutzer:" VerticalAlignment="Center" Opacity="0.8" />
+        <ComboBox x:Name="ProfileBox" MinWidth="180" SelectionChanged="OnProfileChanged" />
+        <Button Content="+ Neuer Benutzer" Click="OnAddProfileClick" />
+        <TextBlock VerticalAlignment="Center" Opacity="0.5"
+                   Text="Jeder Benutzer hat eigene Spielstände." />
+      </StackPanel>
+    </Border>
+
     <TabControl Margin="8">
 
       <!-- ============ Bibliothek ============ -->
@@ -100,6 +111,13 @@
             </ScrollViewer>
           </Border>
         </Grid>
+      </TabItem>
+
+      <!-- ============ Tauschen (wird im Code aufgebaut) ============ -->
+      <TabItem Header="Tauschen">
+        <ScrollViewer>
+          <StackPanel x:Name="TradePanel" Spacing="10" Margin="0,12,12,12" />
+        </ScrollViewer>
       </TabItem>
 
       <!-- ============ Steuerung (wird im Code aufgebaut) ============ -->

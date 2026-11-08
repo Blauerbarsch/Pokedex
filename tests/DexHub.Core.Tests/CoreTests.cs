@@ -194,3 +194,27 @@ public class Gen4PokemonTests
         Assert.Equal("Flammi", Gen4PokemonReader.DecodeString(bytes));
     }
 }
+
+public class Gen4TradeTests
+{
+    [Fact]
+    public void Crc16_matches_known_value()
+    {
+        // CRC-16/CCITT-FALSE von "123456789" ist 0x29B1
+        Assert.Equal(0x29B1, DexHub.Core.Trading.Gen4Save.Crc16("123456789"u8));
+    }
+
+    [Fact]
+    public void Encrypt_then_decrypt_roundtrips_for_all_block_orders()
+    {
+        for (uint pid = 0; pid < 24u << 13; pid += 1u << 13)
+        {
+            var d = new byte[136];
+            BitConverter.GetBytes(pid).CopyTo(d, 0);
+            for (int i = 8; i < 136; i++) d[i] = (byte)(i * 7);
+            var encrypted = Gen4PokemonReader.Encrypt(d);
+            var back = Gen4PokemonReader.Decrypt(encrypted)!;
+            Assert.Equal(d[8..], back[8..]);
+        }
+    }
+}
