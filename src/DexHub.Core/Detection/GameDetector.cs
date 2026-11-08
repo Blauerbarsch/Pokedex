@@ -29,13 +29,25 @@ public static class GameDetector
 
     public static IReadOnlyCollection<string> SupportedExtensions => ExtensionMap.Keys;
 
+    /// <summary>
+    /// Ordner ohne Zugriffsrechte und versteckte Ordner (z. B. ".ipfs", ".Trash") werden übersprungen,
+    /// statt das Programm abstürzen zu lassen – wichtig bei Netzlaufwerken.
+    /// </summary>
+    private static readonly EnumerationOptions ScanOptions = new()
+    {
+        RecurseSubdirectories = true,
+        IgnoreInaccessible = true,
+        AttributesToSkip = FileAttributes.Hidden | FileAttributes.System,
+        MatchCasing = MatchCasing.CaseInsensitive,
+    };
+
     /// <summary>Durchsucht einen Ordner (inkl. Unterordner) nach Spielen.</summary>
     public static List<GameEntry> ScanFolder(string folder)
     {
         var result = new List<GameEntry>();
         if (!Directory.Exists(folder)) return result;
 
-        foreach (var file in Directory.EnumerateFiles(folder, "*", SearchOption.AllDirectories))
+        foreach (var file in Directory.EnumerateFiles(folder, "*", ScanOptions))
         {
             var entry = Detect(file);
             if (entry is not null) result.Add(entry);
@@ -62,7 +74,7 @@ public static class GameDetector
                 _ => null, // Pokémon Mini und 3DS: nur über Dateinamen
             };
         }
-        catch (IOException)
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
         {
             // Datei nicht lesbar -> unten Fallback über den Dateinamen
         }

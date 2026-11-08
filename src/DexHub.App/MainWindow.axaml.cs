@@ -59,15 +59,29 @@ public partial class MainWindow : Window
             return;
         }
 
-        SetStatus("Durchsuche ROM-Ordner…");
         var romFolder = _settings.RomFolder;
-        _games = await Task.Run(() =>
+        if (!Directory.Exists(romFolder))
         {
-            var games = GameDetector.ScanFolder(romFolder);
-            foreach (var g in games)
-                g.SavePath = SaveLocator.Find(g);
-            return games;
-        });
+            SetStatus($"ROM-Ordner nicht erreichbar: {romFolder} – ist das Netzlaufwerk verbunden?");
+            return;
+        }
+
+        SetStatus("Durchsuche ROM-Ordner… (bei Netzlaufwerken kann das etwas dauern)");
+        try
+        {
+            _games = await Task.Run(() =>
+            {
+                var games = GameDetector.ScanFolder(romFolder);
+                foreach (var g in games)
+                    g.SavePath = SaveLocator.Find(g);
+                return games;
+            });
+        }
+        catch (Exception ex)
+        {
+            SetStatus("Fehler beim Durchsuchen: " + ex.Message);
+            return;
+        }
 
         RefreshGamesList();
         RebuildDex();
