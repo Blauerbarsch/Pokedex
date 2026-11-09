@@ -199,6 +199,8 @@
                   <Button Grid.Column="1" Content="…" Margin="6,0,0,0" Click="OnBrowseRomFolderClick" />
                   <Button Grid.Column="2" Content="Speichern" Classes="accent" Margin="6,0,0,0" Click="OnSaveSettingsClick" />
                 </Grid>
+                <CheckBox x:Name="ShowAllGamesBox" IsCheckedChanged="OnShowAllGamesChanged"
+                          Content="Auch Spiele ohne Pokémon anzeigen (z. B. Zelda, Mario – spielbar, aber ohne Pokédex &amp; Co.)" />
               </StackPanel>
             </Expander>
 

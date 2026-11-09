@@ -132,6 +132,20 @@ public class GameDetectorTests
     }
 
     [Fact]
+    public void Shows_all_games_when_asked()
+    {
+        var dir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+        Directory.CreateDirectory(dir);
+        File.WriteAllBytes(Path.Combine(dir, "Pokémon Platin (Germany).nds"), new byte[0x200]);
+        File.WriteAllBytes(Path.Combine(dir, "Mario Kart DS.nds"), new byte[0x200]);
+
+        var titles = GameDetector.ScanFolder(dir, includeAll: true).Select(g => g.Title).ToList();
+
+        Assert.Equal(2, titles.Count);
+        Assert.Contains("Mario Kart DS", titles);
+    }
+
+    [Fact]
     public void Ignores_unsupported_files()
     {
         Assert.Null(GameDetector.Detect(WriteTemp([1, 2, 3], ".txt")));

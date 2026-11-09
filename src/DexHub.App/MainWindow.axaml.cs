@@ -93,7 +93,7 @@ public partial class MainWindow : Window
         {
             _games = await Task.Run(() =>
             {
-                var games = GameDetector.ScanFolder(romFolder);
+                var games = GameDetector.ScanFolder(romFolder, _settings.ShowAllGames);
                 foreach (var g in games)
                     g.SavePath = SaveLocator.Find(g);
                 return games;
@@ -1120,6 +1120,7 @@ public partial class MainWindow : Window
         FastForwardBox.SelectedIndex = Math.Max(0, Array.IndexOf(FastForwardSpeeds, _settings.FastForwardSpeed));
         BuildVideoPanel();
         AutoResumeBox.IsChecked = _settings.AutoResume;
+        ShowAllGamesBox.IsChecked = _settings.ShowAllGames;
         FastForwardModeBox.SelectedIndex = (int)_settings.FastForwardMode;
         BuildControlsPanel();
 
@@ -1152,6 +1153,14 @@ public partial class MainWindow : Window
         if (!_ready || FastForwardModeBox.SelectedIndex < 0) return;
         _settings.FastForwardMode = (FastForwardMode)FastForwardModeBox.SelectedIndex;
         SaveAndApply();
+    }
+
+    private async void OnShowAllGamesChanged(object? sender, RoutedEventArgs e)
+    {
+        if (!_ready) return;
+        _settings.ShowAllGames = ShowAllGamesBox.IsChecked == true;
+        _settings.Save();
+        await ScanLibraryAsync();
     }
 
     private void OnAutoResumeChanged(object? sender, RoutedEventArgs e)

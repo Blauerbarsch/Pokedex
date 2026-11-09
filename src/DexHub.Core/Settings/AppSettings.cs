@@ -61,6 +61,9 @@ public sealed class AppSettings
     /// <summary>Beim Schließen automatisch sichern und beim nächsten Start dort weitermachen.</summary>
     public bool AutoResume { get; set; } = true;
 
+    /// <summary>Auch Spiele ohne Pokémon in der Bibliothek zeigen.</summary>
+    public bool ShowAllGames { get; set; }
+
     /// <summary>Ordner für automatische Sicherungen (leer = aus).</summary>
     public string AutoBackupFolder { get; set; } = "";
 

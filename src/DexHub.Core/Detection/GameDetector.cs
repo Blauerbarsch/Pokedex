@@ -42,7 +42,8 @@ public static class GameDetector
     };
 
     /// <summary>Durchsucht einen Ordner (inkl. Unterordner) nach Spielen.</summary>
-    public static List<GameEntry> ScanFolder(string folder)
+    /// <param name="includeAll">true: auch Spiele, die nichts mit Pokémon zu tun haben.</param>
+    public static List<GameEntry> ScanFolder(string folder, bool includeAll = false)
     {
         var result = new List<GameEntry>();
         if (!Directory.Exists(folder)) return result;
@@ -50,7 +51,7 @@ public static class GameDetector
         foreach (var file in Directory.EnumerateFiles(folder, "*", ScanOptions))
         {
             var entry = Detect(file);
-            if (entry is not null && IsPokemonGame(entry)) result.Add(entry);
+            if (entry is not null && (includeAll || IsPokemonGame(entry))) result.Add(entry);
         }
         return result.OrderBy(e => e.Info.Platform).ThenBy(e => e.Title).ToList();
     }
