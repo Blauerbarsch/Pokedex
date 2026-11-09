@@ -236,6 +236,26 @@ public sealed class Gen4Save : ITradeSave
         return (Gen4PokemonReader.Encrypt(d), evolved);
     }
 
+    /// <summary>
+    /// Frei ist ein Platz, der nur aus Nullen besteht oder ein "leeres" Pokémon (Art 0) enthält.
+    /// Plätze mit ungültigen Daten gelten zur Sicherheit als belegt.
+    /// </summary>
+    public (int Box, int Slot)? FirstFreeSlot()
+    {
+        for (int box = 0; box < BoxCount; box++)
+            for (int slot = 0; slot < SlotsPerBox; slot++)
+            {
+                var raw = Data.AsSpan(SlotOffset(box, slot), PokemonSize);
+                if (raw.IndexOfAnyExcept((byte)0) < 0) return (box, slot);
+                if (Gen4PokemonReader.Decrypt(raw) is { } d && BinaryPrimitives.ReadUInt16LittleEndian(d.AsSpan(0x08)) == 0)
+                    return (box, slot);
+            }
+        return null;
+    }
+
+    /// <summary>Wie das Spiel: ein leeres Pokémon, ordnungsgemäß verschlüsselt.</summary>
+    public void Clear(int box, int slot) => SetRaw(box, slot, Gen4PokemonReader.Encrypt(new byte[PokemonSize]));
+
     public uint? PidOf(byte[] raw) => Gen4PokemonReader.Parse(raw, "", "")?.Pid;
 
     /// <summary>Art im Pokédex als gefangen und gesehen eintragen (wie beim Empfangen im Spiel).</summary>

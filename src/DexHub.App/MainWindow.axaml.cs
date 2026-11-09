@@ -106,6 +106,7 @@ public partial class MainWindow : Window
         RefreshGamesList();
         RebuildDex();
         BuildTradePanel();
+        BuildBankPanel();
         SetStatus($"{_games.Count} Spiel(e) gefunden.");
     }
 
@@ -482,6 +483,7 @@ public partial class MainWindow : Window
             RebuildDex();
             if (_tradeA is not null) LoadTradeColumn(_tradeA);
             if (_tradeB is not null) LoadTradeColumn(_tradeB);
+            BuildBankPanel();
             SetStatus($"Pokédex geladen: {_species.Count} Pokémon.");
         }
         catch (Exception ex)
@@ -517,6 +519,13 @@ public partial class MainWindow : Window
         _dex = PokedexService.Build(_species, _games);
         _dexById = _dex.ToDictionary(d => d.Id);
         _collection = CollectionService.Load(_games, _gameData);
+        if (_gameData is not null)
+            foreach (var banked in PokemonBank.Load(_settings.CurrentProfile))
+                if (banked.Parse(_gameData) is { } p)
+                {
+                    p.Level = _gameData.LevelFromExp(p.Species, p.Exp);
+                    _collection.Add(p);
+                }
         BuildStats();
 
         // Gruppen nur einmal anlegen (bzw. wenn sich die Anzahl Generationen ändert)
@@ -1473,6 +1482,7 @@ public partial class MainWindow : Window
         RefreshGamesList();
         RebuildDex();
         BuildTradePanel();
+        BuildBankPanel();
         SetStatus($"Benutzer gewechselt: {profile}");
     }
 

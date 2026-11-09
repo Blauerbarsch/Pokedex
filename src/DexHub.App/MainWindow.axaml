@@ -164,6 +164,13 @@
         </ScrollViewer>
       </TabItem>
 
+      <!-- ============ Pokémon-Bank (wird im Code aufgebaut) ============ -->
+      <TabItem Header="Bank">
+        <ScrollViewer>
+          <StackPanel x:Name="BankPanel" Spacing="10" Margin="0,12,12,12" />
+        </ScrollViewer>
+      </TabItem>
+
       <!-- ============ Steuerung (wird im Code aufgebaut) ============ -->
       <TabItem Header="Steuerung">
         <ScrollViewer>

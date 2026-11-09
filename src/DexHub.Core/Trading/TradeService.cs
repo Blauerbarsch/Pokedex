@@ -84,7 +84,7 @@ public static class TradeService
         return notes.Count == 0 ? summary : summary + "\n" + string.Join("\n", notes);
     }
 
-    private static void Backup(TradeSide side)
+    internal static void Backup(TradeSide side)
     {
         var source = SaveLocator.Find(side.Game, side.Profile);
         if (source is null) return;
@@ -92,7 +92,7 @@ public static class TradeService
         File.Copy(source, Path.Combine(AppSettings.BackupsFolder, name));
     }
 
-    private static void RemoveAutoState(TradeSide side)
+    internal static void RemoveAutoState(TradeSide side)
     {
         var state = Path.Combine(AppSettings.StatesFolderFor(side.Profile),
             Path.GetFileNameWithoutExtension(side.Game.RomPath) + ".auto.state");

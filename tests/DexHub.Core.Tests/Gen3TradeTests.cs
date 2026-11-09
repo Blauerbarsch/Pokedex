@@ -94,3 +94,46 @@ public class Gen3TradeTests
         Assert.NotEqual("", error);
     }
 }
+
+public class PalParkTests
+{
+    [Fact]
+    public void Converts_gen3_pokemon_to_gen4()
+    {
+        uint pid = 0x1234_ABCD;
+        var raw = new byte[80];
+        BinaryPrimitives.WriteUInt32LittleEndian(raw, pid);
+        BinaryPrimitives.WriteUInt32LittleEndian(raw.AsSpan(4), (54321u << 16) | 12345u);
+        Gen3Save.EncodeString("Blitz", 10)!.CopyTo(raw, 0x08);
+        raw[0x12] = 5; // Deutsch
+        Gen3Save.EncodeString("Ash", 7)!.CopyTo(raw, 0x14);
+
+        var data = new byte[48];
+        int g = Gen3Save.BlockOffset(pid, 'G'), a = Gen3Save.BlockOffset(pid, 'A'), m = Gen3Save.BlockOffset(pid, 'M');
+        BinaryPrimitives.WriteUInt16LittleEndian(data.AsSpan(g), 25);      // Pikachu
+        BinaryPrimitives.WriteUInt32LittleEndian(data.AsSpan(g + 4), 1000); // EP
+        BinaryPrimitives.WriteUInt16LittleEndian(data.AsSpan(a), 84);       // Donnerschock
+        BinaryPrimitives.WriteUInt16LittleEndian(data.AsSpan(m + 2), (ushort)(20 | 1 << 7 | 4 << 11)); // Lv 20, Saphir, Pokéball
+        BinaryPrimitives.WriteUInt32LittleEndian(data.AsSpan(m + 4), 31u | 31u << 25); // KP- und Sp.-Vert.-IS 31
+        var pk3 = Gen3Save.Encrypt(raw, data);
+
+        var names = new SpeciesNames(_ => "Pikachu", _ => "Pikachu");
+        var notes = new List<string>();
+        var pk4 = PalPark.Convert(pk3, i => i, _ => new SpeciesInfo(9, 0, 4), (_, _) => 20, names, notes);
+
+        var p = Gen4PokemonReader.Parse(pk4, "Platin", "Box 1");
+        Assert.NotNull(p);
+        Assert.Equal(25, p.Species);
+        Assert.Equal(pid, p.Pid);
+        Assert.Equal(1000u, p.Exp);
+        Assert.Equal(84, p.Moves[0]);
+        Assert.Equal("Blitz", p.Nickname);
+        Assert.Equal("Ash", p.TrainerName);
+        Assert.Equal(12345, p.TrainerId);
+        Assert.Equal(54321, p.SecretId);
+        Assert.Equal(31, p.Ivs[0]);
+        Assert.Equal(31, p.Ivs[5]);
+        Assert.Equal(4, p.Ball);
+        Assert.Equal(20, p.MetLevel);
+    }
+}

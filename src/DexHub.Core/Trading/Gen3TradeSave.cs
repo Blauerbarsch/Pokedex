@@ -143,6 +143,17 @@ public sealed class Gen3TradeSave : ITradeSave
         return result;
     }
 
+    public (int Box, int Slot)? FirstFreeSlot()
+    {
+        for (int box = 0; box < BoxCount; box++)
+            for (int slot = 0; slot < SlotsPerBox; slot++)
+                if (GetRaw(box, slot).AsSpan().IndexOfAnyExcept((byte)0) < 0) return (box, slot);
+        return null;
+    }
+
+    /// <summary>Gen 3 speichert leere Plätze als 80 Null-Bytes.</summary>
+    public void Clear(int box, int slot) => SetRaw(box, slot, new byte[PokemonSize]);
+
     public uint? PidOf(byte[] raw) => Gen3Save.Decrypt(raw) is null ? null : BinaryPrimitives.ReadUInt32LittleEndian(raw);
 
     // ---------- Pokédex ----------

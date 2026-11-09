@@ -89,6 +89,9 @@ public sealed class AppSettings
     /// <summary>Spielstände (.srm) eines Benutzers.</summary>
     public static string SavesFolderFor(string profile) => ProfileFolder(profile, "saves");
 
+    /// <summary>Pokémon-Bank eines Benutzers.</summary>
+    public static string BankFolderFor(string profile) => ProfileFolder(profile, "bank");
+
     /// <summary>Schnellspeicherungen eines Benutzers.</summary>
     public static string StatesFolderFor(string profile) => ProfileFolder(profile, "states");
 

@@ -15,6 +15,12 @@ public interface ITradeSave
     byte[] GetRaw(int box, int slot);
     void SetRaw(int box, int slot, byte[] raw);
 
+    /// <summary>Erster freier Box-Platz oder null, wenn alle Boxen voll sind.</summary>
+    (int Box, int Slot)? FirstFreeSlot();
+
+    /// <summary>Platz leeren (so, wie das Spiel einen leeren Platz speichert).</summary>
+    void Clear(int box, int slot);
+
     /// <summary>PID der Rohdaten, null wenn sie nicht gültig sind.</summary>
     uint? PidOf(byte[] raw);
 
