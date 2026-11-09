@@ -117,27 +117,18 @@ public sealed class Gen3Save
     /// <summary>
     /// Reihenfolge der vier Unterblöcke je nach PID % 24: G = Wachstum, A = Attacken, E = Fleißpunkte, M = Sonstiges.
     /// </summary>
-    private static readonly string[] Orders =
+    public static readonly string[] Orders =
     [
         "GAEM", "GAME", "GEAM", "GEMA", "GMAE", "GMEA", "AGEM", "AGME", "AEGM", "AEMG", "AMGE", "AMEG",
         "EGAM", "EGMA", "EAGM", "EAMG", "EMGA", "EMAG", "MGAE", "MGEA", "MAGE", "MAEG", "MEGA", "MEAG",
     ];
 
     /// <summary>Entschlüsselt ein Pokémon (80 Byte): 48 Byte Daten, XOR mit PID ^ Trainer-ID.</summary>
-    private static OwnedPokemon? Parse(ReadOnlySpan<byte> raw, string gameTitle, string location, Func<int, int> speciesFromIndex)
+    public static OwnedPokemon? Parse(ReadOnlySpan<byte> raw, string gameTitle, string location, Func<int, int> speciesFromIndex)
     {
         uint pid = BinaryPrimitives.ReadUInt32LittleEndian(raw);
         uint otId = BinaryPrimitives.ReadUInt32LittleEndian(raw[4..]);
-        ushort checksum = BinaryPrimitives.ReadUInt16LittleEndian(raw[0x1C..]);
-        uint key = pid ^ otId;
-
-        var data = new byte[48];
-        for (int i = 0; i < 48; i += 4)
-            BinaryPrimitives.WriteUInt32LittleEndian(data.AsSpan(i), BinaryPrimitives.ReadUInt32LittleEndian(raw[(0x20 + i)..]) ^ key);
-
-        ushort sum = 0;
-        for (int i = 0; i < 48; i += 2) sum = unchecked((ushort)(sum + BinaryPrimitives.ReadUInt16LittleEndian(data.AsSpan(i))));
-        if (sum != checksum) return null;
+        if (Decrypt(raw) is not { } data) return null;
 
         var order = Orders[pid % 24];
         ReadOnlySpan<byte> Block(char kind) => data.AsSpan(order.IndexOf(kind) * 12, 12);
@@ -177,6 +168,61 @@ public sealed class Gen3Save
             GameTitle = gameTitle,
             Location = location,
         };
+    }
+
+    /// <summary>Entschlüsselte 48 Datenbytes (Reihenfolge wie gespeichert) oder null bei falscher Prüfsumme.</summary>
+    public static byte[]? Decrypt(ReadOnlySpan<byte> raw)
+    {
+        if (raw.Length < 80) return null;
+        uint key = BinaryPrimitives.ReadUInt32LittleEndian(raw) ^ BinaryPrimitives.ReadUInt32LittleEndian(raw[4..]);
+        var data = new byte[48];
+        for (int i = 0; i < 48; i += 4)
+            BinaryPrimitives.WriteUInt32LittleEndian(data.AsSpan(i), BinaryPrimitives.ReadUInt32LittleEndian(raw[(0x20 + i)..]) ^ key);
+        return Checksum(data) == BinaryPrimitives.ReadUInt16LittleEndian(raw[0x1C..]) ? data : null;
+    }
+
+    /// <summary>Schreibt die 48 Datenbytes verschlüsselt (mit neuer Prüfsumme) in eine Kopie der Rohdaten.</summary>
+    public static byte[] Encrypt(ReadOnlySpan<byte> raw, byte[] data)
+    {
+        var result = raw[..80].ToArray();
+        uint key = BinaryPrimitives.ReadUInt32LittleEndian(result) ^ BinaryPrimitives.ReadUInt32LittleEndian(result.AsSpan(4));
+        BinaryPrimitives.WriteUInt16LittleEndian(result.AsSpan(0x1C), Checksum(data));
+        for (int i = 0; i < 48; i += 4)
+            BinaryPrimitives.WriteUInt32LittleEndian(result.AsSpan(0x20 + i), BinaryPrimitives.ReadUInt32LittleEndian(data.AsSpan(i)) ^ key);
+        return result;
+    }
+
+    private static ushort Checksum(ReadOnlySpan<byte> data)
+    {
+        ushort sum = 0;
+        for (int i = 0; i < 48; i += 2) sum = unchecked((ushort)(sum + BinaryPrimitives.ReadUInt16LittleEndian(data[i..])));
+        return sum;
+    }
+
+    /// <summary>Position eines Unterblocks (G, A, E, M) in den entschlüsselten Daten.</summary>
+    public static int BlockOffset(uint pid, char kind) => Orders[pid % 24].IndexOf(kind) * 12;
+
+    /// <summary>Text in den Gen-3-Zeichensatz; null, wenn ein Zeichen nicht darstellbar ist.</summary>
+    public static byte[]? EncodeString(string text, int length)
+    {
+        var result = Enumerable.Repeat((byte)0xFF, length).ToArray();
+        if (text.Length > length) return null;
+        for (int i = 0; i < text.Length; i++)
+        {
+            char c = text[i];
+            int? b = c switch
+            {
+                >= 'A' and <= 'Z' => 0xBB + (c - 'A'),
+                >= 'a' and <= 'z' => 0xD5 + (c - 'a'),
+                >= '0' and <= '9' => 0xA1 + (c - '0'),
+                ' ' => 0x00, '!' => 0xAB, '?' => 0xAC, '.' => 0xAD, '-' => 0xAE, '\'' => 0xB4, '♂' => 0xB5, '♀' => 0xB6,
+                'Ä' => 0xF1, 'Ö' => 0xF2, 'Ü' => 0xF3, 'ä' => 0xF4, 'ö' => 0xF5, 'ü' => 0xF6,
+                _ => null,
+            };
+            if (b is null) return null;
+            result[i] = (byte)b.Value;
+        }
+        return result;
     }
 
     /// <summary>Zeichensatz von Gen 3 (inkl. deutscher Umlaute). 0xFF beendet den Text.</summary>

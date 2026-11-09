@@ -14,8 +14,36 @@ namespace DexHub.Core.Trading;
 /// Sicherheit: Geschrieben wird nur, wenn wir die vorhandenen Prüfsummen exakt nachrechnen können –
 /// dann stimmen Blockgrößen und Positionen sicher.
 /// </summary>
-public sealed class Gen4Save
+public sealed class Gen4Save : ITradeSave
 {
+    /// <summary>Gen-4-Item-Nummern der Tausch-Gegenstände.</summary>
+    private const int KingsRock = 221, DeepSeaTooth = 226, DeepSeaScale = 227, MetalCoat = 233,
+        DragonScale = 235, UpGrade = 252, Protector = 321, Electirizer = 322, Magmarizer = 323,
+        DubiousDisc = 324, ReaperCloth = 325, Everstone = 229;
+
+    /// <summary>(Art, benötigtes Item oder 0) -> neue Art.</summary>
+    private static readonly Dictionary<(int Species, int Item), int> TradeEvolutions = new()
+    {
+        [(64, 0)] = 65,               // Kadabra -> Simsala
+        [(67, 0)] = 68,               // Maschock -> Machomei
+        [(75, 0)] = 76,               // Georok -> Geowaz
+        [(93, 0)] = 94,               // Alpollo -> Gengar
+        [(61, KingsRock)] = 186,      // Quaputzi -> Quaxo
+        [(79, KingsRock)] = 199,      // Flegmon -> Laschoking
+        [(95, MetalCoat)] = 208,      // Onix -> Stahlos
+        [(123, MetalCoat)] = 212,     // Sichlor -> Scherox
+        [(117, DragonScale)] = 230,   // Seemon -> Seedraking
+        [(137, UpGrade)] = 233,       // Porygon -> Porygon2
+        [(366, DeepSeaTooth)] = 367,  // Perlu -> Aalabyss
+        [(366, DeepSeaScale)] = 368,  // Perlu -> Saganabyss
+        [(112, Protector)] = 464,     // Rizeros -> Rihornior
+        [(125, Electirizer)] = 466,   // Elektek -> Elevoltek
+        [(126, Magmarizer)] = 467,    // Magmar -> Magbrant
+        [(233, DubiousDisc)] = 474,   // Porygon2 -> Porygon-Z
+        [(356, ReaperCloth)] = 477,   // Zwirrklop -> Zwirrfinst
+    };
+
+
     private sealed record BlockLayout(int Start, int Size, int FooterSize);
     private sealed record Layout(BlockLayout General, BlockLayout Storage, int BoxOffset, int BoxStride, int DexOffset);
 
@@ -35,6 +63,7 @@ public sealed class Gen4Save
     public byte[] Data { get; }
     public SaveFormat Format { get; }
     public string GameTitle { get; }
+    public int Generation => 4;
     private readonly Layout _layout;
 
     /// <summary>Neueste gültige Kopie des allgemeinen Blocks bzw. des Box-Blocks (0 oder 0x40000).</summary>
@@ -177,6 +206,37 @@ public sealed class Gen4Save
             }
         return result;
     }
+
+    /// <summary>Tausch-Entwicklung anwenden (falls zutreffend). Gibt neue Rohdaten und Art zurück.</summary>
+    public (byte[] Raw, int Species) Evolve(byte[] raw, bool enabled, SpeciesNames names, List<string> notes)
+    {
+        var d = Gen4PokemonReader.Decrypt(raw);
+        if (d is null) return (raw, 0);
+        int species = BinaryPrimitives.ReadUInt16LittleEndian(d.AsSpan(0x08));
+        if (!enabled) return (raw, species);
+
+        int item = BinaryPrimitives.ReadUInt16LittleEndian(d.AsSpan(0x0A));
+        bool isEgg = (BinaryPrimitives.ReadUInt32LittleEndian(d.AsSpan(0x38)) >> 30 & 1) == 1;
+        if (isEgg || item == Everstone) return (raw, species); // Ewigstein verhindert Entwicklungen
+
+        if (!TradeEvolutions.TryGetValue((species, item), out var evolved) &&
+            !TradeEvolutions.TryGetValue((species, 0), out evolved))
+            return (raw, species);
+
+        bool usedItem = TradeEvolutions.ContainsKey((species, item)) && item != 0;
+        BinaryPrimitives.WriteUInt16LittleEndian(d.AsSpan(0x08), (ushort)evolved);
+        if (usedItem) BinaryPrimitives.WriteUInt16LittleEndian(d.AsSpan(0x0A), 0); // Item wird verbraucht
+
+        // Ohne Spitznamen steht der Artname im Namensfeld – den aktualisieren
+        bool nicknamed = (BinaryPrimitives.ReadUInt32LittleEndian(d.AsSpan(0x38)) >> 31 & 1) == 1;
+        if (!nicknamed)
+            Gen4PokemonReader.EncodeString(names.German(evolved), 22).CopyTo(d.AsSpan(0x48));
+
+        notes.Add($"✨ {names.German(species)} hat sich beim Tausch zu {names.German(evolved)} entwickelt!");
+        return (Gen4PokemonReader.Encrypt(d), evolved);
+    }
+
+    public uint? PidOf(byte[] raw) => Gen4PokemonReader.Parse(raw, "", "")?.Pid;
 
     /// <summary>Art im Pokédex als gefangen und gesehen eintragen (wie beim Empfangen im Spiel).</summary>
     public void RegisterCaught(int species)

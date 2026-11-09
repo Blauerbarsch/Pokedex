@@ -480,6 +480,8 @@ public partial class MainWindow : Window
                 Console.WriteLine("[DexHub] Spieldaten (Attacken, Wesen) nicht ladbar: " + ex.Message);
             }
             RebuildDex();
+            if (_tradeA is not null) LoadTradeColumn(_tradeA);
+            if (_tradeB is not null) LoadTradeColumn(_tradeB);
             SetStatus($"Pokédex geladen: {_species.Count} Pokémon.");
         }
         catch (Exception ex)
@@ -1176,12 +1178,13 @@ public partial class MainWindow : Window
         TradePanel.Children.Add(Text(
             "Tausche Pokémon zwischen zwei Benutzern oder zwischen zwei eigenen Spielen. Links und rechts je ein " +
             "Pokémon aus den PC-Boxen anklicken, dann tauschen. Vorher werden beide Spielstände gesichert. " +
-            "Bisher für Gen 4 (Diamant, Perl, Platin, HeartGold, SoulSilver).", opacity: 0.8));
+            "Geht für Gen 3 (Rubin bis Blattgrün) und Gen 4 (Diamant bis SoulSilver), jeweils innerhalb einer Generation.", opacity: 0.8));
 
-        var games = _games.Where(g => Gen4Save.IsSupported(g.Info.SaveFormat)).ToList();
+        var games = _games.Where(g => TradeService.IsSupported(g.Info.SaveFormat))
+                          .OrderBy(g => g.Info.Generation).ThenBy(g => g.Title).ToList();
         if (games.Count == 0)
         {
-            TradePanel.Children.Add(Text("Keine Gen-4-Spiele in der Bibliothek gefunden.", opacity: 0.6));
+            TradePanel.Children.Add(Text("Keine Gen-3- oder Gen-4-Spiele in der Bibliothek gefunden.", opacity: 0.6));
             return;
         }
 
@@ -1264,7 +1267,12 @@ public partial class MainWindow : Window
         column.Selected = null;
 
         if (column.Side is not { } side) return;
-        var save = TradeService.Load(side, out var error);
+        if (_gameData is null)
+        {
+            column.Info.Text = "Spieldaten werden noch geladen …";
+            return;
+        }
+        var save = TradeService.Load(side, _gameData, out var error);
         if (save is null)
         {
             column.Info.Text = error;
@@ -1353,8 +1361,13 @@ public partial class MainWindow : Window
 
         try
         {
+            if (_gameData is null) throw new InvalidOperationException("Spieldaten werden noch geladen – bitte kurz warten.");
+            if (sideA.Game.Info.Generation != sideB.Game.Info.Generation)
+                throw new InvalidOperationException("Getauscht werden kann nur innerhalb einer Generation (Gen 3 ⇄ Gen 3, Gen 4 ⇄ Gen 4).");
+            var names = new SpeciesNames(SpeciesName,
+                id => _dexById.TryGetValue(id, out var e) && e.Species.NameEn.Length > 0 ? e.Species.NameEn : SpeciesName(id));
             var result = TradeService.Trade(sideA, slotA, sideB, slotB,
-                _tradeEvolutionBox?.IsChecked == true, SpeciesName);
+                _tradeEvolutionBox?.IsChecked == true, names, _gameData);
             if (_tradeResult is not null) _tradeResult.Text = "Getauscht: " + result;
             SetStatus("Tausch abgeschlossen.");
         }

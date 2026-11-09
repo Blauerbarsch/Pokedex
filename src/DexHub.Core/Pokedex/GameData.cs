@@ -30,6 +30,15 @@ public sealed class GameData
     public int SpeciesFromGen3Index(int index) =>
         GameIndices.TryGetValue((VersionRuby, index), out var species) ? species : index <= 251 ? index : 0;
 
+    /// <summary>Umkehrung: Pokédex-Nummer -> interne Gen-3-Nummer (0, wenn unbekannt).</summary>
+    public int Gen3IndexFromSpecies(int species)
+    {
+        if (species <= 251) return species;
+        foreach (var ((version, index), s) in GameIndices)
+            if (version == VersionRuby && s == species) return index;
+        return 0;
+    }
+
     public static readonly string[] BallNames =
     [
         "", "Meisterball", "Hyperball", "Superball", "Pokéball", "Safariball", "Netzball", "Tauchball",
