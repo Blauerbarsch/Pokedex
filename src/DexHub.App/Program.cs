@@ -37,10 +37,14 @@ internal static class Program
     /// <summary>Gesetzt, wenn dieser Prozess nur ein Spiel zeigen soll.</summary>
     public static PlayRequest? Play { get; private set; }
 
+    /// <summary>Mit "--bigpicture" startet DexHub direkt im Großbild-Modus (z. B. als Steam-Verknüpfung).</summary>
+    public static bool StartInBigPicture { get; private set; }
+
     [STAThread]
     public static void Main(string[] args)
     {
         Play = PlayRequest.Parse(args);
+        StartInBigPicture = args.Contains("--bigpicture");
         BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
     }
 

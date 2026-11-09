@@ -19,6 +19,8 @@
         <TextBlock Text="Benutzer:" VerticalAlignment="Center" Opacity="0.8" />
         <ComboBox x:Name="ProfileBox" MinWidth="180" SelectionChanged="OnProfileChanged" />
         <Button Content="+ Neuer Benutzer" Click="OnAddProfileClick" />
+        <Button Content="🎮 Großbild-Modus" Click="OnBigPictureClick"
+                ToolTip.Tip="Vollbild, mit dem Controller bedienbar (auch: DexHub --bigpicture)" />
         <TextBlock VerticalAlignment="Center" Opacity="0.5"
                    Text="Jeder Benutzer hat eigene Spielstände." />
       </StackPanel>

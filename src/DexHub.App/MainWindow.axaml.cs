@@ -49,6 +49,13 @@ public partial class MainWindow : Window
 
         WatchSaveFolder();
 
+        if (Program.StartInBigPicture)
+            Opened += async (_, _) =>
+            {
+                await ScanLibraryAsync();
+                OpenBigPicture();
+            };
+
         Opened += async (_, _) =>
         {
             await ScanLibraryAsync();
@@ -1381,6 +1388,32 @@ public partial class MainWindow : Window
     // =====================================================================
     // Benutzer
     // =====================================================================
+
+    private void OnBigPictureClick(object? sender, RoutedEventArgs e) => OpenBigPicture();
+
+    private BigPictureWindow? _bigPicture;
+
+    private void OpenBigPicture()
+    {
+        if (_bigPicture is not null)
+        {
+            _bigPicture.Activate();
+            return;
+        }
+        _bigPicture = new BigPictureWindow(
+            () => _games,
+            (game, resume) => LaunchGameAsync(game, resume),
+            _settings,
+            profile =>
+            {
+                _ready = false;
+                ProfileBox.SelectedItem = profile;
+                _ready = true;
+                SwitchProfile(profile);
+            });
+        _bigPicture.Closed += (_, _) => _bigPicture = null;
+        _bigPicture.Show();
+    }
 
     private void FillProfiles()
     {
