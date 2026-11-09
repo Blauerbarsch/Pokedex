@@ -21,6 +21,23 @@ Kein RetroArch, keine Zusatzprogramme: einfach starten, ROM-Ordner wählen, spie
 > ROMs, BIOS-Dateien und Spielstände sind **nicht** enthalten und gehören nicht ins Repo.
 > Jeder nutzt seine eigenen Sicherungskopien.
 
+## Herunterladen
+
+Fertige Pakete gibt es unter **[Releases](https://github.com/Blauerbarsch/Pokedex/releases)** – ohne .NET,
+ohne Git, Emulatorkerne sind dabei:
+
+| System | Datei | Starten |
+|---|---|---|
+| Windows | `DexHub-win-x64.zip` | entpacken, `DexHub.exe` doppelklicken |
+| Linux (z. B. Bazzite, Steam Deck) | `DexHub-linux-x64.zip` | entpacken, `./DexHub` (braucht SDL2, ist fast überall installiert) |
+| Mac (Apple Silicon) | `DexHub-osx-arm64.zip` | entpacken, im Terminal einmal `xattr -cr DexHub`, dann `./DexHub/DexHub` |
+
+Windows zeigt beim ersten Start evtl. „Der Computer wurde durch Windows geschützt“ – auf
+„Weitere Informationen“ → „Trotzdem ausführen“ klicken (das Programm ist nicht signiert).
+
+**Großbild-Modus:** Mit `DexHub --bigpicture` startet DexHub im Vollbild, komplett mit Controller
+bedienbar – ideal als Steam-Verknüpfung (Steam → „Spiel hinzufügen“ → „Nicht-Steam-Spiel“, Startoption `--bigpicture`).
+
 ## Stand
 
 | Konsole | Spielbar | Emulatorkern |
