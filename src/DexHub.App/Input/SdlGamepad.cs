@@ -94,6 +94,17 @@ public sealed unsafe class SdlGamepad : IInputProvider
         }
     }
 
+    /// <summary>Ist diese Controller-Taste gerade gedrückt? (für die Menü-Steuerung im Großbild-Modus)</summary>
+    public bool IsDown(PadControl control)
+    {
+        lock (SdlApi.Lock)
+        {
+            if (!EnsureInit()) return false;
+            Update();
+            return IsPressed(control);
+        }
+    }
+
     /// <summary>Für "Taste belegen": die erste gerade gedrückte Controller-Taste, sonst None.</summary>
     public PadControl FirstPressed()
     {
