@@ -57,8 +57,19 @@ public sealed unsafe class EmulatorSession : ICoreHost, IDisposable
     public string SaveRamPath => Path.Combine(AppSettings.SavesFolder,
         Path.GetFileNameWithoutExtension(Game.RomPath) + ".srm");
 
+    /// <summary>Schnellspeicher-Platz 0–9 (Platz 0 = ".state", wie früher).</summary>
+    public int StateSlot
+    {
+        get => _stateSlot;
+        set => _stateSlot = (value % 10 + 10) % 10;
+    }
+    private volatile int _stateSlot;
+
     public string StatePath => Path.Combine(AppSettings.StatesFolder,
-        Path.GetFileNameWithoutExtension(Game.RomPath) + ".state");
+        Path.GetFileNameWithoutExtension(Game.RomPath) + (_stateSlot == 0 ? ".state" : $".state{_stateSlot}"));
+
+    /// <summary>Gibt es auf dem aktuellen Platz schon eine Schnellspeicherung?</summary>
+    public bool StateSlotUsed => File.Exists(StatePath);
 
     /// <summary>Automatische Sicherung beim Schließen, wird beim nächsten Start geladen.</summary>
     public string AutoStatePath => Path.Combine(AppSettings.StatesFolder,
@@ -316,17 +327,17 @@ public sealed unsafe class EmulatorSession : ICoreHost, IDisposable
             if (state is null) { Message?.Invoke("Schnellspeichern wird von diesem Core nicht unterstützt."); return; }
             Directory.CreateDirectory(AppSettings.StatesFolder);
             File.WriteAllBytes(StatePath, state);
-            Message?.Invoke("Schnellspeicherung gesichert");
+            Message?.Invoke($"Gesichert auf Platz {_stateSlot}");
         }
         else if (File.Exists(StatePath))
         {
             Message?.Invoke(_core.LoadState(File.ReadAllBytes(StatePath))
-                ? "Schnellspeicherung geladen"
+                ? $"Platz {_stateSlot} geladen"
                 : "Schnellspeicherung konnte nicht geladen werden");
         }
         else
         {
-            Message?.Invoke("Noch keine Schnellspeicherung vorhanden");
+            Message?.Invoke($"Platz {_stateSlot} ist noch leer");
         }
     }
 
@@ -596,7 +607,8 @@ public sealed unsafe class EmulatorSession : ICoreHost, IDisposable
         if ((newlyPressed & (1 << (int)HotkeyAction.SaveState)) != 0) RequestSaveState();
         if ((newlyPressed & (1 << (int)HotkeyAction.LoadState)) != 0) RequestLoadState();
 
-        foreach (var action in new[] { HotkeyAction.NextDsLayout, HotkeyAction.SwapDsScreens, HotkeyAction.NextEffect })
+        foreach (var action in new[] { HotkeyAction.NextDsLayout, HotkeyAction.SwapDsScreens, HotkeyAction.NextEffect,
+                                       HotkeyAction.PreviousStateSlot, HotkeyAction.NextStateSlot })
             if ((newlyPressed & (1 << (int)action)) != 0) HotkeyPressed?.Invoke(action);
     }
 

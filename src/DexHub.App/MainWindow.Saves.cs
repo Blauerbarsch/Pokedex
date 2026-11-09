@@ -84,6 +84,7 @@ public partial class MainWindow
 
         var state = Path.Combine(AppSettings.StatesFolderFor(profile), Path.GetFileNameWithoutExtension(game.RomPath) + ".auto.state");
         if (File.Exists(state)) status += " · Fortsetzen-Sicherung";
+        status += PlayTimeText(profile, game);
 
         var buttons = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 4 };
         var import = new Button { Content = "Importieren…" };

@@ -18,6 +18,9 @@ public readonly record struct LearnEntry(short VersionGroup, short Move, byte Me
 
 public sealed record EvolutionStep(int From, int To, string Condition);
 
+/// <summary>Wo ein Pokémon in einer Edition wild vorkommt.</summary>
+public sealed record EncounterInfo(int Version, string Location, string Method, int MinLevel, int MaxLevel, int Rarity, string Conditions);
+
 /// <summary>Alles, was der Guide über ein Pokémon weiß.</summary>
 public sealed class GuidePokemon
 {
@@ -67,6 +70,12 @@ public sealed class GuideData
     public List<EvolutionStep> Evolutions { get; } = [];
     public List<VersionGroupInfo> VersionGroups { get; } = [];
     public Dictionary<int, List<LearnEntry>> Learnsets { get; } = [];
+
+    /// <summary>Wilde Begegnungen pro Pokémon.</summary>
+    public Dictionary<int, List<EncounterInfo>> Encounters { get; } = [];
+
+    /// <summary>Editionen einer Editionsgruppe, z. B. Gruppe "HeartGold/SoulSilver" -> (HeartGold, SoulSilver).</summary>
+    public Dictionary<int, List<(int Id, string Name)>> VersionsByGroup { get; } = [];
 
     public static readonly string[] StatNames = ["KP", "Angriff", "Verteidigung", "Sp.-Angriff", "Sp.-Vert.", "Initiative"];
 

@@ -197,7 +197,7 @@ public partial class MainWindow : Window
                     },
                     new TextBlock
                     {
-                        Text = game.StatusText,
+                        Text = game.StatusText + PlayTimeText(_settings.CurrentProfile, game),
                         FontSize = 11,
                         Opacity = 0.6,
                         TextWrapping = TextWrapping.Wrap,
@@ -263,6 +263,12 @@ public partial class MainWindow : Window
             ? "Doppelklick startet ein Spiel, Rechtsklick zeigt mehr."
             : $"Ausgewählt: {game.Title}";
     }
+
+    /// <summary>" · ⏱ 3 Std. 12 Min." – leer, wenn noch nie gespielt.</summary>
+    private static string PlayTimeText(string profile, GameEntry game) =>
+        DexHub.Core.Stats.PlayTimeStore.Get(profile, game.RomPath) is { Seconds: >= 60 } entry
+            ? " · ⏱ " + DexHub.Core.Stats.PlayTimeStore.Format(TimeSpan.FromSeconds(entry.Seconds))
+            : "";
 
     private void OnLibrarySearchChanged(object? sender, TextChangedEventArgs e)
     {
@@ -808,6 +814,8 @@ public partial class MainWindow : Window
                 StatCard($"{_dex.Count(d => d.SeenIn.Count > 0 || d.IsCaught)}", "Arten gesehen"),
                 StatCard($"{mons.Count}", "Pokémon in Team & Boxen"),
                 StatCard($"{mons.Count(p => p.IsShiny)}", "Schillernde ✨"),
+                StatCard(DexHub.Core.Stats.PlayTimeStore.Format(DexHub.Core.Stats.PlayTimeStore.Total(_settings.CurrentProfile)),
+                    $"Spielzeit von {_settings.CurrentProfile}"),
             },
         });
 

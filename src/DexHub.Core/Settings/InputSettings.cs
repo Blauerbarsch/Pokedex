@@ -37,6 +37,9 @@ public enum HotkeyAction
     SwapDsScreens,
     /// <summary>Nächster Bildeffekt (aus, Scanlines, LCD-Raster).</summary>
     NextEffect,
+    /// <summary>Schnellspeicher-Platz wechseln (0–9).</summary>
+    PreviousStateSlot,
+    NextStateSlot,
 }
 
 public sealed class InputSettings
@@ -103,6 +106,8 @@ public sealed class InputSettings
         [HotkeyAction.NextDsLayout] = "F2",
         [HotkeyAction.SwapDsScreens] = "F3",
         [HotkeyAction.NextEffect] = "F4",
+        [HotkeyAction.PreviousStateSlot] = "F6",
+        [HotkeyAction.NextStateSlot] = "F7",
     };
 
     public static readonly Dictionary<HotkeyAction, PadControl> DefaultHotkeyGamepad = new()
@@ -114,6 +119,8 @@ public sealed class InputSettings
         [HotkeyAction.NextDsLayout] = PadControl.None,
         [HotkeyAction.SwapDsScreens] = PadControl.None,
         [HotkeyAction.NextEffect] = PadControl.None,
+        [HotkeyAction.PreviousStateSlot] = PadControl.None,
+        [HotkeyAction.NextStateSlot] = PadControl.None,
     };
 
     /// <summary>Ergänzt fehlende Einträge (z. B. nach einem Update) mit der Standardbelegung.</summary>
@@ -162,6 +169,8 @@ public sealed class InputSettings
         HotkeyAction.NextDsLayout => "DS: Bildschirm-Anordnung",
         HotkeyAction.SwapDsScreens => "DS: Bildschirme tauschen",
         HotkeyAction.NextEffect => "Bildeffekt wechseln",
+        HotkeyAction.PreviousStateSlot => "Speicherplatz zurück",
+        HotkeyAction.NextStateSlot => "Speicherplatz vor",
         _ => action.ToString(),
     };
 

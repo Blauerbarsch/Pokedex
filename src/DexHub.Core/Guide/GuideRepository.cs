@@ -16,6 +16,9 @@ public static class GuideRepository
         "pokemon_evolution.csv", "item_names.csv", "location_names.csv",
         "moves.csv", "move_names.csv", "move_flavor_text.csv",
         "version_groups.csv", "versions.csv", "version_names.csv",
+        "locations.csv", "location_areas.csv", "location_area_prose.csv",
+        "encounters.csv", "encounter_slots.csv", "encounter_methods.csv", "encounter_method_prose.csv",
+        "encounter_condition_value_map.csv", "encounter_condition_value_prose.csv",
         "pokemon_moves.csv",
     ];
 
@@ -203,6 +206,10 @@ public static class GuideRepository
         var versionsByGroup = T("versions.csv").Rows()
             .GroupBy(r => r.I("version_group_id"))
             .ToDictionary(g => g.Key, g => g.Select(r => versionNames.GetValueOrDefault(r.I("id"), r.S("identifier"))).ToList());
+        foreach (var group in T("versions.csv").Rows().GroupBy(r => r.I("version_group_id")))
+            data.VersionsByGroup[group.Key] = group
+                .Select(r => (r.I("id"), versionNames.GetValueOrDefault(r.I("id"), r.S("identifier"))))
+                .ToList();
         foreach (var r in T("version_groups.csv").Rows())
         {
             int id = r.I("id");
@@ -222,6 +229,9 @@ public static class GuideRepository
             data.Evolutions.Add(new EvolutionStep(target.EvolvesFrom, to, DescribeEvolution(r, data, itemNames, locationNames)));
         }
 
+        // Wilde Begegnungen
+        LoadEncounters(T, data, de, en);
+
         // Attacken pro Pokémon (große Datei)
         foreach (var r in T("pokemon_moves.csv").Rows())
         {
@@ -233,6 +243,70 @@ public static class GuideRepository
         }
 
         return data;
+    }
+
+    /// <summary>Text in Deutsch, sonst Englisch, sonst der interne Bezeichner.</summary>
+    private static Dictionary<int, string> Localized(IEnumerable<Row> rows, string idColumn, int de, int en)
+    {
+        var german = new Dictionary<int, string>();
+        var english = new Dictionary<int, string>();
+        foreach (var r in rows)
+        {
+            int lang = r.I("local_language_id");
+            var name = r.S("name");
+            if (name.Length == 0) continue;
+            if (lang == de) german[r.I(idColumn)] = name;
+            else if (lang == en) english[r.I(idColumn)] = name;
+        }
+        foreach (var (id, name) in english) german.TryAdd(id, name);
+        return german;
+    }
+
+    private static void LoadEncounters(Func<string, Table> T, GuideData data, int de, int en)
+    {
+        var locationNames = Localized(T("location_names.csv").Rows(), "location_id", de, en);
+        foreach (var r in T("locations.csv").Rows())
+            locationNames.TryAdd(r.I("id"), r.S("identifier").Replace('-', ' '));
+
+        var areaNames = Localized(T("location_area_prose.csv").Rows(), "location_area_id", de, en);
+        var areaLocation = new Dictionary<int, int>();
+        foreach (var r in T("location_areas.csv").Rows()) areaLocation[r.I("id")] = r.I("location_id");
+
+        var methodNames = Localized(T("encounter_method_prose.csv").Rows(), "encounter_method_id", de, en);
+        foreach (var r in T("encounter_methods.csv").Rows()) methodNames.TryAdd(r.I("id"), r.S("identifier"));
+
+        var slots = new Dictionary<int, (int Method, int Rarity)>();
+        foreach (var r in T("encounter_slots.csv").Rows()) slots[r.I("id")] = (r.I("encounter_method_id"), r.I("rarity"));
+
+        var conditionNames = Localized(T("encounter_condition_value_prose.csv").Rows(), "encounter_condition_value_id", de, en);
+        var conditions = new Dictionary<int, List<string>>();
+        foreach (var r in T("encounter_condition_value_map.csv").Rows())
+        {
+            if (!conditionNames.TryGetValue(r.I("encounter_condition_value_id"), out var name)) continue;
+            int id = r.I("encounter_id");
+            if (!conditions.TryGetValue(id, out var list)) conditions[id] = list = [];
+            list.Add(name);
+        }
+
+        foreach (var r in T("encounters.csv").Rows())
+        {
+            int species = r.I("pokemon_id");
+            if (!data.Pokemon.ContainsKey(species)) continue;
+
+            int area = r.I("location_area_id");
+            var location = areaLocation.TryGetValue(area, out var loc) ? locationNames.GetValueOrDefault(loc, $"Ort #{loc}") : $"Gebiet #{area}";
+            if (areaNames.TryGetValue(area, out var areaName) && areaName.Length > 0 && !location.Contains(areaName))
+                location += $" ({areaName})";
+
+            var (method, rarity) = slots.GetValueOrDefault(r.I("encounter_slot_id"));
+            var encounter = new EncounterInfo(
+                r.I("version_id"), location, methodNames.GetValueOrDefault(method, "?"),
+                r.I("min_level"), r.I("max_level"), rarity,
+                conditions.TryGetValue(r.I("id"), out var c) ? string.Join(", ", c.Distinct()) : "");
+
+            if (!data.Encounters.TryGetValue(species, out var list)) data.Encounters[species] = list = [];
+            list.Add(encounter);
+        }
     }
 
     private static string DescribeEvolution(Row r, GuideData data, Dictionary<int, string> items, Dictionary<int, string> locations)

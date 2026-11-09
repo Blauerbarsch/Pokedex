@@ -401,6 +401,9 @@ public partial class MainWindow
         }
         GuideContent.Children.Add(Card("Entwicklung", evolution));
 
+        // Fundorte in der gewählten Edition
+        GuideContent.Children.Add(Card($"Fundorte in {(GuideVersionBox.SelectedItem as VersionGroupInfo)?.Name}", BuildEncounters(id)));
+
         // Zucht und Daten
         string gender = p.GenderRate < 0 ? "geschlechtslos"
             : $"♂ {100 - p.GenderRate * 12.5:0.#} % · ♀ {p.GenderRate * 12.5:0.#} %";
@@ -428,6 +431,55 @@ public partial class MainWindow
             Orientation = Orientation.Horizontal,
             Children = { Text($"   {label}: ", 13, opacity: 0.8), typeIds.Count == 0 ? (Control)Text("–", 13) : Wrap(typeIds.Select(t => TypeBadge(t, 12))) },
         };
+    }
+
+    /// <summary>Wilde Begegnungen, zusammengefasst nach Edition, Ort, Methode und Bedingung.</summary>
+    private Control BuildEncounters(int id)
+    {
+        var g = _guide!;
+        var panel = new StackPanel { Spacing = 4 };
+        var versions = g.VersionsByGroup.GetValueOrDefault(GuideVersionGroup) ?? [];
+        var versionIds = versions.Select(v => v.Id).ToHashSet();
+        var encounters = g.Encounters.GetValueOrDefault(id)?.Where(e => versionIds.Contains(e.Version)).ToList() ?? [];
+
+        if (encounters.Count == 0)
+        {
+            panel.Children.Add(Text("In dieser Edition nicht wild zu finden – evtl. nur durch Entwicklung, Zucht, Tausch, " +
+                                    "Geschenk oder Event. (Für neuere Editionen fehlen teils Daten.)", opacity: 0.7));
+            return panel;
+        }
+
+        bool showVersion = versions.Count > 1;
+        var rows = encounters
+            .GroupBy(e => (e.Version, e.Location, e.Method, e.Conditions))
+            .Select(x => (x.Key.Version, x.Key.Location, x.Key.Method, x.Key.Conditions,
+                          Min: x.Min(e => e.MinLevel), Max: x.Max(e => e.MaxLevel), Rarity: x.Sum(e => e.Rarity)))
+            .OrderBy(x => x.Location).ThenBy(x => x.Method).ThenBy(x => x.Version)
+            .ToList();
+
+        Grid Row(string version, string location, string method, string level, string chance, string condition, bool header = false)
+        {
+            var grid = new Grid { ColumnDefinitions = new ColumnDefinitions(showVersion ? "110,*,150,80,70,200" : "0,*,150,80,70,200") };
+            TextBlock Cell(string t) => Text(t, 13, bold: header, opacity: header ? 0.7 : 1);
+            grid.Children.Add(Cell(version));
+            grid.Children.Add(WithColumn(Cell(location), 1));
+            grid.Children.Add(WithColumn(Cell(method), 2));
+            grid.Children.Add(WithColumn(Cell(level), 3));
+            grid.Children.Add(WithColumn(Cell(chance), 4));
+            grid.Children.Add(WithColumn(Cell(condition), 5));
+            return grid;
+        }
+
+        panel.Children.Add(Row("Edition", "Ort", "Methode", "Level", "Chance", "Bedingung", header: true));
+        foreach (var r in rows)
+        {
+            var version = versions.FirstOrDefault(v => v.Id == r.Version).Name ?? "";
+            panel.Children.Add(Row(version, r.Location, r.Method,
+                r.Min == r.Max ? r.Min.ToString() : $"{r.Min}–{r.Max}",
+                $"{Math.Min(100, r.Rarity)} %", r.Conditions));
+        }
+        panel.Children.Add(Text("Chance = Anteil der Begegnungen an diesem Ort mit dieser Methode.", 11, opacity: 0.5));
+        return panel;
     }
 
     private Control PokemonChip(int id)

@@ -17,7 +17,7 @@ public partial class GameWindow : Window
 {
     public const string ControlsHelp =
         "Steuerung: Pfeiltasten · X = A · Y = B · Enter = Start · Rücktaste = Select · Leertaste = Schnellvorlauf · " +
-        "P = Pause · F5/F9 = Schnellspeichern/-laden · F11 = Vollbild · F4 = Bildeffekt · DS: F2 = Anordnung, F3 = tauschen, " +
+        "P = Pause · F5/F9 = Schnellspeichern/-laden (F6/F7 = Platz) · F11 = Vollbild · F4 = Bildeffekt · DS: F2 = Anordnung, F3 = tauschen, " +
         "Touch per Maus/Finger oder rechtem Stick · Beim Schließen wird automatisch gesichert (Belegung änderbar im Tab Steuerung)";
 
     private AppSettings _settings;
@@ -63,6 +63,7 @@ public partial class GameWindow : Window
             Width = 540;
             Height = 800;
         }
+        RestoreWindowPlacement(); // zuletzt benutzte Größe/Position dieser Konsole
 
         // Tasten abfangen, bevor ein Steuerelement sie bekommt
         AddHandler(KeyDownEvent, OnKeyDown, Avalonia.Interactivity.RoutingStrategies.Tunnel, handledEventsToo: true);
@@ -88,14 +89,69 @@ public partial class GameWindow : Window
             RequestAnimationFrame(OnAnimationFrame);
         };
 
+        // Spielzeit: jede Minute festhalten (falls das Spiel abstürzt), Rest beim Schließen
+        var playClock = System.Diagnostics.Stopwatch.StartNew();
+        var playTimer = new DispatcherTimer { Interval = TimeSpan.FromMinutes(1) };
+        playTimer.Tick += (_, _) => FlushPlayTime(playClock);
+        Opened += (_, _) => playTimer.Start();
+
+        Closing += (_, _) => SaveWindowPlacement();
+
         Closed += (_, _) =>
         {
+            playTimer.Stop();
+            FlushPlayTime(playClock);
             _closed = true;
             _session.Dispose(); // hält den Emulator an und speichert den Spielstand
         };
     }
 
     private VideoSettings Video => _settings.VideoFor(_platform);
+
+    private void FlushPlayTime(System.Diagnostics.Stopwatch clock)
+    {
+        var seconds = clock.Elapsed.TotalSeconds;
+        clock.Restart();
+        DexHub.Core.Stats.PlayTimeStore.Add(AppSettings.ActiveProfile, _session.Game.RomPath, seconds);
+    }
+
+    // ---------- Fenstergröße und -position pro Konsole ----------
+
+    private string PlacementFile => Path.Combine(AppSettings.AppDataFolder, "windows.json");
+
+    private void SaveWindowPlacement()
+    {
+        if (WindowState != WindowState.Normal) return;
+        try
+        {
+            var all = LoadPlacements();
+            all[_platform.ToString()] = [Width, Height, Position.X, Position.Y];
+            File.WriteAllText(PlacementFile, System.Text.Json.JsonSerializer.Serialize(all));
+        }
+        catch (IOException) { }
+    }
+
+    private Dictionary<string, double[]> LoadPlacements()
+    {
+        try
+        {
+            if (File.Exists(PlacementFile))
+                return System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, double[]>>(File.ReadAllText(PlacementFile)) ?? [];
+        }
+        catch (Exception ex) when (ex is IOException or System.Text.Json.JsonException) { }
+        return [];
+    }
+
+    private void RestoreWindowPlacement()
+    {
+        if (!LoadPlacements().TryGetValue(_platform.ToString(), out var p) || p.Length < 4) return;
+        if (p[0] >= 200 && p[1] >= 150)
+        {
+            Width = p[0];
+            Height = p[1];
+        }
+        Position = new PixelPoint((int)p[2], (int)p[3]);
+    }
 
     /// <summary>Neue Einstellungen übernehmen (Spiel-Prozess: settings.json wurde geändert).</summary>
     public void ReplaceSettings(AppSettings fresh)
@@ -311,6 +367,10 @@ public partial class GameWindow : Window
                 video.DsSwapScreens = !video.DsSwapScreens;
                 ShowOsd(video.DsSwapScreens ? "Bildschirme getauscht" : "Bildschirme normal");
                 break;
+            case HotkeyAction.PreviousStateSlot or HotkeyAction.NextStateSlot:
+                _session.StateSlot += action == HotkeyAction.NextStateSlot ? 1 : -1;
+                ShowOsd($"Speicherplatz {_session.StateSlot}" + (_session.StateSlotUsed ? " (belegt)" : " (leer)"));
+                return; // keine Einstellung geändert
             case HotkeyAction.NextEffect:
                 video.Effect = (OverlayEffect)(((int)video.Effect + 1) % Enum.GetValues<OverlayEffect>().Length);
                 ShowOsd("Bildeffekt: " + VideoSettings.EffectLabels[(int)video.Effect]);
@@ -367,7 +427,8 @@ public partial class GameWindow : Window
                 if (IsHotkey(e.Key, HotkeyAction.Touch)) { _session.SetKeyboardTouch(true); handled = true; }
                 if (IsHotkey(e.Key, HotkeyAction.SaveState)) { _session.RequestSaveState(); handled = true; }
                 if (IsHotkey(e.Key, HotkeyAction.LoadState)) { _session.RequestLoadState(); handled = true; }
-                foreach (var action in new[] { HotkeyAction.NextDsLayout, HotkeyAction.SwapDsScreens, HotkeyAction.NextEffect })
+                foreach (var action in new[] { HotkeyAction.NextDsLayout, HotkeyAction.SwapDsScreens, HotkeyAction.NextEffect,
+                                               HotkeyAction.PreviousStateSlot, HotkeyAction.NextStateSlot })
                     if (IsHotkey(e.Key, action)) { HandleWindowHotkey(action); handled = true; }
                 if (!handled) return;
                 break;

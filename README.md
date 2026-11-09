@@ -15,7 +15,8 @@ Kein RetroArch, keine Zusatzprogramme: einfach starten, ROM-Ordner wählen, spie
 - **Benutzer:** mehrere Profile mit eigenen Spielständen; mehrere Spiele gleichzeitig (jedes in eigenem Fenster)
 - **Tauschen:** Tauschzentrale direkt zwischen Spielständen (Gen 4, inkl. Tausch-Entwicklungen) und
   Linkkabel zwischen zwei Game-Boy-Fenstern
-- **Guide:** Typen, Schwächen, Basiswerte, Fähigkeiten, Entwicklungen und Attacken pro Edition, Typ-Tabelle
+- **Guide:** Typen, Schwächen, Basiswerte, Fähigkeiten, Entwicklungen, Fundorte und Attacken pro Edition, Typ-Tabelle
+- **Spielzeit** pro Benutzer und Spiel; Fenstergröße wird pro Konsole gemerkt
 - **Spielstände:** Übersicht pro Benutzer mit Import, Export (auch als ZIP) und Sicherungen
 
 > ROMs, BIOS-Dateien und Spielstände sind **nicht** enthalten und gehören nicht ins Repo.
@@ -71,6 +72,7 @@ bewegt einen Zeiger auf dem unteren Bildschirm, Stick drücken tippt. Die Paddle
 Elite-Controllers oder Steam Decks lassen sich ebenfalls belegen.
 
 | Schnellspeichern / -laden | F5 / F9 | frei belegbar (z. B. Paddles) |
+| Speicherplatz wechseln (0–9) | F6 / F7 | frei belegbar |
 
 Fest: P = Pause, F11 = Vollbild.
 
