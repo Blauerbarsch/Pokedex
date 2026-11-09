@@ -24,11 +24,11 @@ public static class GameDatabase
     // GBA: 4-stelliger Spielcode ab 0xAC. Wir vergleichen die ersten 3 Zeichen (4. = Region).
     public static readonly Dictionary<string, GameInfo> GameBoyAdvance = new()
     {
-        ["AXV"] = new("Pokémon Rubin-Edition",     Platform.GameBoyAdvance, 3),
-        ["AXP"] = new("Pokémon Saphir-Edition",    Platform.GameBoyAdvance, 3),
-        ["BPR"] = new("Pokémon Feuerrote Edition", Platform.GameBoyAdvance, 3),
-        ["BPG"] = new("Pokémon Blattgrüne Edition",Platform.GameBoyAdvance, 3),
-        ["BPE"] = new("Pokémon Smaragd-Edition",   Platform.GameBoyAdvance, 3),
+        ["AXV"] = new("Pokémon Rubin-Edition",     Platform.GameBoyAdvance, 3, SaveFormat.Gen3),
+        ["AXP"] = new("Pokémon Saphir-Edition",    Platform.GameBoyAdvance, 3, SaveFormat.Gen3),
+        ["BPR"] = new("Pokémon Feuerrote Edition", Platform.GameBoyAdvance, 3, SaveFormat.Gen3),
+        ["BPG"] = new("Pokémon Blattgrüne Edition",Platform.GameBoyAdvance, 3, SaveFormat.Gen3),
+        ["BPE"] = new("Pokémon Smaragd-Edition",   Platform.GameBoyAdvance, 3, SaveFormat.Gen3),
         ["BPP"] = new("Pokémon Pinball: Rubin & Saphir", Platform.GameBoyAdvance, null),
         ["B24"] = new("Pokémon Mystery Dungeon: Team Rot", Platform.GameBoyAdvance, null),
     };

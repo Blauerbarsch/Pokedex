@@ -18,8 +18,17 @@ public sealed class OwnedPokemon
     public ushort SecretId { get; init; }
     public string TrainerName { get; init; } = "";
 
-    /// <summary>Schillernd ("Shiny"): Formel aus Gen 3–5.</summary>
-    public bool IsShiny => (TrainerId ^ SecretId ^ (Pid >> 16) ^ (Pid & 0xFFFF)) < 8;
+    /// <summary>Aus welcher Generation (bestimmt, welche Angaben es gibt).</summary>
+    public int Generation { get; init; } = 4;
+
+    /// <summary>Gen 2 bestimmt "schillernd" über die DVs statt über die PID.</summary>
+    public bool? ShinyOverride { get; init; }
+
+    /// <summary>Schillernd ("Shiny"): Formel aus Gen 3–5 bzw. Gen-2-DVs.</summary>
+    public bool IsShiny => ShinyOverride ?? (Generation >= 3 && (TrainerId ^ SecretId ^ (Pid >> 16) ^ (Pid & 0xFFFF)) < 8);
+
+    /// <summary>Wesen gibt es erst ab Gen 3.</summary>
+    public bool HasNature => Generation >= 3;
 
     /// <summary>Wesen 0–24 in Spiel-Reihenfolge (0 = Robust).</summary>
     public int Nature => (int)(Pid % 25);

@@ -721,9 +721,23 @@ public partial class MainWindow : Window
 
     private string SpeciesName(int id) => _dexById.TryGetValue(id, out var e) ? e.Name : $"#{id}";
 
-    private string DisplayName(OwnedPokemon p) => p.Nickname is { Length: > 0 } nick && nick != SpeciesName(p.Species)
-        ? $"{nick} ({SpeciesName(p.Species)})"
-        : SpeciesName(p.Species);
+    /// <summary>
+    /// Spitzname oder Artname. Gen 1–3 speichern immer einen Namen – entspricht er dem Artnamen
+    /// (z. B. "GLUMANDA" oder englisch "CHARMANDER"), ist es kein echter Spitzname.
+    /// </summary>
+    private string NickOrName(OwnedPokemon p)
+    {
+        if (p.IsEgg) return "Ei";
+        var nick = p.Nickname?.Trim();
+        if (string.IsNullOrEmpty(nick)) return SpeciesName(p.Species);
+        bool isSpeciesName = string.Equals(nick, SpeciesName(p.Species), StringComparison.OrdinalIgnoreCase)
+            || (_dexById.TryGetValue(p.Species, out var e) && string.Equals(nick, e.Species.NameEn, StringComparison.OrdinalIgnoreCase));
+        return isSpeciesName ? SpeciesName(p.Species) : nick;
+    }
+
+    private string DisplayName(OwnedPokemon p) => NickOrName(p) is var name && name != SpeciesName(p.Species) && !p.IsEgg
+        ? $"{name} ({SpeciesName(p.Species)})"
+        : name;
 
     /// <summary>Für die Pokédex-Details: alle eigenen Exemplare dieser Art.</summary>
     private string OwnedSummary(int species)
@@ -731,7 +745,7 @@ public partial class MainWindow : Window
         var own = _collection.Where(p => p.Species == species && !p.IsEgg).OrderByDescending(p => p.Level).ToList();
         if (own.Count == 0) return "";
         var lines = own.Select(p =>
-            $"• Lv. {p.Level} {p.Nickname ?? SpeciesName(p.Species)} {p.Gender}{(p.IsShiny ? " ✨" : "")} – {p.GameTitle}, {p.Location}");
+            $"• Lv. {p.Level} {NickOrName(p)} {p.Gender}{(p.IsShiny ? " ✨" : "")} – {p.GameTitle}, {p.Location}");
         return $"\n\nDeine Exemplare ({own.Count}):\n" + string.Join("\n", lines);
     }
 
@@ -783,7 +797,7 @@ public partial class MainWindow : Window
             {
                 StatCard($"{caughtSpecies} / {_dex.Count}", "Arten gefangen (alle Spiele)"),
                 StatCard($"{_dex.Count(d => d.SeenIn.Count > 0 || d.IsCaught)}", "Arten gesehen"),
-                StatCard($"{mons.Count}", "Pokémon in Team & Boxen (Gen 4)"),
+                StatCard($"{mons.Count}", "Pokémon in Team & Boxen"),
                 StatCard($"{mons.Count(p => p.IsShiny)}", "Schillernde ✨"),
             },
         });
@@ -835,7 +849,7 @@ public partial class MainWindow : Window
         }
         else
         {
-            panel.Children.Add(Text("Einzelne Pokémon werden bisher aus Gen-4-Spielständen gelesen (Diamant bis SoulSilver).", opacity: 0.6));
+            panel.Children.Add(Text("Noch keine Pokémon in den Spielständen gefunden (Gen 1–4 werden gelesen).", opacity: 0.6));
         }
 
         return panel;
@@ -864,7 +878,7 @@ public partial class MainWindow : Window
         var panel = new StackPanel { Spacing = 6 };
         if (mons.Count == 0)
         {
-            panel.Children.Add(Text("Noch keine Pokémon gefunden. Spiele ein Gen-4-Spiel und speichere im Spiel.", opacity: 0.6));
+            panel.Children.Add(Text("Noch keine Pokémon gefunden. Spiele ein Spiel aus Gen 1–4 und speichere im Spiel.", opacity: 0.6));
             return panel;
         }
 
@@ -920,7 +934,7 @@ public partial class MainWindow : Window
                     sprite,
                     new TextBlock
                     {
-                        Text = p.Nickname ?? SpeciesName(p.Species),
+                        Text = NickOrName(p),
                         FontWeight = FontWeight.SemiBold,
                         TextAlignment = TextAlignment.Center,
                         TextTrimming = TextTrimming.CharacterEllipsis,
@@ -952,13 +966,18 @@ public partial class MainWindow : Window
         RenderOptions.SetBitmapInterpolationMode(sprite, BitmapInterpolationMode.None);
         panel.Children.Add(sprite);
 
-        panel.Children.Add(Text(p.Nickname ?? SpeciesName(p.Species), 22, bold: true));
+        panel.Children.Add(Text(NickOrName(p), 22, bold: true));
         panel.Children.Add(Text($"#{p.Species:0000} {SpeciesName(p.Species)} {p.Gender}{(p.IsShiny ? "  ✨ schillernd" : "")}", opacity: 0.8));
-        panel.Children.Add(Text($"Level {p.Level} · Wesen: {_gameData?.Nature(p.Nature) ?? p.Nature.ToString()}"));
+        panel.Children.Add(Text(p.HasNature
+            ? $"Level {p.Level} · Wesen: {_gameData?.Nature(p.Nature) ?? p.Nature.ToString()}"
+            : $"Level {p.Level} · Gen {p.Generation}"));
         panel.Children.Add(Text($"{p.GameTitle} · {p.Location}", opacity: 0.8));
 
-        var met = p.MetDate is { } date ? $"Gefangen am {date:dd.MM.yyyy}" : "Fangdatum unbekannt";
-        panel.Children.Add(Text($"{met} mit Lv. {p.MetLevel} im {GameData.Ball(p.Ball)}"));
+        if (p.Generation >= 3)
+        {
+            var met = p.MetDate is { } date ? $"Gefangen am {date:dd.MM.yyyy}" : "Fangdatum: erst ab Gen 4 gespeichert";
+            panel.Children.Add(Text($"{met} · mit Lv. {p.MetLevel} im {GameData.Ball(p.Ball)}"));
+        }
         panel.Children.Add(Text($"Trainer: {p.TrainerName} (ID {p.TrainerId:00000}) · Freundschaft {p.Friendship}/255", 12, opacity: 0.7));
 
         panel.Children.Add(Text("Attacken", bold: true));
@@ -972,13 +991,15 @@ public partial class MainWindow : Window
             row.Children.Add(Text(GameData.StatNames[i], 12));
             row.Children.Add(WithColumn(new ProgressBar
             {
-                Minimum = 0, Maximum = 31, Value = p.Ivs[i], Height = 8,
+                Minimum = 0, Maximum = p.Generation <= 2 ? 15 : 31, Value = p.Ivs[i], Height = 8,
                 VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(6, 0),
             }, 1));
             row.Children.Add(WithColumn(Text($"{p.Ivs[i]} / {p.Evs.ElementAtOrDefault(i)}", 12), 2));
             panel.Children.Add(row);
         }
-        panel.Children.Add(Text("IV: 0–31 (angeboren), EV: Fleißpunkte (max. 255 pro Wert)", 11, opacity: 0.5));
+        panel.Children.Add(Text(p.Generation <= 2
+            ? "DV: 0–15 (angeboren), Stat-EP: Fleißpunkte (max. 65535), Spezial zählt für Sp.-Angr. und Sp.-Vert."
+            : "IV: 0–31 (angeboren), EV: Fleißpunkte (max. 255 pro Wert)", 11, opacity: 0.5));
 
         var path = await _pokeApi.GetSpritePathAsync(p.Species, shiny: p.IsShiny);
         if (path is not null) sprite.Source = new Bitmap(path);

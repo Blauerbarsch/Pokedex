@@ -67,6 +67,19 @@ public sealed class Gen4Save
         try { data = File.ReadAllBytes(path); }
         catch (IOException ex) { error = ex.Message; return null; }
 
+        return Load(data, format, gameTitle, out error);
+    }
+
+    /// <summary>Wie oben, aber mit bereits gelesenen Daten.</summary>
+    public static Gen4Save? Load(byte[] data, SaveFormat format, string gameTitle, out string error)
+    {
+        error = "";
+        if (!Layouts.TryGetValue(format, out var layout))
+        {
+            error = "Dieses Spiel wird von der Tauschzentrale noch nicht unterstützt.";
+            return null;
+        }
+
         if (data.Length < 2 * PartitionSize)
         {
             error = $"Spielstand ist zu klein ({data.Length} Bytes, erwartet 512 KB).";
