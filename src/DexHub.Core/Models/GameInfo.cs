@@ -8,6 +8,8 @@ public enum SaveFormat
     Gen1,
     Gen2GoldSilver,
     Gen2Crystal,
+    /// <summary>Rubin, Saphir, Smaragd, Feuerrot, Blattgrün (gleicher Aufbau, Unterschiede werden erkannt).</summary>
+    Gen3,
     Gen4DiamondPearl,
     Gen4Platinum,
     Gen4HeartGoldSoulSilver,

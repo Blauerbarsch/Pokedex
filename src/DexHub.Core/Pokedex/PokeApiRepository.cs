@@ -100,8 +100,17 @@ public sealed class PokeApiRepository
             if (level is >= 1 and <= 100) table[level] = int.Parse(r["experience"]);
         }
 
+        var gameIndices = new Dictionary<(int, int), int>();
+        foreach (var r in await Table("pokemon_game_indices.csv"))
+        {
+            int version = int.Parse(r["version_id"]);
+            if (version is GameData.VersionRed or GameData.VersionRuby)
+                gameIndices[(version, int.Parse(r["game_index"]))] = int.Parse(r["pokemon_id"]);
+        }
+
         return new GameData
         {
+            GameIndices = gameIndices,
             MoveNames = moves,
             NatureNames = natures,
             GrowthRateBySpecies = growth,

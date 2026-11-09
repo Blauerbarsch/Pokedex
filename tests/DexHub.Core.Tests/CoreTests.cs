@@ -218,3 +218,46 @@ public class Gen4TradeTests
         }
     }
 }
+
+public class Gen123Tests
+{
+    [Fact]
+    public void Decodes_gen1_text()
+    {
+        // "PIKA" + Ende
+        byte[] data = [0x8F, 0x88, 0x8A, 0x80, 0x50];
+        Assert.Equal("PIKA", Gen12PokemonReader.DecodeString(data));
+    }
+
+    [Fact]
+    public void Decodes_gen3_text()
+    {
+        // "Flo" + Ende
+        byte[] data = [0xC0, 0xE0, 0xE3, 0xFF];
+        Assert.Equal("Flo", Gen3Save.DecodeString(data));
+    }
+
+    [Fact]
+    public void Reads_gen2_party_pokemon()
+    {
+        var save = new byte[0x8000];
+        int party = 0x288A;                 // Gold/Silber
+        save[party] = 1;                    // ein Pokémon
+        save[party + 1] = 155;              // Artenliste: Feurigel
+        save[party + 2] = 0xFF;
+        int mon = party + 8;
+        save[mon] = 155;                    // Art
+        save[mon + 0x02] = 33;              // Tackle
+        save[mon + 0x1F] = 5;               // Level 5
+        save[mon + 0x15] = 0xAA; save[mon + 0x16] = 0xAA; // DVs 10/10/10/10 -> schillernd
+        save[0x2724] = 0;                   // aktuelle Box 1 (leer)
+
+        var list = Gen12PokemonReader.Read(save, SaveFormat.Gen2GoldSilver, "Gold", i => i);
+
+        var p = Assert.Single(list);
+        Assert.Equal(155, p.Species);
+        Assert.Equal(5, p.Level);
+        Assert.True(p.IsShiny);
+        Assert.Equal("Team", p.Location);
+    }
+}

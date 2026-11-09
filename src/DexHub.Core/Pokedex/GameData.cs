@@ -17,6 +17,19 @@ public sealed class GameData
     /// <summary>Wachstumskurve -> benötigte EP für Level 1–100 (Index = Level).</summary>
     public Dictionary<int, int[]> ExpTables { get; init; } = [];
 
+    /// <summary>
+    /// Interne Nummern der Spiele -> Pokédex-Nummer. Gen 1 und Gen 3 nutzen intern eine andere
+    /// Reihenfolge (z. B. ist in Rot/Blau Rhyhorn die Nr. 1). Schlüssel: (Version, interne Nummer).
+    /// </summary>
+    public Dictionary<(int Version, int Index), int> GameIndices { get; init; } = [];
+
+    public const int VersionRed = 1, VersionRuby = 7;
+
+    public int SpeciesFromGen1Index(int index) => GameIndices.GetValueOrDefault((VersionRed, index));
+
+    public int SpeciesFromGen3Index(int index) =>
+        GameIndices.TryGetValue((VersionRuby, index), out var species) ? species : index <= 251 ? index : 0;
+
     public static readonly string[] BallNames =
     [
         "", "Meisterball", "Hyperball", "Superball", "Pokéball", "Safariball", "Netzball", "Tauchball",
