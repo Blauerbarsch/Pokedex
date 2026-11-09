@@ -19,6 +19,7 @@
         <TextBlock Text="Benutzer:" VerticalAlignment="Center" Opacity="0.8" />
         <ComboBox x:Name="ProfileBox" MinWidth="180" SelectionChanged="OnProfileChanged" />
         <Button Content="+ Neuer Benutzer" Click="OnAddProfileClick" />
+        <Button x:Name="UpdateButton" Content="⬆ Update verfügbar" Classes="accent" IsVisible="False" Click="OnUpdateClick" />
         <Button Content="🎮 Großbild-Modus" Click="OnBigPictureClick"
                 ToolTip.Tip="Vollbild, mit dem Controller bedienbar (auch: DexHub --bigpicture)" />
         <TextBlock VerticalAlignment="Center" Opacity="0.5"
@@ -216,6 +217,18 @@
                           Content="Beim Schließen automatisch sichern und beim nächsten Start dort weitermachen"
                           IsCheckedChanged="OnAutoResumeChanged" />
               </Grid>
+            </Expander>
+
+            <Expander Header="Updates" HorizontalAlignment="Stretch">
+              <StackPanel Spacing="8">
+                <TextBlock x:Name="VersionText" />
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                  <Button Content="Nach Updates suchen" Click="OnCheckUpdatesClick" />
+                  <Button x:Name="InstallUpdateButton" Content="Update installieren" Classes="accent"
+                          IsVisible="False" Click="OnUpdateClick" />
+                </StackPanel>
+                <TextBlock x:Name="UpdateStatusText" TextWrapping="Wrap" Opacity="0.8" />
+              </StackPanel>
             </Expander>
 
             <Expander Header="Emulatoren &amp; Ordner" HorizontalAlignment="Stretch">

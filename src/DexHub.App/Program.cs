@@ -7,7 +7,7 @@ namespace DexHub.App;
 /// Emulator-Core pro Programm nur einmal geladen sein kann – so laufen mehrere Spiele gleichzeitig.
 /// Aufruf: DexHub --play "rom.nds" --profile "Name" [--fresh] [--option key=value …]
 /// </summary>
-public sealed record PlayRequest(string RomPath, string Profile, bool Resume, Dictionary<string, string> Options)
+public sealed record PlayRequest(string RomPath, string Profile, bool Resume, Dictionary<string, string> Options, bool Fullscreen = false)
 {
     public static PlayRequest? Parse(string[] args)
     {
@@ -28,7 +28,7 @@ public sealed record PlayRequest(string RomPath, string Profile, bool Resume, Di
                 if (eq > 0) options[pair[..eq]] = pair[(eq + 1)..];
             }
         }
-        return new PlayRequest(rom, profile, resume, options);
+        return new PlayRequest(rom, profile, resume, options, args.Contains("--fullscreen"));
     }
 }
 

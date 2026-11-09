@@ -48,6 +48,7 @@ public partial class MainWindow : Window
         AddHandler(KeyDownEvent, OnCaptureKeyDown, RoutingStrategies.Tunnel);
 
         WatchSaveFolder();
+        InitUpdates();
 
         if (Program.StartInBigPicture)
             Opened += async (_, _) =>
@@ -293,7 +294,8 @@ public partial class MainWindow : Window
     private bool IsRunning(GameEntry game, string profile) =>
         _running.Any(r => !r.Process.HasExited && r.Game.RomPath == game.RomPath && r.Profile == profile);
 
-    private async Task LaunchGameAsync(GameEntry game, bool resume = true, Dictionary<string, string>? options = null)
+    private async Task LaunchGameAsync(GameEntry game, bool resume = true, Dictionary<string, string>? options = null,
+        bool fullscreen = false)
     {
         var profile = _settings.CurrentProfile;
         if (IsRunning(game, profile))
@@ -323,7 +325,7 @@ public partial class MainWindow : Window
         Process process;
         try
         {
-            process = Process.Start(PlayerHost.CreateStartInfo(game.RomPath, profile, resume && _settings.AutoResume, options))
+            process = Process.Start(PlayerHost.CreateStartInfo(game.RomPath, profile, resume && _settings.AutoResume, options, fullscreen))
                       ?? throw new InvalidOperationException("Prozess konnte nicht gestartet werden.");
         }
         catch (Exception ex)
@@ -1402,7 +1404,7 @@ public partial class MainWindow : Window
         }
         _bigPicture = new BigPictureWindow(
             () => _games,
-            (game, resume) => LaunchGameAsync(game, resume),
+            (game, resume) => LaunchGameAsync(game, resume, fullscreen: true),
             _settings,
             profile =>
             {
