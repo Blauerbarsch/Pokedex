@@ -1,5 +1,7 @@
-# Baut DexHub bei jedem Push (Kompilieren + Tests) und erstellt fertige Downloads.
-# Wird auf GitHub eine Release veröffentlicht (Tag-Name egal), werden die Pakete automatisch angehängt.
+# Baut DexHub bei jedem Push (Kompilieren + Tests) und veröffentlicht automatisch eine neue Version
+# (v0.4.<Laufnummer>) mit fertigen Paketen. Der Update-Knopf im Programm findet sie dann von selbst.
+#
+# Außerdem: Wird auf GitHub von Hand eine Release veröffentlicht, werden die Pakete daran angehängt.
 # Für eine schon bestehende Release: Actions -> Build -> "Run workflow" und den Tag-Namen eintragen.
 name: Build
 
@@ -19,7 +21,12 @@ on:
 permissions:
   contents: write
 
+env:
+  # An welche Release die Pakete kommen (leer = keine, z. B. bei Pull Requests)
+  RELEASE_TAG: ${{ github.event.release.tag_name || inputs.tag || (github.event_name == 'push' && format('v0.4.{0}', github.run_number)) || '' }}
+
 jobs:
+  # Windows und Linux: schnell verfügbar
   build:
     strategy:
       fail-fast: false
@@ -29,13 +36,7 @@ jobs:
             rid: win-x64
           - os: ubuntu-latest
             rid: linux-x64
-          # GitHub hat oft keine Mac-Rechner frei – Windows/Linux sollen nicht darauf warten müssen
-          - os: macos-latest
-            rid: osx-arm64
-            mac: true
     runs-on: ${{ matrix.os }}
-    # Mac darf ausfallen, ohne den ganzen Lauf als Fehler zu markieren
-    continue-on-error: ${{ matrix.mac == true }}
 
     steps:
       - uses: actions/checkout@v4
@@ -61,18 +62,12 @@ jobs:
           Expand-Archive sdl.zip -DestinationPath sdl
           Copy-Item sdl/SDL2.dll publish/DexHub/
 
-      - name: SDL2 beilegen (Mac)
-        if: runner.os == 'macOS'
-        run: |
-          brew install sdl2
-          cp "$(brew --prefix sdl2)/lib/libSDL2-2.0.0.dylib" publish/DexHub/
-
       - name: Packen (Windows)
         if: runner.os == 'Windows'
         shell: pwsh
         run: Compress-Archive -Path publish/DexHub -DestinationPath DexHub-${{ matrix.rid }}.zip
 
-      - name: Packen (Linux/Mac)
+      - name: Packen (Linux)
         if: runner.os != 'Windows'
         run: cd publish && zip -r -y ../DexHub-${{ matrix.rid }}.zip DexHub
 
@@ -81,10 +76,63 @@ jobs:
           name: DexHub-${{ matrix.rid }}
           path: DexHub-${{ matrix.rid }}.zip
 
-      # Jedes System hängt sein Paket selbst an die Release – so wartet niemand auf den Mac
+  # Veröffentlicht die Version mit den Windows- und Linux-Paketen
+  publish:
+    needs: build
+    # (Auf Job-Ebene gibt es den env-Kontext nicht, deshalb die Bedingung ausgeschrieben)
+    if: github.event_name == 'push' || github.event_name == 'release' || (github.event_name == 'workflow_dispatch' && inputs.tag != '')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ env.RELEASE_TAG }}
+          target_commitish: ${{ github.sha }}
+          name: ${{ github.event_name == 'push' && format('DexHub {0}', env.RELEASE_TAG) || '' }}
+          body: ${{ github.event_name == 'push' && github.event.head_commit.message || '' }}
+          make_latest: true
+          files: dist/*.zip
+
+  # Mac: GitHub hat oft keine Mac-Rechner frei – deshalb erst nach der Veröffentlichung,
+  # das Mac-Paket wird nachträglich angehängt
+  mac:
+    needs: [build, publish]
+    if: always() && needs.build.result == 'success'
+    runs-on: macos-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Emulator-Cores laden
+        run: dotnet run scripts/FetchCores.cs
+
+      - name: Programm bauen
+        run: dotnet publish src/DexHub.App -c Release -r osx-arm64 --self-contained true -o publish/DexHub -p:SourceRevisionId=${{ github.sha }}
+
+      - name: SDL2 beilegen
+        run: |
+          brew install sdl2
+          cp "$(brew --prefix sdl2)/lib/libSDL2-2.0.0.dylib" publish/DexHub/
+
+      - name: Packen
+        run: cd publish && zip -r -y ../DexHub-osx-arm64.zip DexHub
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: DexHub-osx-arm64
+          path: DexHub-osx-arm64.zip
+
       - name: An Release anhängen
-        if: github.event_name == 'release' || (github.event_name == 'workflow_dispatch' && inputs.tag != '')
+        if: env.RELEASE_TAG != ''
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ github.event.release.tag_name || inputs.tag }}
-          files: DexHub-${{ matrix.rid }}.zip
+          tag_name: ${{ env.RELEASE_TAG }}
+          files: DexHub-osx-arm64.zip

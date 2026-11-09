@@ -25,7 +25,8 @@ Kein RetroArch, keine Zusatzprogramme: einfach starten, ROM-Ordner wählen, spie
 ## Herunterladen
 
 Fertige Pakete gibt es unter **[Releases](https://github.com/Blauerbarsch/Pokedex/releases)** – ohne .NET,
-ohne Git, Emulatorkerne sind dabei:
+ohne Git, Emulatorkerne sind dabei. Bei jeder Änderung entsteht automatisch eine neue Version (v0.4.x);
+im Programm genügt dann ein Klick auf „⬆ Update verfügbar“.
 
 | System | Datei | Starten |
 |---|---|---|
