@@ -89,6 +89,12 @@ public sealed class AppSettings
     /// <summary>Spielstände (.srm) eines Benutzers.</summary>
     public static string SavesFolderFor(string profile) => ProfileFolder(profile, "saves");
 
+    /// <summary>Eine Datei direkt im Ordner eines Benutzers (beim Standard-Benutzer im DexHub-Ordner).</summary>
+    public static string ProfileFile(string profile, string name) =>
+        profile == DefaultProfile
+            ? Path.Combine(AppDataFolder, name)
+            : Path.Combine(Ensure(Path.Combine(AppDataFolder, "profiles", SafeName(profile))), name);
+
     /// <summary>Pokémon-Bank eines Benutzers.</summary>
     public static string BankFolderFor(string profile) => ProfileFolder(profile, "bank");
 

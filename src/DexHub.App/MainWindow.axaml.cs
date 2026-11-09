@@ -797,6 +797,7 @@ public partial class MainWindow : Window
         var mons = _collection.Where(p => !p.IsEgg).ToList();
 
         StatsPanel.Children.Add(StatsSection("Überblick", BuildOverview(mons), expanded: true));
+        StatsPanel.Children.Add(BuildAchievementsSection(mons));
         StatsPanel.Children.Add(StatsSection($"Meine Pokémon ({mons.Count})", BuildMyPokemon(mons), expanded: true));
         StatsPanel.Children.Add(StatsSection("Rückblick", BuildTimeline(mons), expanded: false));
         _huntPanel = new StackPanel { Spacing = 10 };
