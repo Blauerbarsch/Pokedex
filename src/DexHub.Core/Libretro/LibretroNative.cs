@@ -107,7 +107,6 @@ public struct RetroSystemAvInfo
     public RetroSystemTiming Timing;
 }
 
-[StructLayout(LayoutKind.Sequential)]
 /// <summary>Ein Speicherbereich des emulierten Systems (für das Auslesen per Adresse).</summary>
 [StructLayout(LayoutKind.Sequential)]
 internal struct RetroMemoryDescriptor
@@ -129,6 +128,7 @@ internal struct RetroMemoryMap
     public uint NumDescriptors;
 }
 
+[StructLayout(LayoutKind.Sequential)]
 internal struct RetroGameInfo
 {
     public IntPtr Path;
