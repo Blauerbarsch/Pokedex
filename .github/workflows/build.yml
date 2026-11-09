@@ -78,7 +78,8 @@ jobs:
           path: DexHub-${{ matrix.rid }}.zip
 
   release:
-    if: github.event_name == 'release' || (github.event_name == 'workflow_dispatch' && inputs.tag != '')
+    # Auch anhängen, wenn ein Build fehlt (z. B. wenn GitHub gerade keine Mac-Rechner frei hat)
+    if: always() && (github.event_name == 'release' || (github.event_name == 'workflow_dispatch' && inputs.tag != ''))
     needs: build
     runs-on: ubuntu-latest
     steps:
