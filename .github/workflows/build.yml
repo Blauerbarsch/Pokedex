@@ -29,9 +29,13 @@ jobs:
             rid: win-x64
           - os: ubuntu-latest
             rid: linux-x64
+          # GitHub hat oft keine Mac-Rechner frei – Windows/Linux sollen nicht darauf warten müssen
           - os: macos-latest
             rid: osx-arm64
+            mac: true
     runs-on: ${{ matrix.os }}
+    # Mac darf ausfallen, ohne den ganzen Lauf als Fehler zu markieren
+    continue-on-error: ${{ matrix.mac == true }}
 
     steps:
       - uses: actions/checkout@v4
@@ -77,18 +81,10 @@ jobs:
           name: DexHub-${{ matrix.rid }}
           path: DexHub-${{ matrix.rid }}.zip
 
-  release:
-    # Auch anhängen, wenn ein Build fehlt (z. B. wenn GitHub gerade keine Mac-Rechner frei hat)
-    if: always() && (github.event_name == 'release' || (github.event_name == 'workflow_dispatch' && inputs.tag != ''))
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/download-artifact@v4
-        with:
-          path: dist
-          merge-multiple: true
-
-      - uses: softprops/action-gh-release@v2
+      # Jedes System hängt sein Paket selbst an die Release – so wartet niemand auf den Mac
+      - name: An Release anhängen
+        if: github.event_name == 'release' || (github.event_name == 'workflow_dispatch' && inputs.tag != '')
+        uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ github.event.release.tag_name || inputs.tag }}
-          files: dist/*.zip
+          files: DexHub-${{ matrix.rid }}.zip
