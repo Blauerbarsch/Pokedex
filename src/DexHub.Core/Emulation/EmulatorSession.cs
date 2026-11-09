@@ -608,7 +608,8 @@ public sealed unsafe class EmulatorSession : ICoreHost, IDisposable
         if ((newlyPressed & (1 << (int)HotkeyAction.LoadState)) != 0) RequestLoadState();
 
         foreach (var action in new[] { HotkeyAction.NextDsLayout, HotkeyAction.SwapDsScreens, HotkeyAction.NextEffect,
-                                       HotkeyAction.PreviousStateSlot, HotkeyAction.NextStateSlot })
+                                       HotkeyAction.PreviousStateSlot, HotkeyAction.NextStateSlot,
+                                       HotkeyAction.HuntPlus, HotkeyAction.HuntMinus })
             if ((newlyPressed & (1 << (int)action)) != 0) HotkeyPressed?.Invoke(action);
     }
 

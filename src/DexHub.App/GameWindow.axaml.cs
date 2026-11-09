@@ -84,6 +84,7 @@ public partial class GameWindow : Window
         Opened += (_, _) =>
         {
             if (StartFullscreen) WindowState = WindowState.FullScreen;
+            ShowHunt(DexHub.Core.Stats.HuntStore.Active(AppSettings.ActiveProfile, session.Game.RomPath));
             ShowOsd(StartFullscreen ? ControllerHelp : ControlsHelp + " · " + ControllerHelp);
             session.Start();
             RequestAnimationFrame(OnAnimationFrame);
@@ -367,6 +368,9 @@ public partial class GameWindow : Window
                 video.DsSwapScreens = !video.DsSwapScreens;
                 ShowOsd(video.DsSwapScreens ? "Bildschirme getauscht" : "Bildschirme normal");
                 break;
+            case HotkeyAction.HuntPlus or HotkeyAction.HuntMinus:
+                ChangeHunt(action == HotkeyAction.HuntPlus ? 1 : -1);
+                return;
             case HotkeyAction.PreviousStateSlot or HotkeyAction.NextStateSlot:
                 _session.StateSlot += action == HotkeyAction.NextStateSlot ? 1 : -1;
                 ShowOsd($"Speicherplatz {_session.StateSlot}" + (_session.StateSlotUsed ? " (belegt)" : " (leer)"));
@@ -428,7 +432,8 @@ public partial class GameWindow : Window
                 if (IsHotkey(e.Key, HotkeyAction.SaveState)) { _session.RequestSaveState(); handled = true; }
                 if (IsHotkey(e.Key, HotkeyAction.LoadState)) { _session.RequestLoadState(); handled = true; }
                 foreach (var action in new[] { HotkeyAction.NextDsLayout, HotkeyAction.SwapDsScreens, HotkeyAction.NextEffect,
-                                               HotkeyAction.PreviousStateSlot, HotkeyAction.NextStateSlot })
+                                               HotkeyAction.PreviousStateSlot, HotkeyAction.NextStateSlot,
+                                               HotkeyAction.HuntPlus, HotkeyAction.HuntMinus })
                     if (IsHotkey(e.Key, action)) { HandleWindowHotkey(action); handled = true; }
                 if (!handled) return;
                 break;
@@ -477,6 +482,27 @@ public partial class GameWindow : Window
         var frame = WindowToFrame(e.GetPosition(Surface), w, h);
         if (frame is { } f) _session.SetPointer(f.X, f.Y, pressed);
         else if (!pressed) _session.SetPointer(0, 0, false);
+    }
+
+    // =====================================================================
+    // Shiny-Jagd-Zähler
+    // =====================================================================
+
+    private void ChangeHunt(int delta)
+    {
+        var game = _session.Game;
+        var hunt = DexHub.Core.Stats.HuntStore.Change(AppSettings.ActiveProfile, game.RomPath, game.Title,
+            game.Info.Generation ?? 4, delta);
+        ShowHunt(hunt);
+    }
+
+    /// <summary>Zähler oben rechts – sichtbar, solange in diesem Spiel eine Jagd läuft.</summary>
+    private void ShowHunt(DexHub.Core.Stats.Hunt? hunt)
+    {
+        HuntBorder.IsVisible = hunt is { Count: > 0 };
+        if (hunt is null) return;
+        HuntText.Text = $"✨ {hunt.Count}";
+        ToolTip.SetTip(HuntBorder, $"Shiny-Jagd: {hunt.Count} Begegnungen · Chance bisher {hunt.ChanceSoFar:P0}");
     }
 
     // =====================================================================

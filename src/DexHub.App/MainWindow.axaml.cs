@@ -440,6 +440,11 @@ public partial class MainWindow : Window
             FileSystemEventHandler changed = (_, e) =>
             {
                 var path = e.FullPath.Replace('\\', '/');
+                if (path.EndsWith("/hunts.json", StringComparison.Ordinal))
+                {
+                    Dispatcher.UIThread.Post(RebuildHunts);
+                    return;
+                }
                 if (!path.Contains("/saves/") && !path.EndsWith("/saves", StringComparison.Ordinal)) return;
                 Dispatcher.UIThread.Post(OnSaveFolderChanged);
             };
@@ -794,6 +799,9 @@ public partial class MainWindow : Window
         StatsPanel.Children.Add(StatsSection("Überblick", BuildOverview(mons), expanded: true));
         StatsPanel.Children.Add(StatsSection($"Meine Pokémon ({mons.Count})", BuildMyPokemon(mons), expanded: true));
         StatsPanel.Children.Add(StatsSection("Rückblick", BuildTimeline(mons), expanded: false));
+        _huntPanel = new StackPanel { Spacing = 10 };
+        StatsPanel.Children.Add(StatsSection("✨ Shiny-Jagden", _huntPanel, expanded: true));
+        RebuildHunts();
     }
 
     private static Expander StatsSection(string title, Control content, bool expanded) => new()

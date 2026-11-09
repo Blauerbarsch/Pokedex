@@ -40,6 +40,9 @@ public enum HotkeyAction
     /// <summary>Schnellspeicher-Platz wechseln (0–9).</summary>
     PreviousStateSlot,
     NextStateSlot,
+    /// <summary>Shiny-Jagd: Begegnung zählen.</summary>
+    HuntPlus,
+    HuntMinus,
 }
 
 public sealed class InputSettings
@@ -108,6 +111,8 @@ public sealed class InputSettings
         [HotkeyAction.NextEffect] = "F4",
         [HotkeyAction.PreviousStateSlot] = "F6",
         [HotkeyAction.NextStateSlot] = "F7",
+        [HotkeyAction.HuntPlus] = "F8",
+        [HotkeyAction.HuntMinus] = "F10",
     };
 
     public static readonly Dictionary<HotkeyAction, PadControl> DefaultHotkeyGamepad = new()
@@ -121,6 +126,8 @@ public sealed class InputSettings
         [HotkeyAction.NextEffect] = PadControl.None,
         [HotkeyAction.PreviousStateSlot] = PadControl.None,
         [HotkeyAction.NextStateSlot] = PadControl.None,
+        [HotkeyAction.HuntPlus] = PadControl.None,
+        [HotkeyAction.HuntMinus] = PadControl.None,
     };
 
     /// <summary>Ergänzt fehlende Einträge (z. B. nach einem Update) mit der Standardbelegung.</summary>
@@ -171,6 +178,8 @@ public sealed class InputSettings
         HotkeyAction.NextEffect => "Bildeffekt wechseln",
         HotkeyAction.PreviousStateSlot => "Speicherplatz zurück",
         HotkeyAction.NextStateSlot => "Speicherplatz vor",
+        HotkeyAction.HuntPlus => "Shiny-Jagd: +1 Begegnung",
+        HotkeyAction.HuntMinus => "Shiny-Jagd: −1 Begegnung",
         _ => action.ToString(),
     };
 
