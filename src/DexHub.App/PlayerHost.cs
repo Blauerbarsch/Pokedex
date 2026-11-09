@@ -13,7 +13,7 @@ public static class PlayerHost
 {
     /// <summary>Startinfo für einen neuen Spiel-Prozess (dasselbe Programm mit --play).</summary>
     public static ProcessStartInfo CreateStartInfo(string romPath, string profile, bool resume,
-        IReadOnlyDictionary<string, string>? options = null)
+        IReadOnlyDictionary<string, string>? options = null, bool fullscreen = false)
     {
         var exe = Environment.ProcessPath ?? throw new InvalidOperationException("Programmpfad unbekannt.");
         var psi = new ProcessStartInfo(exe) { UseShellExecute = false };
@@ -27,6 +27,7 @@ public static class PlayerHost
         psi.ArgumentList.Add("--profile");
         psi.ArgumentList.Add(profile);
         if (!resume) psi.ArgumentList.Add("--fresh");
+        if (fullscreen) psi.ArgumentList.Add("--fullscreen");
         foreach (var (key, value) in options ?? new Dictionary<string, string>())
         {
             psi.ArgumentList.Add("--option");
@@ -55,7 +56,7 @@ public static class PlayerHost
         foreach (var (k, v) in play.Options) options[k] = v; // z. B. Linkkabel
         session.CoreOptions = options;
 
-        var window = new GameWindow(session, settings);
+        var window = new GameWindow(session, settings) { StartFullscreen = play.Fullscreen };
         // Bei mehreren Fenstern sofort sehen, wer wo spielt
         window.Title = $"{play.Profile} spielt: {game.Title} – DexHub";
         if (play.Options.Keys.Any(k => k.Contains("link", StringComparison.OrdinalIgnoreCase)))

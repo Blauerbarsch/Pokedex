@@ -47,7 +47,7 @@ jobs:
         run: dotnet run scripts/FetchCores.cs
 
       - name: Programm bauen
-        run: dotnet publish src/DexHub.App -c Release -r ${{ matrix.rid }} --self-contained true -o publish/DexHub
+        run: dotnet publish src/DexHub.App -c Release -r ${{ matrix.rid }} --self-contained true -o publish/DexHub -p:SourceRevisionId=${{ github.sha }}
 
       - name: SDL2 beilegen (Windows)
         if: runner.os == 'Windows'

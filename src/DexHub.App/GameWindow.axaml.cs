@@ -37,6 +37,12 @@ public partial class GameWindow : Window
 
     public EmulatorSession Session => _session;
 
+    /// <summary>Im Vollbild starten (aus dem Großbild-Modus).</summary>
+    public bool StartFullscreen { get; init; }
+
+    public const string ControllerHelp =
+        "Select + Start 1 Sekunde halten = Spiel beenden (wird automatisch gesichert)";
+
     // Nur für den XAML-Designer der IDE
     public GameWindow() : this(null!, null!) { }
 
@@ -72,9 +78,12 @@ public partial class GameWindow : Window
         session.Failed += msg => Dispatcher.UIThread.Post(() => ShowOsd("Fehler: " + msg, persistent: true));
         session.HotkeyPressed += action => Dispatcher.UIThread.Post(() => HandleWindowHotkey(action));
 
+        session.QuitRequested += () => Dispatcher.UIThread.Post(Close);
+
         Opened += (_, _) =>
         {
-            ShowOsd(ControlsHelp);
+            if (StartFullscreen) WindowState = WindowState.FullScreen;
+            ShowOsd(StartFullscreen ? ControllerHelp : ControlsHelp + " · " + ControllerHelp);
             session.Start();
             RequestAnimationFrame(OnAnimationFrame);
         };
@@ -421,7 +430,7 @@ public partial class GameWindow : Window
         _osdTimer?.Stop();
         if (persistent) return;
 
-        _osdTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(text == ControlsHelp ? 8 : 3) };
+        _osdTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(text.Length > 80 ? 8 : 3) };
         _osdTimer.Tick += (_, _) =>
         {
             OsdBorder.IsVisible = false;

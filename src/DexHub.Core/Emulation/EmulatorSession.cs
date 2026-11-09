@@ -30,6 +30,9 @@ public sealed unsafe class EmulatorSession : ICoreHost, IDisposable
     public event Action<string>? SaveWritten;
     /// <summary>Emulator-Thread ist beendet.</summary>
     public event Action? Stopped;
+    /// <summary>Select + Start wurden eine Sekunde gehalten: Spiel beenden (für reine Controller-Bedienung).</summary>
+    public event Action? QuitRequested;
+    private int _quitComboFrames;
     /// <summary>Eine Zusatztaste auf dem Controller wurde gedrückt, die das Fenster erledigen muss (z. B. DS-Layout).</summary>
     public event Action<HotkeyAction>? HotkeyPressed;
 
@@ -234,6 +237,7 @@ public sealed unsafe class EmulatorSession : ICoreHost, IDisposable
                 bool fastForward = ResolveFastForward(_fastForwardKey || pad.Has(HotkeyAction.FastForward));
                 UpdateTouchCursor(pad, frameCounter);
                 HandlePadHotkeys(pad);
+                CheckQuitCombo();
 
                 _core.RunFrame();
                 FlushAudio(fastForward);
@@ -567,6 +571,19 @@ public sealed unsafe class EmulatorSession : ICoreHost, IDisposable
 
         _cursorPressed = touch;
         _cursorVisible = frame - _cursorLastMovedFrame < 180; // nach ca. 3 s ohne Bewegung ausblenden
+    }
+
+    private void CheckQuitCombo()
+    {
+        int combo = (1 << (int)JoypadButton.Select) | (1 << (int)JoypadButton.Start);
+        if ((Volatile.Read(ref _effectiveButtons) & combo) == combo)
+        {
+            if (++_quitComboFrames == 60) QuitRequested?.Invoke(); // ca. 1 Sekunde
+        }
+        else
+        {
+            _quitComboFrames = 0;
+        }
     }
 
     private int _previousPadHotkeys;
