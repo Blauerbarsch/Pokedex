@@ -1,6 +1,7 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
+using Avalonia.Interactivity;
 using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
@@ -64,7 +65,7 @@ public sealed class BigPictureWindow : Window
                     Orientation = Orientation.Horizontal,
                     Spacing = 16,
                     VerticalAlignment = VerticalAlignment.Center,
-                    Children = { Hint("LB"), _profileText, Hint("RB") },
+                    Children = { Hint("LB"), _profileText, Hint("RB"), CloseButton() },
                 }, 1),
             },
         };
@@ -79,7 +80,7 @@ public sealed class BigPictureWindow : Window
             Children =
             {
                 Legend("A", "Spielen"), Legend("Y", "Ohne Fortsetzen"), Legend("LB / RB", "Benutzer"),
-                Legend("B", "Großbild beenden"),
+                Legend("B / Esc", "Großbild beenden"), Legend("F11", "Vollbild an/aus"),
             },
         };
 
@@ -93,7 +94,8 @@ public sealed class BigPictureWindow : Window
         root.Children.Add(_scroll);
         Content = root;
 
-        KeyDown += OnKeyDown;
+        // Tasten abfangen, bevor die Bildlaufleiste sie bekommt (sonst kämen z. B. Pfeiltasten nie an)
+        AddHandler(KeyDownEvent, OnKeyDown, RoutingStrategies.Tunnel, handledEventsToo: true);
         Opened += (_, _) =>
         {
             Rebuild();
@@ -117,6 +119,20 @@ public sealed class BigPictureWindow : Window
         VerticalAlignment = VerticalAlignment.Center,
         Child = new TextBlock { Text = text, FontSize = 18, FontWeight = FontWeight.Bold, Foreground = Brushes.White },
     };
+
+    private Button CloseButton()
+    {
+        var button = new Button
+        {
+            Content = "✕",
+            FontSize = 20,
+            Margin = new Thickness(20, 0, 0, 0),
+            VerticalAlignment = VerticalAlignment.Center,
+        };
+        ToolTip.SetTip(button, "Großbild beenden (Esc)");
+        button.Click += (_, _) => Close();
+        return button;
+    }
 
     private static Control Legend(string button, string action) => new StackPanel
     {
@@ -249,6 +265,9 @@ public sealed class BigPictureWindow : Window
             case Key.PageUp: SwitchProfile(-1); break;
             case Key.PageDown: SwitchProfile(1); break;
             case Key.Escape: Close(); break;
+            case Key.F11:
+                WindowState = WindowState == WindowState.FullScreen ? WindowState.Maximized : WindowState.FullScreen;
+                break;
             default: return;
         }
         e.Handled = true;
