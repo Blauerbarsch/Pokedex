@@ -27,7 +27,7 @@ public static class Gen12PokemonReader
     public static List<OwnedPokemon> Read(byte[] save, SaveFormat format, string gameTitle, Func<int, int> speciesFromIndex)
     {
         var result = new List<OwnedPokemon>();
-        if (!Layouts.TryGetValue(format, out var layout) || save.Length < 0x8000) return result;
+        if (!Layouts.TryGetValue(format, out var layout) || !Saves.SaveValidator.IsValidGen12(save, format)) return result;
 
         // Team: Anzahl, Artenliste (7), Pokémon, Trainernamen (je 11), Spitznamen (je 11)
         ReadList(save, layout.Party, 6, layout.PartyMonSize, layout, gameTitle, "Team", speciesFromIndex, result);

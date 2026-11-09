@@ -362,7 +362,13 @@ public sealed unsafe class EmulatorSession : ICoreHost, IDisposable
 
         // Eigener Spielstand, sonst einen vorhandenen übernehmen (z. B. .sav neben der ROM)
         var source = File.Exists(SaveRamPath) ? SaveRamPath : Saves.SaveLocator.Find(Game);
-        if (source is null) return;
+        if (source is null)
+        {
+            // Noch kein Spielstand: den leeren Anfangszustand merken, damit erst dann eine Datei
+            // entsteht, wenn das Spiel wirklich speichert
+            _lastWrittenSram = sram.ToArray();
+            return;
+        }
 
         var data = File.ReadAllBytes(source);
         data.AsSpan(0, Math.Min(data.Length, sram.Length)).CopyTo(sram);
