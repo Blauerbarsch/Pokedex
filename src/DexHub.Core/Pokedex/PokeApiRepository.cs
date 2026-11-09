@@ -145,6 +145,9 @@ public sealed class PokeApiRepository
     }
 
     /// <summary>Lädt eine CSV-Datei aus dem PokéAPI-Datensatz (einmalig) und gibt den lokalen Pfad zurück.</summary>
+    /// <summary>true, wenn die Datei schon heruntergeladen wurde.</summary>
+    public static bool IsCsvCached(string name) => File.Exists(Path.Combine(CacheFolder, name));
+
     public static Task<string> GetCsvAsync(string name, bool forceRefresh = false, CancellationToken ct = default) =>
         GetCachedAsync(name, CsvBase + name, forceRefresh, ct);
 

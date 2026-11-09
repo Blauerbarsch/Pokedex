@@ -45,9 +45,18 @@ public partial class MainWindow
         if (MainTabs.SelectedItem == SavesTab) BuildSavesPanel();
     }
 
-    private async Task EnsureGuideLoadedAsync()
+    private Task? _guideLoadTask;
+
+    /// <summary>Lädt die Guide-Daten einmal; weitere Aufrufe warten auf denselben Ladevorgang.</summary>
+    private Task EnsureGuideLoadedAsync()
     {
-        if (_guide is not null || _guideLoading) return;
+        if (_guide is not null) return Task.CompletedTask;
+        if (_guideLoadTask is { IsCompleted: false }) return _guideLoadTask;
+        return _guideLoadTask = LoadGuideAsync();
+    }
+
+    private async Task LoadGuideAsync()
+    {
         _guideLoading = true;
         GuideContent.Children.Clear();
         GuideContent.Children.Add(Text("Beim ersten Öffnen lädt der Guide seine Daten (einmalig, ca. 30–40 MB). " +
@@ -64,6 +73,7 @@ public partial class MainWindow
 
             ShowGuideList();
             Navigate("chart", 0, remember: false);
+            OnGuideLoaded();
         }
         catch (Exception ex)
         {

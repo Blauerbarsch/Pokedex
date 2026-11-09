@@ -73,8 +73,13 @@
               <ComboBoxItem>Gen 8</ComboBoxItem>
               <ComboBoxItem>Gen 9</ComboBoxItem>
             </ComboBox>
-            <CheckBox x:Name="OnlyCaughtBox" Content="Nur gefangene"
-                      IsCheckedChanged="OnOnlyCaughtChanged" />
+            <ComboBox x:Name="DexShowBox" SelectedIndex="0" Width="250"
+                      SelectionChanged="OnDexShowChanged">
+              <ComboBoxItem>Alle anzeigen</ComboBoxItem>
+              <ComboBoxItem>Nur gefangene</ComboBoxItem>
+              <ComboBoxItem>Nur fehlende</ComboBoxItem>
+              <ComboBoxItem>Fehlend, in meinen Spielen erhältlich</ComboBoxItem>
+            </ComboBox>
             <TextBlock x:Name="DexCounter" VerticalAlignment="Center" Opacity="0.7" />
             <Button Content="Daten neu laden" Click="OnReloadDexClick" />
           </StackPanel>
@@ -85,7 +90,8 @@
           </ScrollViewer>
 
           <!-- Detailansicht -->
-          <StackPanel Grid.Row="1" Grid.Column="1" Spacing="10" Margin="0,8,0,0">
+          <ScrollViewer Grid.Row="1" Grid.Column="1" Margin="0,8,0,0">
+          <StackPanel Spacing="10" Margin="0,0,12,0">
             <Border Height="200" CornerRadius="8" Background="{DynamicResource SystemControlBackgroundBaseLowBrush}">
               <Image x:Name="SpriteImage" Width="192" Height="192"
                      RenderOptions.BitmapInterpolationMode="None" />
@@ -94,9 +100,11 @@
                        Text="Pokémon auswählen" />
             <TextBlock x:Name="DetailText" TextWrapping="Wrap" />
             <Button x:Name="OpenInGuideButton" Content="📖 Im Guide öffnen" Click="OnOpenInGuideClick" IsVisible="False" />
+            <StackPanel x:Name="WhereToFindPanel" Spacing="4" />
             <TextBlock Opacity="0.5" FontSize="12" TextWrapping="Wrap"
-                       Text="● gefangen   ○ gesehen. Zählt, was im Spiel gespeichert wurde. Bisher für Gen 1, 2 und 4 (Diamant bis SoulSilver)." />
+                       Text="● gefangen   ○ gesehen. Zählt, was im Spiel gespeichert wurde (Gen 1 bis 4)." />
           </StackPanel>
+          </ScrollViewer>
         </Grid>
       </TabItem>
 

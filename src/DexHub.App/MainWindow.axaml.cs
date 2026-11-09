@@ -525,10 +525,15 @@ public partial class MainWindow : Window
         foreach (var (id, tile) in _dexTiles)
             if (_dexById.TryGetValue(id, out var entry)) StyleDexTile(tile, entry);
 
+        RecomputeObtainable();
         ApplyDexFilter();
 
         // Detailansicht aktuell halten
-        if (_dexById.TryGetValue(_selectedDexId, out var selected)) DetailText.Text = selected.DetailText + OwnedSummary(_selectedDexId);
+        if (_dexById.TryGetValue(_selectedDexId, out var selected))
+        {
+            DetailText.Text = selected.DetailText + OwnedSummary(_selectedDexId);
+            ShowWhereToFind(_selectedDexId);
+        }
     }
 
     private void BuildDexGroups(List<int> generations)
@@ -652,14 +657,20 @@ public partial class MainWindow : Window
         var query = SearchBox.Text?.Trim() ?? "";
         int number = int.TryParse(query.TrimStart('#'), out var n) ? n : -1;
         int genFilter = GenFilter.SelectedIndex; // 0 = alle
-        bool onlyCaught = OnlyCaughtBox.IsChecked == true;
+        int show = DexShowBox.SelectedIndex; // 0 alle, 1 gefangen, 2 fehlend, 3 fehlend + erhältlich
 
         bool Matches(DexEntry d) =>
             (query.Length == 0 || d.Id == number
                 || d.Name.Contains(query, StringComparison.OrdinalIgnoreCase)
                 || d.Species.NameEn.Contains(query, StringComparison.OrdinalIgnoreCase))
             && (genFilter <= 0 || d.Species.Generation == genFilter)
-            && (!onlyCaught || d.IsCaught);
+            && show switch
+            {
+                1 => d.IsCaught,
+                2 => !d.IsCaught,
+                3 => !d.IsCaught && _obtainable.ContainsKey(d.Id),
+                _ => true,
+            };
 
         int totalShown = 0, totalCaught = 0;
         foreach (var group in _dexGroups)
@@ -692,7 +703,6 @@ public partial class MainWindow : Window
 
     private void OnSearchChanged(object? sender, TextChangedEventArgs e) { if (_ready) ApplyDexFilter(); }
     private void OnGenFilterChanged(object? sender, SelectionChangedEventArgs e) { if (_ready) ApplyDexFilter(); }
-    private void OnOnlyCaughtChanged(object? sender, RoutedEventArgs e) { if (_ready) ApplyDexFilter(); }
 
     private async void OnReloadDexClick(object? sender, RoutedEventArgs e) => await LoadPokedexAsync(forceRefresh: true);
 
@@ -708,6 +718,7 @@ public partial class MainWindow : Window
         DetailName.Text = $"{entry.Number} {entry.Name}";
         OpenInGuideButton.IsVisible = true;
         DetailText.Text = entry.DetailText + OwnedSummary(id);
+        ShowWhereToFind(id);
         SpriteImage.Source = null;
 
         // Bild nachladen; ältere Ladevorgänge abbrechen, wenn man schnell weiterklickt

@@ -22,6 +22,9 @@ public static class GuideRepository
         "pokemon_moves.csv",
     ];
 
+    /// <summary>true, wenn alle Guide-Daten schon lokal liegen (dann ist Laden schnell und ohne Download).</summary>
+    public static bool IsCached => Files.All(PokeApiRepository.IsCsvCached);
+
     /// <param name="progress">Meldet Fortschritt als Text, z. B. "Lade pokemon_moves.csv (24/24)".</param>
     public static async Task<GuideData> LoadAsync(IProgress<string>? progress = null, bool forceRefresh = false)
     {

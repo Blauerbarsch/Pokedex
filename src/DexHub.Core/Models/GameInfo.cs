@@ -20,7 +20,8 @@ public sealed record GameInfo(
     string Title,
     Platform Platform,
     int? Generation,
-    SaveFormat SaveFormat = SaveFormat.None);
+    SaveFormat SaveFormat = SaveFormat.None,
+    int? Version = null); // Editions-Nummer im PokéAPI-Datensatz (für Fundorte), z. B. 15 = HeartGold
 
 /// <summary>Eine ROM-Datei in der Bibliothek des Nutzers.</summary>
 public sealed class GameEntry
