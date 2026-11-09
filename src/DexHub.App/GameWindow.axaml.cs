@@ -58,8 +58,9 @@ public partial class GameWindow : Window
             Height = 800;
         }
 
-        KeyDown += OnKeyDown;
-        KeyUp += OnKeyUp;
+        // Tasten abfangen, bevor ein Steuerelement sie bekommt
+        AddHandler(KeyDownEvent, OnKeyDown, Avalonia.Interactivity.RoutingStrategies.Tunnel, handledEventsToo: true);
+        AddHandler(KeyUpEvent, OnKeyUp, Avalonia.Interactivity.RoutingStrategies.Tunnel, handledEventsToo: true);
         Deactivated += (_, _) =>
         {
             ReleaseAllKeys();
