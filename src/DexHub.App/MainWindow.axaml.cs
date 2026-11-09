@@ -49,6 +49,7 @@ public partial class MainWindow : Window
 
         WatchSaveFolder();
         InitUpdates();
+        DexHub.Core.Live.LiveDexStore.Clear();
         InitBackup();
 
         if (Program.StartInBigPicture)
@@ -446,6 +447,11 @@ public partial class MainWindow : Window
                     Dispatcher.UIThread.Post(RebuildHunts);
                     return;
                 }
+                if (path.Contains("/live/") && path.EndsWith(".json", StringComparison.Ordinal))
+                {
+                    Dispatcher.UIThread.Post(OnSaveFolderChanged);
+                    return;
+                }
                 if (!path.Contains("/saves/") && !path.EndsWith("/saves", StringComparison.Ordinal)) return;
                 Dispatcher.UIThread.Post(OnSaveFolderChanged);
             };
@@ -464,6 +470,7 @@ public partial class MainWindow : Window
             }
             _saveWatcher.Changed += changed;
             _saveWatcher.Created += changed;
+            _saveWatcher.Deleted += changed;
             _saveWatcher.EnableRaisingEvents = true;
         }
         catch (Exception ex)
@@ -522,7 +529,7 @@ public partial class MainWindow : Window
 
     private void RebuildDex()
     {
-        _dex = PokedexService.Build(_species, _games);
+        _dex = PokedexService.Build(_species, _games, _settings.CurrentProfile);
         _dexById = _dex.ToDictionary(d => d.Id);
         _collection = CollectionService.Load(_games, _gameData);
         if (_gameData is not null)

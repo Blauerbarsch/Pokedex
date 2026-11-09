@@ -216,6 +216,42 @@ public sealed unsafe class LibretroCore : IDisposable
     public Span<byte> SaveRam => GetMemory(Retro.MemorySaveRam);
     public Span<byte> SystemRam => GetMemory(Retro.MemorySystemRam);
 
+    // ---------- Speicher per Adresse (vom Core gemeldete Speicherbereiche) ----------
+
+    private readonly List<(IntPtr Ptr, ulong Offset, ulong Start, ulong Select, ulong Len)> _memoryMap = [];
+
+    private void ReadMemoryMaps(IntPtr data)
+    {
+        if (data == IntPtr.Zero) return;
+        var map = Marshal.PtrToStructure<RetroMemoryMap>(data);
+        _memoryMap.Clear();
+        int size = Marshal.SizeOf<RetroMemoryDescriptor>();
+        for (int i = 0; i < map.NumDescriptors && i < 256; i++)
+        {
+            var d = Marshal.PtrToStructure<RetroMemoryDescriptor>(map.Descriptors + i * size);
+            if (d.Ptr == IntPtr.Zero || d.Len == 0) continue;
+            _memoryMap.Add((d.Ptr, d.Offset, d.Start, d.Select, d.Len));
+        }
+    }
+
+    /// <summary>
+    /// Liest Speicher an einer Adresse des emulierten Systems (z. B. 0x03005D90 beim GBA).
+    /// false, wenn der Bereich nicht bekannt ist.
+    /// </summary>
+    public bool ReadAddress(ulong address, Span<byte> destination)
+    {
+        foreach (var (ptr, offset, start, select, len) in _memoryMap)
+        {
+            bool inside = select == 0
+                ? address >= start && address + (ulong)destination.Length <= start + len
+                : (address & select) == (start & select) && address - start + (ulong)destination.Length <= len;
+            if (!inside) continue;
+            new ReadOnlySpan<byte>((void*)(ptr + (nint)(offset + address - start)), destination.Length).CopyTo(destination);
+            return true;
+        }
+        return false;
+    }
+
     public byte[]? SaveState()
     {
         var size = (int)_serializeSize();
@@ -370,6 +406,9 @@ public sealed unsafe class LibretroCore : IDisposable
                 case Retro.EnvSetSubsystemInfo:
                 case Retro.EnvSetControllerInfo:
                 case Retro.EnvSetMemoryMaps:
+                    ReadMemoryMaps(data);
+                    return true;
+
                 case Retro.EnvSetSupportAchievements:
                 case Retro.EnvSetSerializationQuirks:
                 case Retro.EnvSetCoreOptionsDisplay:

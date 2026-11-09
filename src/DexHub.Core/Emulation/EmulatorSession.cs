@@ -256,6 +256,9 @@ public sealed unsafe class EmulatorSession : ICoreHost, IDisposable
                 // Etwa alle 5 Sekunden prüfen, ob das Spiel gespeichert hat
                 if (++frameCounter % 300 == 0) WriteSramIfChanged();
 
+                // Etwa alle 2 Sekunden den Pokédex direkt aus dem Arbeitsspeicher lesen
+                if (frameCounter % 120 == 60) UpdateLiveDex();
+
                 // Takt halten: auf den Zeitpunkt des nächsten Bildes warten
                 if (fastForward)
                     nextFrame += FastForwardSpeed > 0 ? ticksPerFrame / FastForwardSpeed : 0;
@@ -267,6 +270,7 @@ public sealed unsafe class EmulatorSession : ICoreHost, IDisposable
             }
 
             WriteSramIfChanged();
+            Live.LiveDexStore.Delete(AppSettings.ActiveProfile, Game.RomPath);
             var finalSram = _core.SaveRam;
             if (!finalSram.IsEmpty)
                 Log($"Spielstand beim Beenden: Prüfsumme {Checksum(finalSram)}");
@@ -284,6 +288,22 @@ public sealed unsafe class EmulatorSession : ICoreHost, IDisposable
             _audio.Dispose();
             Stopped?.Invoke();
         }
+    }
+
+    private Live.LiveDexReader? _liveDex;
+    private string _lastLive = "";
+
+    private void UpdateLiveDex()
+    {
+        if (_core is null || !Live.LiveDexReader.IsSupported(Game.Info.SaveFormat)) return;
+        _liveDex ??= new Live.LiveDexReader(Game);
+        var progress = _liveDex.Read(_core);
+        if (progress is null) return;
+
+        var key = $"{progress.Caught.Count}/{progress.Seen.Count}/{string.Join(",", progress.Caught.Order())}";
+        if (key == _lastLive) return;
+        _lastLive = key;
+        Live.LiveDexStore.Write(AppSettings.ActiveProfile, Game.RomPath, progress);
     }
 
     private static void WaitUntil(Stopwatch clock, long targetTicks)

@@ -108,6 +108,27 @@ public struct RetroSystemAvInfo
 }
 
 [StructLayout(LayoutKind.Sequential)]
+/// <summary>Ein Speicherbereich des emulierten Systems (für das Auslesen per Adresse).</summary>
+[StructLayout(LayoutKind.Sequential)]
+internal struct RetroMemoryDescriptor
+{
+    public ulong Flags;
+    public IntPtr Ptr;
+    public nuint Offset;
+    public nuint Start;
+    public nuint Select;
+    public nuint Disconnect;
+    public nuint Len;
+    public IntPtr AddrSpace;
+}
+
+[StructLayout(LayoutKind.Sequential)]
+internal struct RetroMemoryMap
+{
+    public IntPtr Descriptors;
+    public uint NumDescriptors;
+}
+
 internal struct RetroGameInfo
 {
     public IntPtr Path;

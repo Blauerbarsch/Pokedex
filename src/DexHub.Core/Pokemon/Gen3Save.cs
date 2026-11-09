@@ -64,6 +64,9 @@ public sealed class Gen3Save
 
     private ReadOnlySpan<byte> Section(int id) => _data.AsSpan(_sections[id], SectorData);
 
+    /// <summary>Spielername (8 Byte) und Trainer-ID (4 Byte) – damit findet man den Spielstand im Arbeitsspeicher wieder.</summary>
+    public (byte[] Name, byte[] TrainerId) TrainerAnchor() => (Section(0)[..8].ToArray(), Section(0).Slice(0x0A, 4).ToArray());
+
     // ---------- Pokédex ----------
 
     /// <summary>Gefangen bei 0x28, gesehen bei 0x5C im Abschnitt 0 (je 49 Byte, nationale Reihenfolge).</summary>
