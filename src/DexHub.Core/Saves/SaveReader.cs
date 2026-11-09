@@ -55,7 +55,15 @@ public static class SaveReader
     /// <summary>Reine Auswertung eines Speicherabbilds – nützlich für Tests.</summary>
     public static DexProgress? Parse(byte[] data, SaveFormat format, string? source = null)
     {
-        if (Layouts.TryGetValue(format, out var layout)) return Parse(data, layout);
+        if (Layouts.TryGetValue(format, out var layout))
+        {
+            if (!SaveValidator.IsValidGen12(data, format))
+            {
+                LogOnce($"{source}: kein gültiger Spielstand (noch nie im Spiel gespeichert?)");
+                return null;
+            }
+            return Parse(data, layout);
+        }
         if (Gen4DexOffsets.TryGetValue(format, out var dexOffset)) return ParseGen4(data, dexOffset, source ?? "?");
         if (format == SaveFormat.Gen3)
         {

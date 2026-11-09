@@ -10,6 +10,13 @@ namespace DexHub.Core.Tests;
 public class SaveReaderTests
 {
     [Fact]
+    public void Blank_gen1_memory_is_not_a_save()
+    {
+        var blank = Enumerable.Repeat((byte)0xFF, 0x8000).ToArray();
+        Assert.Null(SaveReader.Parse(blank, SaveFormat.Gen1));
+    }
+
+    [Fact]
     public void Gen1_reads_caught_and_seen_flags()
     {
         var save = new byte[0x8000];
@@ -20,6 +27,7 @@ public class SaveReaderTests
         SetFlag(save, 0x25B6, 25);
         SetFlag(save, 0x25B6, 151);
 
+        FixGen1Checksum(save);
         var dex = SaveReader.Parse(save, SaveFormat.Gen1)!;
 
         Assert.Equal(new[] { 1, 151 }, dex.Caught.Order().ToArray());
@@ -48,6 +56,21 @@ public class SaveReaderTests
     public void Too_small_file_returns_null()
     {
         Assert.Null(SaveReader.Parse(new byte[100], SaveFormat.Gen1));
+    }
+
+    internal static void FixGen1Checksum(byte[] save)
+    {
+        int sum = 0;
+        for (int i = 0x2598; i <= 0x3522; i++) sum += save[i];
+        save[0x3523] = (byte)~sum;
+    }
+
+    internal static void FixGen2Checksum(byte[] save)
+    {
+        int sum = 0;
+        for (int i = 0x2009; i <= 0x2D68; i++) sum += save[i];
+        save[0x2D69] = (byte)sum;
+        save[0x2D6A] = (byte)(sum >> 8);
     }
 
     private static void SetFlag(byte[] data, int offset, int dexNumber)
@@ -252,6 +275,7 @@ public class Gen123Tests
         save[mon + 0x15] = 0xAA; save[mon + 0x16] = 0xAA; // DVs 10/10/10/10 -> schillernd
         save[0x2724] = 0;                   // aktuelle Box 1 (leer)
 
+        SaveReaderTests.FixGen2Checksum(save);
         var list = Gen12PokemonReader.Read(save, SaveFormat.Gen2GoldSilver, "Gold", i => i);
 
         var p = Assert.Single(list);
