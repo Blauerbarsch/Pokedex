@@ -116,6 +116,7 @@
             <Button x:Name="GuideModePokemon" Content="Pokémon" Click="OnGuideModeClick" Tag="pokemon" />
             <Button x:Name="GuideModeTypes" Content="Typen" Click="OnGuideModeClick" Tag="types" />
             <Button x:Name="GuideModeMoves" Content="Attacken" Click="OnGuideModeClick" Tag="moves" />
+            <Button x:Name="GuideModeTeam" Content="Team-Planer" Click="OnGuideModeClick" Tag="team" />
             <TextBlock Text="Edition:" VerticalAlignment="Center" Margin="12,0,0,0" Opacity="0.8" />
             <ComboBox x:Name="GuideVersionBox" Width="280" SelectionChanged="OnGuideVersionChanged" />
             <TextBlock x:Name="GuideStatus" VerticalAlignment="Center" Opacity="0.7" />

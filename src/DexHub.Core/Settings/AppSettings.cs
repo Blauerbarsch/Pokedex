@@ -55,6 +55,9 @@ public sealed class AppSettings
     /// <summary>Aufgeklappte Generationen im Pokédex (Standard: nur Gen 1).</summary>
     public HashSet<int> ExpandedGenerations { get; set; } = [1];
 
+    /// <summary>Team-Planer: pro Benutzer bis zu 6 Pokémon (Art + PID eines eigenen Pokémon, 0 = nur die Art).</summary>
+    public Dictionary<string, List<TeamMember>> Teams { get; set; } = [];
+
     /// <summary>Beim Schließen automatisch sichern und beim nächsten Start dort weitermachen.</summary>
     public bool AutoResume { get; set; } = true;
 
@@ -172,4 +175,11 @@ public sealed class AppSettings
     }
 
     public void Save() => File.WriteAllText(SettingsFile, JsonSerializer.Serialize(this, JsonOptions));
+}
+
+/// <summary>Ein Platz im Team-Planer.</summary>
+public sealed class TeamMember
+{
+    public int Species { get; set; }
+    public uint Pid { get; set; }
 }

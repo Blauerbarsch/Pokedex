@@ -128,6 +128,7 @@ public partial class MainWindow
         GuideSearchBox.Text = "";
         ShowGuideList();
         if (mode == "types") Navigate("chart", 0);
+        if (mode == "team") Navigate("team", 0);
     }
 
     private void OnGuideSearchChanged(object? sender, TextChangedEventArgs e)
@@ -150,6 +151,11 @@ public partial class MainWindow
     private void OnGuideListSelectionChanged(object? sender, SelectionChangedEventArgs e)
     {
         if (_guideListUpdating || GuideList.SelectedItem is not GuideListItem item) return;
+        if (item.Kind is "teamown" or "teamspecies")
+        {
+            AddTeamMember(item);
+            return;
+        }
         Navigate(item.Kind, item.Id);
     }
 
@@ -178,6 +184,7 @@ public partial class MainWindow
             "types" => new[] { new GuideListItem("chart", 0, "📊 Typ-Tabelle") }.Concat(
                 _guide.TypesIn(GuideGeneration).Where(t => Match(t.Name, t.Id))
                       .Select(t => new GuideListItem("type", t.Id, t.Name))),
+            "team" => TeamCandidates(query, number),
             "moves" => _guide.Moves.Values.Where(m => Match(m.Name, m.Id)).OrderBy(m => m.Name)
                              .Select(m => new GuideListItem("move", m.Id, m.Name)),
             _ => _guide.Pokemon.Values.Where(p => Match(p.Name, p.Id) || p.NameEn.Contains(query, StringComparison.OrdinalIgnoreCase))
@@ -203,6 +210,7 @@ public partial class MainWindow
             case "pokemon": ShowGuidePokemon(id); break;
             case "type": ShowGuideType(id); break;
             case "move": ShowGuideMove(id); break;
+            case "team": ShowTeamPlanner(); break;
             default: ShowTypeChart(); break;
         }
         GuideScroll.Offset = new Vector(0, 0);

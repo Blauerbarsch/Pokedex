@@ -9,18 +9,19 @@ Kein RetroArch, keine Zusatzprogramme: einfach starten, ROM-Ordner wählen, spie
   (Cover aus [libretro-thumbnails](https://github.com/libretro-thumbnails))
 - **Pokédex:** alle Pokémon mit deutschen Namen, Bildern und Filtern (Daten von [PokéAPI](https://pokeapi.co))
 - **Fortschritt:** Sobald du im Spiel speicherst, markiert der Pokédex gefangene ● und gesehene ○ Pokémon
-  (Gen 1 bis 4)
+  (Gen 1 bis 5) – und schon während des Spielens, ohne zu speichern (Live-Pokédex)
 - **Was fehlt mir noch?** Zu jedem Pokémon zeigt der Pokédex, in welchen deiner Spiele und wo du es
   bekommst – wild, durch Entwicklung oder Zucht. Filter „Fehlend, in meinen Spielen erhältlich“
 - **Statistik & Rückblick:** einzelne Pokémon aus Team und Boxen (Gen 1–4), Fortschritt, Zeitleiste nach Fangdatum
 - **Erfolge:** z. B. „Kanto komplett“, „Es glitzert!“, „Hundert Stunden“ – mit Fortschritt und Datum
 - **Shiny-Jagd:** Begegnungszähler per Taste (F8 / F10), Anzeige im Spiel, Wahrscheinlichkeit und Liste gefundener Shinys
 - **Benutzer:** mehrere Profile mit eigenen Spielständen; mehrere Spiele gleichzeitig (jedes in eigenem Fenster)
-- **Tauschen:** Tauschzentrale direkt zwischen Spielständen (Gen 3 und Gen 4, inkl. Tausch-Entwicklungen) und
+- **Tauschen:** Tauschzentrale direkt zwischen Spielständen (Gen 3, 4 und 5, inkl. Tausch-Entwicklungen) und
   Linkkabel zwischen zwei Game-Boy-Fenstern
 - **Pokémon-Bank:** Pokémon aus einem Spiel ablegen und in ein anderes holen – von Gen 3 auch nach Gen 4
-  (wie der Pal-Park)
+  (wie der Pal-Park) und von Gen 4 nach Gen 5 (wie der PokéTransfer)
 - **Guide:** Typen, Schwächen, Basiswerte, Fähigkeiten, Entwicklungen, Fundorte und Attacken pro Edition, Typ-Tabelle
+- **Team-Planer** (im Guide): Team aus deinen eigenen Pokémon zusammenstellen, Abwehr- und Angriffs-Lücken sehen, Vorschläge
 - **Spielzeit** pro Benutzer und Spiel; Fenstergröße wird pro Konsole gemerkt
 - **Spielstände:** Übersicht pro Benutzer mit Import, Export (auch als ZIP) und Sicherungen
 - **Automatische Sicherung:** alle Spielstände regelmäßig als ZIP in einen Ordner deiner Wahl (z. B. NAS)
@@ -156,8 +157,8 @@ beim ersten Start übernommen.
 - [x] Cover, Bibliothek nach Konsolen, Bild-Einstellungen pro Konsole
 - [x] Controller-Unterstützung und frei belegbare Tasten
 - [x] Spielstände Gen 3 (GBA, inkl. Prüfsummen und Sektorrotation)
-- [ ] Pokédex live aus dem Arbeitsspeicher, auch ohne Speichern im Spiel
-- [ ] Spielstände Gen 5 (DS)
+- [x] Pokédex live aus dem Arbeitsspeicher, auch ohne Speichern im Spiel
+- [x] Spielstände Gen 5 (DS)
 - [ ] N64, GameCube/Wii, 3DS (OpenGL-Rendering für die Cores)
 - [x] Fertige Downloads für Windows, Linux und Mac (automatisch bei jeder Änderung)
 - [x] Tauschen, Bank, Shiny-Jagd, Erfolge, automatische Sicherung
