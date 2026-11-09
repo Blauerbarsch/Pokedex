@@ -102,7 +102,7 @@
             <Button x:Name="OpenInGuideButton" Content="📖 Im Guide öffnen" Click="OnOpenInGuideClick" IsVisible="False" />
             <StackPanel x:Name="WhereToFindPanel" Spacing="4" />
             <TextBlock Opacity="0.5" FontSize="12" TextWrapping="Wrap"
-                       Text="● gefangen   ○ gesehen. Zählt, was im Spiel gespeichert wurde (Gen 1 bis 4)." />
+                       Text="● gefangen   ○ gesehen. Zählt, was im Spiel gespeichert wurde (Gen 1 bis 5)." />
           </StackPanel>
           </ScrollViewer>
         </Grid>

@@ -38,7 +38,8 @@ public static class SaveReader
     private const int Gen4SpeciesCount = 493;
 
     public static bool IsSupported(SaveFormat format) =>
-        Layouts.ContainsKey(format) || Gen4DexOffsets.ContainsKey(format) || format == SaveFormat.Gen3;
+        Layouts.ContainsKey(format) || Gen4DexOffsets.ContainsKey(format) || format == SaveFormat.Gen3
+        || Trading.Gen5Save.IsSupported(format);
 
     /// <summary>Gibt null zurück, wenn das Format nicht unterstützt wird oder die Datei nicht passt.</summary>
     public static DexProgress? Read(string savePath, SaveFormat format)
@@ -65,6 +66,12 @@ public static class SaveReader
             return Parse(data, layout);
         }
         if (Gen4DexOffsets.TryGetValue(format, out var dexOffset)) return ParseGen4(data, dexOffset, source ?? "?");
+        if (Trading.Gen5Save.IsSupported(format))
+        {
+            var gen5 = Trading.Gen5Save.Load(data, format, source ?? "", out var error);
+            if (gen5 is null) LogOnce($"{source}: {error}");
+            return gen5?.ReadDex();
+        }
         if (format == SaveFormat.Gen3)
         {
             var gen3 = Pokemon.Gen3Save.Load(data);

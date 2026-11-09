@@ -45,6 +45,9 @@ public static class CollectionService
                 format == SaveFormat.Gen1 ? gameData!.SpeciesFromGen1Index : index => index);
         }
 
+        if (Trading.Gen5Save.IsSupported(format))
+            return Trading.Gen5Save.Load(data, format, title, out _)?.ReadPokemon(title) ?? [];
+
         if (format == SaveFormat.Gen3)
         {
             if (gameData is null) return [];

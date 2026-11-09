@@ -30,14 +30,14 @@ public partial class MainWindow
 
         BankPanel.Children.Add(Text(
             "Lege Pokémon aus einem Spiel in deine Bank und hol sie später in ein anderes Spiel. " +
-            "Von Gen 3 (Rubin bis Blattgrün) geht es auch nach Gen 4 – wie im Pal-Park. " +
+            "Von Gen 3 geht es auch nach Gen 4 (wie im Pal-Park) und von Gen 4 nach Gen 5 (wie der PokéTransfer). " +
             "Vorher wird der Spielstand gesichert. Jeder Benutzer hat seine eigene Bank.", opacity: 0.8));
 
         var games = _games.Where(g => TradeService.IsSupported(g.Info.SaveFormat))
                           .OrderBy(g => g.Info.Generation).ThenBy(g => g.Title).ToList();
         if (games.Count == 0)
         {
-            BankPanel.Children.Add(Text("Keine Gen-3- oder Gen-4-Spiele in der Bibliothek gefunden.", opacity: 0.6));
+            BankPanel.Children.Add(Text("Keine Gen-3-, Gen-4- oder Gen-5-Spiele in der Bibliothek gefunden.", opacity: 0.6));
             return;
         }
 
@@ -167,11 +167,16 @@ public partial class MainWindow
 
         var entry = PokemonBank.Load(_settings.CurrentProfile).FirstOrDefault(e => e.Id == id);
         if (entry is null) { LoadBankTiles(); return; }
-        bool palPark = entry.Generation == 3 && side.Game.Info.Generation == 4;
+        int targetGen = side.Game.Info.Generation ?? 0;
+        bool palPark = entry.Generation == 3 && targetGen >= 4;
+        bool transfer = entry.Generation <= 4 && targetGen == 5;
 
         var question = $"{(entry.Parse(_gameData) is { } p ? DisplayName(p) : "Pokémon")} nach {side.Game.Title} holen?" +
-                       (palPark ? "\n\nEs wird dabei von Gen 3 nach Gen 4 umgewandelt (wie im Pal-Park). " +
-                                  "Ein getragenes Item und Bänder bleiben zurück. Zurück nach Gen 3 geht danach nicht mehr." : "");
+                       (palPark || transfer
+                           ? $"\n\nEs wird dabei von Gen {entry.Generation} nach Gen {targetGen} umgewandelt" +
+                             (palPark ? " (Pal-Park" + (transfer ? " und PokéTransfer)" : ")") : " (PokéTransfer)") +
+                             ". Je nach Weg bleiben Items oder Bänder zurück und VM-Attacken werden vergessen. Zurück geht danach nicht mehr."
+                           : "");
         if (!await ConfirmAsync("Aus der Bank holen", question)) return;
 
         // Für den Pal-Park braucht es Fähigkeiten und Geschlechterverteilung aus den Guide-Daten

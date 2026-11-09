@@ -13,6 +13,8 @@ public enum SaveFormat
     Gen4DiamondPearl,
     Gen4Platinum,
     Gen4HeartGoldSoulSilver,
+    Gen5BlackWhite,
+    Gen5Black2White2,
 }
 
 /// <summary>Ein bekanntes Spiel aus der <see cref="Detection.GameDatabase"/>.</summary>

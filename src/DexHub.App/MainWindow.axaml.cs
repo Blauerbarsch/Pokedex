@@ -868,7 +868,7 @@ public partial class MainWindow : Window
             {
                 var progress = SaveReader.Read(game.SavePath!, game.Info.SaveFormat);
                 if (progress is null) continue;
-                int max = game.Info.Generation switch { 1 => 151, 2 => 251, 3 => 386, 4 => 493, _ => _dex.Count };
+                int max = game.Info.Generation switch { 1 => 151, 2 => 251, 3 => 386, 4 => 493, 5 => 649, _ => _dex.Count };
                 panel.Children.Add(ProgressRow(game.Title, progress.Caught.Count, max, $" · {progress.Seen.Count} gesehen"));
             }
         }
@@ -1197,13 +1197,13 @@ public partial class MainWindow : Window
         TradePanel.Children.Add(Text(
             "Tausche Pokémon zwischen zwei Benutzern oder zwischen zwei eigenen Spielen. Links und rechts je ein " +
             "Pokémon aus den PC-Boxen anklicken, dann tauschen. Vorher werden beide Spielstände gesichert. " +
-            "Geht für Gen 3 (Rubin bis Blattgrün) und Gen 4 (Diamant bis SoulSilver), jeweils innerhalb einer Generation.", opacity: 0.8));
+            "Geht für Gen 3 (Rubin bis Blattgrün), Gen 4 (Diamant bis SoulSilver) und Gen 5 (Schwarz/Weiß 1 und 2), jeweils innerhalb einer Generation.", opacity: 0.8));
 
         var games = _games.Where(g => TradeService.IsSupported(g.Info.SaveFormat))
                           .OrderBy(g => g.Info.Generation).ThenBy(g => g.Title).ToList();
         if (games.Count == 0)
         {
-            TradePanel.Children.Add(Text("Keine Gen-3- oder Gen-4-Spiele in der Bibliothek gefunden.", opacity: 0.6));
+            TradePanel.Children.Add(Text("Keine Gen-3-, Gen-4- oder Gen-5-Spiele in der Bibliothek gefunden.", opacity: 0.6));
             return;
         }
 
@@ -1382,7 +1382,7 @@ public partial class MainWindow : Window
         {
             if (_gameData is null) throw new InvalidOperationException("Spieldaten werden noch geladen – bitte kurz warten.");
             if (sideA.Game.Info.Generation != sideB.Game.Info.Generation)
-                throw new InvalidOperationException("Getauscht werden kann nur innerhalb einer Generation (Gen 3 ⇄ Gen 3, Gen 4 ⇄ Gen 4).");
+                throw new InvalidOperationException("Getauscht werden kann nur innerhalb einer Generation (Gen 3 ⇄ Gen 3, Gen 4 ⇄ Gen 4, Gen 5 ⇄ Gen 5).");
             var names = new SpeciesNames(SpeciesName,
                 id => _dexById.TryGetValue(id, out var e) && e.Species.NameEn.Length > 0 ? e.Species.NameEn : SpeciesName(id));
             var result = TradeService.Trade(sideA, slotA, sideB, slotB,

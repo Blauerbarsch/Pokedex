@@ -230,7 +230,7 @@ public sealed class Gen4Save : ITradeSave
         // Ohne Spitznamen steht der Artname im Namensfeld – den aktualisieren
         bool nicknamed = (BinaryPrimitives.ReadUInt32LittleEndian(d.AsSpan(0x38)) >> 31 & 1) == 1;
         if (!nicknamed)
-            Gen4PokemonReader.EncodeString(names.German(evolved), 22).CopyTo(d.AsSpan(0x48));
+            Gen4PokemonReader.EncodeString(names.German(evolved).ToUpperInvariant(), 22).CopyTo(d.AsSpan(0x48));
 
         notes.Add($"✨ {names.German(species)} hat sich beim Tausch zu {names.German(evolved)} entwickelt!");
         return (Gen4PokemonReader.Encrypt(d), evolved);

@@ -20,7 +20,8 @@ public sealed record TradeSlot(int Box, int Slot, OwnedPokemon Pokemon);
 public static class TradeService
 {
     /// <summary>Lädt den Spielstand einer Seite (eigener Spielstand des Benutzers bevorzugt).</summary>
-    public static bool IsSupported(SaveFormat format) => format == SaveFormat.Gen3 || Gen4Save.IsSupported(format);
+    public static bool IsSupported(SaveFormat format) =>
+        format == SaveFormat.Gen3 || Gen4Save.IsSupported(format) || Gen5Save.IsSupported(format);
 
     public static ITradeSave? Load(TradeSide side, GameData gameData, out string error)
     {
@@ -30,12 +31,14 @@ public static class TradeService
             error = $"{side.Profile} hat noch keinen Spielstand für {side.Game.Title}.";
             return null;
         }
-        if (side.Game.Info.SaveFormat != SaveFormat.Gen3)
-            return Gen4Save.Load(path, side.Game.Info.SaveFormat, side.Game.Title, out error);
+        var format = side.Game.Info.SaveFormat;
+        if (Gen4Save.IsSupported(format))
+            return Gen4Save.Load(path, format, side.Game.Title, out error);
 
         byte[] data;
         try { data = File.ReadAllBytes(path); }
         catch (IOException ex) { error = ex.Message; return null; }
+        if (Gen5Save.IsSupported(format)) return Gen5Save.Load(data, format, side.Game.Title, out error);
         return Gen3TradeSave.Load(data, side.Game.Title, gameData, out error);
     }
 
@@ -46,7 +49,7 @@ public static class TradeService
         var saveA = Load(sideA, gameData, out var errorA) ?? throw new InvalidOperationException(errorA);
         var saveB = Load(sideB, gameData, out var errorB) ?? throw new InvalidOperationException(errorB);
         if (saveA.Generation != saveB.Generation)
-            throw new InvalidOperationException("Getauscht werden kann nur innerhalb einer Generation (Gen 3 ⇄ Gen 3, Gen 4 ⇄ Gen 4).");
+            throw new InvalidOperationException("Getauscht werden kann nur innerhalb einer Generation (Gen 3 ⇄ Gen 3, Gen 4 ⇄ Gen 4, Gen 5 ⇄ Gen 5).");
         bool sameSave = SaveLocator.Find(sideA.Game, sideA.Profile) == SaveLocator.Find(sideB.Game, sideB.Profile);
         if (sameSave) throw new InvalidOperationException("Beide Seiten nutzen denselben Spielstand – bitte zwei verschiedene wählen.");
 
@@ -62,6 +65,8 @@ public static class TradeService
         Backup(sideB);
 
         var notes = new List<string>();
+        if (saveA is Gen5Save a5) a5.PartnerSpecies = slotB.Pokemon.Species; // Laming ⇄ Schnuthelm
+        if (saveB is Gen5Save b5) b5.PartnerSpecies = slotA.Pokemon.Species;
         var (newForB, speciesForB) = saveA.Evolve(rawA, tradeEvolutions, names, notes);
         var (newForA, speciesForA) = saveB.Evolve(rawB, tradeEvolutions, names, notes);
 

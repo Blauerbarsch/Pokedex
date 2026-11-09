@@ -18,9 +18,12 @@ public sealed class BankEntry
     public byte[] RawBytes => System.Convert.FromBase64String(Raw);
 
     /// <summary>Für die Anzeige: das Pokémon entschlüsselt.</summary>
-    public OwnedPokemon? Parse(GameData gameData) => Generation == 3
-        ? Gen3Save.Parse(RawBytes, FromGame, "Bank", gameData.SpeciesFromGen3Index)
-        : Gen4PokemonReader.Parse(RawBytes, FromGame, "Bank");
+    public OwnedPokemon? Parse(GameData gameData) => Generation switch
+    {
+        3 => Gen3Save.Parse(RawBytes, FromGame, "Bank", gameData.SpeciesFromGen3Index),
+        5 => Gen5PokemonReader.Parse(RawBytes, FromGame, "Bank"),
+        _ => Gen4PokemonReader.Parse(RawBytes, FromGame, "Bank"),
+    };
 }
 
 /// <summary>
@@ -97,15 +100,25 @@ public static class PokemonBank
             var notes = new List<string>();
 
             byte[] raw = entry.RawBytes;
-            if (entry.Generation == 4 && save.Generation == 3)
-                throw new InvalidOperationException("Pokémon aus Gen 4 können nicht zurück nach Gen 3 – das ging auch im Original nicht.");
-            if (entry.Generation == 3 && save.Generation == 4)
+            if (entry.Generation > save.Generation)
+                throw new InvalidOperationException($"Pokémon aus Gen {entry.Generation} können nicht zurück nach Gen {save.Generation} – das ging auch im Original nicht.");
+            int generation = entry.Generation;
+            if (generation == 3 && save.Generation >= 4)
             {
                 raw = PalPark.Convert(raw, gameData.SpeciesFromGen3Index, speciesInfo, gameData.LevelFromExp, names, notes);
                 notes.Insert(0, "Über den Pal-Park nach Gen 4 gebracht.");
+                generation = 4;
+            }
+            if (generation == 4 && save.Generation == 5)
+            {
+                raw = PokeTransfer.Convert(raw, gameData.LevelFromExp, notes);
+                notes.Add("Per PokéTransfer nach Gen 5 gebracht.");
+                generation = 5;
             }
 
-            var parsed = entry.Generation == save.Generation ? entry.Parse(gameData) : Gen4PokemonReader.Parse(raw, "", "");
+            var parsed = generation == 5 ? Gen5PokemonReader.Parse(raw, "", "")
+                       : generation == 4 ? Gen4PokemonReader.Parse(raw, "", "")
+                       : entry.Parse(gameData);
             if (parsed is null) throw new InvalidOperationException("Die Pokémon-Daten sind beschädigt.");
 
             var free = save.FirstFreeSlot() ?? throw new InvalidOperationException("Alle Boxen in diesem Spiel sind voll.");

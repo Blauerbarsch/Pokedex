@@ -31,7 +31,10 @@ public sealed class OwnedPokemon
     public bool HasNature => Generation >= 3;
 
     /// <summary>Wesen 0–24 in Spiel-Reihenfolge (0 = Robust).</summary>
-    public int Nature => (int)(Pid % 25);
+    public int Nature => NatureOverride ?? (int)(Pid % 25);
+
+    /// <summary>Ab Gen 5 steht das Wesen extra im Pokémon (nicht mehr aus der PID berechnet).</summary>
+    public int? NatureOverride { get; init; }
 
     /// <summary>"♂", "♀" oder "" (geschlechtslos).</summary>
     public string Gender { get; init; } = "";

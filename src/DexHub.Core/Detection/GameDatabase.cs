@@ -41,10 +41,10 @@ public static class GameDatabase
         ["CPU"] = new("Pokémon Platin-Edition",    Platform.NintendoDS, 4, SaveFormat.Gen4Platinum, Version: 14),
         ["IPK"] = new("Pokémon HeartGold",         Platform.NintendoDS, 4, SaveFormat.Gen4HeartGoldSoulSilver, Version: 15),
         ["IPG"] = new("Pokémon SoulSilver",        Platform.NintendoDS, 4, SaveFormat.Gen4HeartGoldSoulSilver, Version: 16),
-        ["IRB"] = new("Pokémon Schwarze Edition",  Platform.NintendoDS, 5, SaveFormat.None, Version: 17),
-        ["IRA"] = new("Pokémon Weiße Edition",     Platform.NintendoDS, 5, SaveFormat.None, Version: 18),
-        ["IRE"] = new("Pokémon Schwarze Edition 2",Platform.NintendoDS, 5, SaveFormat.None, Version: 21),
-        ["IRD"] = new("Pokémon Weiße Edition 2",   Platform.NintendoDS, 5, SaveFormat.None, Version: 22),
+        ["IRB"] = new("Pokémon Schwarze Edition",  Platform.NintendoDS, 5, SaveFormat.Gen5BlackWhite, Version: 17),
+        ["IRA"] = new("Pokémon Weiße Edition",     Platform.NintendoDS, 5, SaveFormat.Gen5BlackWhite, Version: 18),
+        ["IRE"] = new("Pokémon Schwarze Edition 2",Platform.NintendoDS, 5, SaveFormat.Gen5Black2White2, Version: 21),
+        ["IRD"] = new("Pokémon Weiße Edition 2",   Platform.NintendoDS, 5, SaveFormat.Gen5Black2White2, Version: 22),
     };
 
     // GameCube/Wii: 6-stellige Disc-ID ab 0x00, wir vergleichen die ersten 3 Zeichen.
