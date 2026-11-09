@@ -246,6 +246,10 @@
               </StackPanel>
             </Expander>
 
+            <Expander Header="Automatische Sicherung" HorizontalAlignment="Stretch">
+              <StackPanel x:Name="BackupSettingsPanel" Spacing="8" />
+            </Expander>
+
             <Expander Header="Emulatoren &amp; Ordner" HorizontalAlignment="Stretch">
               <StackPanel Spacing="8">
                 <TextBlock x:Name="CoreStatusText" TextWrapping="Wrap" FontFamily="Consolas,Menlo,monospace" />

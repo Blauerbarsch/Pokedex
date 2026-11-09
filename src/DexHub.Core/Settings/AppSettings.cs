@@ -58,6 +58,17 @@ public sealed class AppSettings
     /// <summary>Beim Schließen automatisch sichern und beim nächsten Start dort weitermachen.</summary>
     public bool AutoResume { get; set; } = true;
 
+    /// <summary>Ordner für automatische Sicherungen (leer = aus).</summary>
+    public string AutoBackupFolder { get; set; } = "";
+
+    /// <summary>Wie oft gesichert wird (Stunden; 0 = bei jedem Programmstart).</summary>
+    public int AutoBackupHours { get; set; } = 24;
+
+    /// <summary>Wie viele Sicherungen aufgehoben werden.</summary>
+    public int AutoBackupKeep { get; set; } = 10;
+
+    public DateTime? LastAutoBackup { get; set; }
+
     // ---------- Feste Ordner im Benutzerverzeichnis ----------
 
     /// <summary>Windows: %APPDATA%\DexHub, Mac: ~/Library/Application Support/DexHub</summary>

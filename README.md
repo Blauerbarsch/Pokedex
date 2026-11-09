@@ -9,15 +9,21 @@ Kein RetroArch, keine Zusatzprogramme: einfach starten, ROM-Ordner wählen, spie
   (Cover aus [libretro-thumbnails](https://github.com/libretro-thumbnails))
 - **Pokédex:** alle Pokémon mit deutschen Namen, Bildern und Filtern (Daten von [PokéAPI](https://pokeapi.co))
 - **Fortschritt:** Sobald du im Spiel speicherst, markiert der Pokédex gefangene ● und gesehene ○ Pokémon
-  (Gen 1, 2 und 4)
-
-- **Statistik & Rückblick:** einzelne Pokémon aus Team und Boxen (Gen 4), Fortschritt, Zeitleiste nach Fangdatum
+  (Gen 1 bis 4)
+- **Was fehlt mir noch?** Zu jedem Pokémon zeigt der Pokédex, in welchen deiner Spiele und wo du es
+  bekommst – wild, durch Entwicklung oder Zucht. Filter „Fehlend, in meinen Spielen erhältlich“
+- **Statistik & Rückblick:** einzelne Pokémon aus Team und Boxen (Gen 1–4), Fortschritt, Zeitleiste nach Fangdatum
+- **Erfolge:** z. B. „Kanto komplett“, „Es glitzert!“, „Hundert Stunden“ – mit Fortschritt und Datum
+- **Shiny-Jagd:** Begegnungszähler per Taste (F8 / F10), Anzeige im Spiel, Wahrscheinlichkeit und Liste gefundener Shinys
 - **Benutzer:** mehrere Profile mit eigenen Spielständen; mehrere Spiele gleichzeitig (jedes in eigenem Fenster)
-- **Tauschen:** Tauschzentrale direkt zwischen Spielständen (Gen 4, inkl. Tausch-Entwicklungen) und
+- **Tauschen:** Tauschzentrale direkt zwischen Spielständen (Gen 3 und Gen 4, inkl. Tausch-Entwicklungen) und
   Linkkabel zwischen zwei Game-Boy-Fenstern
+- **Pokémon-Bank:** Pokémon aus einem Spiel ablegen und in ein anderes holen – von Gen 3 auch nach Gen 4
+  (wie der Pal-Park)
 - **Guide:** Typen, Schwächen, Basiswerte, Fähigkeiten, Entwicklungen, Fundorte und Attacken pro Edition, Typ-Tabelle
 - **Spielzeit** pro Benutzer und Spiel; Fenstergröße wird pro Konsole gemerkt
 - **Spielstände:** Übersicht pro Benutzer mit Import, Export (auch als ZIP) und Sicherungen
+- **Automatische Sicherung:** alle Spielstände regelmäßig als ZIP in einen Ordner deiner Wahl (z. B. NAS)
 
 > ROMs, BIOS-Dateien und Spielstände sind **nicht** enthalten und gehören nicht ins Repo.
 > Jeder nutzt seine eigenen Sicherungskopien.
@@ -74,6 +80,7 @@ Elite-Controllers oder Steam Decks lassen sich ebenfalls belegen.
 
 | Schnellspeichern / -laden | F5 / F9 | frei belegbar (z. B. Paddles) |
 | Speicherplatz wechseln (0–9) | F6 / F7 | frei belegbar |
+| Shiny-Jagd: Begegnung +1 / −1 | F8 / F10 | frei belegbar |
 
 Fest: P = Pause, F11 = Vollbild.
 
@@ -148,11 +155,12 @@ beim ersten Start übernommen.
 - [x] Automatisch sichern und fortsetzen
 - [x] Cover, Bibliothek nach Konsolen, Bild-Einstellungen pro Konsole
 - [x] Controller-Unterstützung und frei belegbare Tasten
-- [ ] Spielstände Gen 3 (GBA, inkl. Prüfsummen und Sektorrotation)
+- [x] Spielstände Gen 3 (GBA, inkl. Prüfsummen und Sektorrotation)
 - [ ] Pokédex live aus dem Arbeitsspeicher, auch ohne Speichern im Spiel
 - [ ] Spielstände Gen 5 (DS)
 - [ ] N64, GameCube/Wii, 3DS (OpenGL-Rendering für die Cores)
-- [ ] Fertige Downloads für Windows und Mac (GitHub Actions)
+- [x] Fertige Downloads für Windows, Linux und Mac (automatisch bei jeder Änderung)
+- [x] Tauschen, Bank, Shiny-Jagd, Erfolge, automatische Sicherung
 - [ ] Android-Version
 
 ## Lizenzen und Hinweise

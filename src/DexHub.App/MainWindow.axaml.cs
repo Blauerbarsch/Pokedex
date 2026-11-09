@@ -49,6 +49,7 @@ public partial class MainWindow : Window
 
         WatchSaveFolder();
         InitUpdates();
+        InitBackup();
 
         if (Program.StartInBigPicture)
             Opened += async (_, _) =>
