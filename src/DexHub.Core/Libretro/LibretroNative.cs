@@ -217,6 +217,10 @@ internal static class RetroFn
     public delegate bool LoadGame(ref RetroGameInfo game);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+    [return: MarshalAs(UnmanagedType.I1)]
+    public delegate bool LoadGameSpecial(uint gameType, IntPtr info, nuint numInfo);
+
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     public delegate void SetControllerPortDevice(uint port, uint device);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]

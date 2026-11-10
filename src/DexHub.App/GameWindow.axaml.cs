@@ -63,6 +63,17 @@ public partial class GameWindow : Window
             Width = 540;
             Height = 800;
         }
+        else if (_platform == GamePlatform.Nintendo3DS)
+        {
+            // Citra liefert beide Bildschirme untereinander (400×480); Klick unten = Touchscreen
+            Width = 600;
+            Height = 760;
+        }
+        else if (_platform is GamePlatform.Nintendo64 or GamePlatform.GameCube or GamePlatform.Wii)
+        {
+            Width = 960;
+            Height = 720;
+        }
         RestoreWindowPlacement(); // zuletzt benutzte Größe/Position dieser Konsole
 
         // Tasten abfangen, bevor ein Steuerelement sie bekommt

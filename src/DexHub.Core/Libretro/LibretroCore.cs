@@ -187,6 +187,34 @@ public sealed unsafe class LibretroCore : IDisposable
 
         if (!_loadGame(ref game))
             throw new InvalidOperationException($"Der Core „{LibraryName}“ konnte das Spiel nicht laden.");
+        AfterLoad();
+    }
+
+    /// <summary>
+    /// Mehrere Dateien zusammen laden ("Subsystem"), z. B. N64-Spiel + Game-Boy-Spiel im Transfer Pak.
+    /// Die Dateien liest der Core selbst (nur Pfade).
+    /// </summary>
+    public void LoadGameSpecial(uint gameType, string[] paths)
+    {
+        if (!NativeLibrary.TryGetExport(_lib, "retro_load_game_special", out var fn))
+            throw new InvalidOperationException($"Der Core „{LibraryName}“ kann keine Zusatz-Module laden.");
+        var load = Marshal.GetDelegateForFunctionPointer<RetroFn.LoadGameSpecial>(fn);
+
+        int size = Marshal.SizeOf<RetroGameInfo>();
+        var array = Marshal.AllocHGlobal(size * paths.Length);
+        _allocationsHGlobal.Add(array);
+        for (int i = 0; i < paths.Length; i++)
+            Marshal.StructureToPtr(new RetroGameInfo { Path = Utf8(paths[i]) }, array + i * size, false);
+
+        if (!load(gameType, array, (nuint)paths.Length))
+            throw new InvalidOperationException($"Der Core „{LibraryName}“ konnte die Spiele nicht laden.");
+        AfterLoad();
+    }
+
+    private readonly List<IntPtr> _allocationsHGlobal = [];
+
+    private void AfterLoad()
+    {
         _gameLoaded = true;
 
         var av = new RetroSystemAvInfo();
@@ -595,5 +623,7 @@ public sealed unsafe class LibretroCore : IDisposable
         _stringCache.Clear();
         if (_romData != IntPtr.Zero) { Marshal.FreeHGlobal(_romData); _romData = IntPtr.Zero; }
         if (_gameInfoExt != IntPtr.Zero) { Marshal.FreeHGlobal(_gameInfoExt); _gameInfoExt = IntPtr.Zero; }
+        foreach (var p in _allocationsHGlobal) Marshal.FreeHGlobal(p);
+        _allocationsHGlobal.Clear();
     }
 }

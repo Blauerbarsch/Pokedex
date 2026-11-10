@@ -55,9 +55,9 @@ bedienbar – ideal als Steam-Verknüpfung (Steam → „Spiel hinzufügen“ �
 | Game Boy / Color | ✓ | Gambatte |
 | Game Boy Advance | ✓ | mGBA |
 | Nintendo DS | ✓ (Touchscreen per Maus) | melonDS DS |
-| Nintendo 64 | später | braucht 3D-Rendering |
-| GameCube / Wii | später | braucht 3D-Rendering |
-| Nintendo 3DS | später | braucht 3D-Rendering |
+| Nintendo 64 | ✅ (Windows/Linux) | mupen64plus-next, Transfer Pak für Pokémon Stadium |
+| GameCube / Wii | ✅ (Windows/Linux) | Dolphin |
+| Nintendo 3DS | ✅ (Windows/Linux) | Citra – ROMs müssen entschlüsselt sein |
 
 ## Steuerung
 
@@ -159,7 +159,7 @@ beim ersten Start übernommen.
 - [x] Spielstände Gen 3 (GBA, inkl. Prüfsummen und Sektorrotation)
 - [x] Pokédex live aus dem Arbeitsspeicher, auch ohne Speichern im Spiel
 - [x] Spielstände Gen 5 (DS)
-- [ ] N64, GameCube/Wii, 3DS (OpenGL-Rendering für die Cores)
+- [x] N64, GameCube/Wii, 3DS (OpenGL-Rendering für die Cores), Transfer Pak für Pokémon Stadium
 - [x] Fertige Downloads für Windows, Linux und Mac (automatisch bei jeder Änderung)
 - [x] Tauschen, Bank, Shiny-Jagd, Erfolge, automatische Sicherung
 - [ ] Android-Version

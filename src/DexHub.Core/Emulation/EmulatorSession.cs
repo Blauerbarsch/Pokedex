@@ -208,14 +208,28 @@ public sealed unsafe class EmulatorSession : ICoreHost, IDisposable
     private LibretroCore? _core;
     private byte[]? _lastWrittenSram;
 
+    /// <summary>Pseudo-Optionen für den Transfer Pak (gehen nicht an den Core).</summary>
+    public const string TransferPakPrefix = "dexhub:transferpak-";
+    public const string TransferPakRom = TransferPakPrefix + "rom", TransferPakRam = TransferPakPrefix + "ram";
+    private const uint TransferPakGameType = 2; // mupen64plus-next: RETRO_GAME_TYPE_TRANSFERPAK
+
     private void RunLoop()
     {
         try
         {
             CoreCatalog.EnsureSystemFiles(CoreName);
             _core = new LibretroCore(_corePath, this, AppSettings.SystemFolder, AppSettings.SavesFolder);
-            foreach (var (key, value) in CoreOptions) _core.OptionOverrides[key] = value;
-            _core.LoadGame(Game.RomPath);
+            foreach (var (key, value) in CoreOptions)
+                if (!key.StartsWith(TransferPakPrefix, StringComparison.Ordinal)) _core.OptionOverrides[key] = value;
+
+            // N64 mit Transfer Pak (Pokémon Stadium): Game-Boy-Spiel und -Spielstand einstecken
+            if (CoreOptions.TryGetValue(TransferPakRom, out var gbRom) && CoreOptions.TryGetValue(TransferPakRam, out var gbRam))
+            {
+                _core.OptionOverrides["mupen64plus-pak1"] = "transfer";
+                _core.LoadGameSpecial(TransferPakGameType, [gbRam, gbRom, Game.RomPath]);
+                Message?.Invoke("Transfer Pak: " + Path.GetFileNameWithoutExtension(gbRom));
+            }
+            else _core.LoadGame(Game.RomPath);
             CoreOptionStore.Save(CoreName, _core.OptionDefinitions);
             LoadSram();
 

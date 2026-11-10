@@ -233,6 +233,22 @@ public partial class MainWindow : Window
             menu.Add(host);
             menu.Add(join);
         }
+        if (game.Info.Platform == GamePlatform.Nintendo64)
+        {
+            // Transfer Pak: Game-Boy-Spiel einstecken (Pokémon Stadium liest Team und Boxen)
+            var pak = new MenuItem { Header = "🎮 Mit Transfer Pak starten" };
+            var gbGames = _games.Where(g => g.Info.SaveFormat is SaveFormat.Gen1 or SaveFormat.Gen2GoldSilver or SaveFormat.Gen2Crystal)
+                                .OrderBy(g => g.Info.Generation).ThenBy(g => g.Title).ToList();
+            foreach (var gb in gbGames)
+            {
+                var item = new MenuItem { Header = gb.Title };
+                item.Click += async (_, _) => await LaunchWithTransferPakAsync(game, gb);
+                pak.Items.Add(item);
+            }
+            if (gbGames.Count == 0) pak.Items.Add(new MenuItem { Header = "Keine Game-Boy-Pokémon-Spiele in der Bibliothek", IsEnabled = false });
+            menu.Add(new Separator());
+            menu.Add(pak);
+        }
         menu.Add(new Separator());
         menu.Add(info);
         tile.ContextMenu = new ContextMenu { ItemsSource = menu };
@@ -302,6 +318,45 @@ public partial class MainWindow : Window
 
     private bool IsRunning(GameEntry game, string profile) =>
         _running.Any(r => !r.Process.HasExited && r.Game.RomPath == game.RomPath && r.Profile == profile);
+
+    /// <summary>
+    /// N64-Spiel mit eingestecktem Game-Boy-Spiel (Transfer Pak) starten. Pokémon Stadium kann dann Team und
+    /// Boxen des Game-Boy-Spielstands lesen und ändern – deshalb vorher eine Sicherung.
+    /// </summary>
+    private async Task LaunchWithTransferPakAsync(GameEntry n64, GameEntry gb)
+    {
+        var profile = _settings.CurrentProfile;
+        if (IsRunning(gb, profile))
+        {
+            await ShowMessageAsync("Transfer Pak", $"{gb.Title} läuft gerade. Bitte erst beenden – sonst überschreiben sich die Spielstände.");
+            return;
+        }
+
+        var save = SaveLocator.Find(gb, profile);
+        var ram = SaveLocator.OwnSavePath(gb, profile);
+        if (save is not null && File.Exists(save))
+        {
+            try
+            {
+                var backup = Path.Combine(AppSettings.BackupsFolder,
+                    $"{AppSettings.SafeName(profile)}_{Path.GetFileNameWithoutExtension(gb.RomPath)}_vor-Transfer-Pak_{DateTime.Now:yyyy-MM-dd_HH-mm-ss}{Path.GetExtension(save)}");
+                File.Copy(save, backup, overwrite: true);
+                if (!string.Equals(save, ram, StringComparison.Ordinal)) File.Copy(save, ram, overwrite: true);
+            }
+            catch (IOException ex)
+            {
+                await ShowMessageAsync("Transfer Pak", "Sicherung fehlgeschlagen: " + ex.Message);
+                return;
+            }
+        }
+
+        var options = new Dictionary<string, string>
+        {
+            [EmulatorSession.TransferPakRom] = gb.RomPath,
+            [EmulatorSession.TransferPakRam] = ram,
+        };
+        await LaunchGameAsync(n64, resume: false, options: options);
+    }
 
     private async Task LaunchGameAsync(GameEntry game, bool resume = true, Dictionary<string, string>? options = null,
         bool fullscreen = false)
