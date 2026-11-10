@@ -25,6 +25,13 @@
     <PackageReference Include="Avalonia.Themes.Fluent" Version="11.3.0" />
   </ItemGroup>
 
+  <!-- Android-eigene Standard-usings weglassen: Button, CheckBox, Application … gibt es sonst doppelt (Avalonia) -->
+  <ItemGroup>
+    <Using Remove="Android.App" />
+    <Using Remove="Android.Widget" />
+    <Using Remove="Android.OS.Bundle" />
+  </ItemGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\DexHub.Core\DexHub.Core.csproj" />
   </ItemGroup>

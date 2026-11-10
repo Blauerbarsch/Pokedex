@@ -38,3 +38,4 @@ Thumbs.db
 
 # Heruntergeladene Emulator-Cores (scripts/FetchCores.cs)
 src/DexHub.App/cores/
+src/DexHub.Android/cores/

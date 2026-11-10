@@ -5,7 +5,7 @@ using Avalonia.Themes.Fluent;
 
 namespace DexHub.Mobile;
 
-public class App : Application
+public class App : Avalonia.Application
 {
     public static MobileView? View { get; private set; }
 
