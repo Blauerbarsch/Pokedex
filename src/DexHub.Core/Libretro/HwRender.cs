@@ -75,29 +75,29 @@ internal sealed unsafe class HwFramebuffer : IDisposable
 
     public HwFramebuffer(IGlContext gl, int width, int height, bool depth, bool stencil)
     {
-        T Fn<T>(string name) where T : unmanaged
+        void* Fn(string name)
         {
             var p = gl.GetProcAddress(name);
             if (p == IntPtr.Zero) throw new InvalidOperationException($"OpenGL-Funktion {name} fehlt.");
-            return *(T*)&p;
+            return (void*)p;
         }
-        _genFramebuffers = Fn<delegate* unmanaged<int, uint*, void>>("glGenFramebuffers");
-        _genTextures = Fn<delegate* unmanaged<int, uint*, void>>("glGenTextures");
-        _genRenderbuffers = Fn<delegate* unmanaged<int, uint*, void>>("glGenRenderbuffers");
-        _deleteFramebuffers = Fn<delegate* unmanaged<int, uint*, void>>("glDeleteFramebuffers");
-        _deleteTextures = Fn<delegate* unmanaged<int, uint*, void>>("glDeleteTextures");
-        _deleteRenderbuffers = Fn<delegate* unmanaged<int, uint*, void>>("glDeleteRenderbuffers");
-        _bindFramebuffer = Fn<delegate* unmanaged<uint, uint, void>>("glBindFramebuffer");
-        _bindTexture = Fn<delegate* unmanaged<uint, uint, void>>("glBindTexture");
-        _bindRenderbuffer = Fn<delegate* unmanaged<uint, uint, void>>("glBindRenderbuffer");
-        _texImage2D = Fn<delegate* unmanaged<uint, int, int, int, int, int, uint, uint, void*, void>>("glTexImage2D");
-        _texParameteri = Fn<delegate* unmanaged<uint, uint, int, void>>("glTexParameteri");
-        _framebufferTexture2D = Fn<delegate* unmanaged<uint, uint, uint, uint, int, void>>("glFramebufferTexture2D");
-        _renderbufferStorage = Fn<delegate* unmanaged<uint, uint, int, int, void>>("glRenderbufferStorage");
-        _framebufferRenderbuffer = Fn<delegate* unmanaged<uint, uint, uint, uint, void>>("glFramebufferRenderbuffer");
-        _checkFramebufferStatus = Fn<delegate* unmanaged<uint, uint>>("glCheckFramebufferStatus");
-        _readPixels = Fn<delegate* unmanaged<int, int, int, int, uint, uint, void*, void>>("glReadPixels");
-        _pixelStorei = Fn<delegate* unmanaged<uint, int, void>>("glPixelStorei");
+        _genFramebuffers = (delegate* unmanaged<int, uint*, void>)Fn("glGenFramebuffers");
+        _genTextures = (delegate* unmanaged<int, uint*, void>)Fn("glGenTextures");
+        _genRenderbuffers = (delegate* unmanaged<int, uint*, void>)Fn("glGenRenderbuffers");
+        _deleteFramebuffers = (delegate* unmanaged<int, uint*, void>)Fn("glDeleteFramebuffers");
+        _deleteTextures = (delegate* unmanaged<int, uint*, void>)Fn("glDeleteTextures");
+        _deleteRenderbuffers = (delegate* unmanaged<int, uint*, void>)Fn("glDeleteRenderbuffers");
+        _bindFramebuffer = (delegate* unmanaged<uint, uint, void>)Fn("glBindFramebuffer");
+        _bindTexture = (delegate* unmanaged<uint, uint, void>)Fn("glBindTexture");
+        _bindRenderbuffer = (delegate* unmanaged<uint, uint, void>)Fn("glBindRenderbuffer");
+        _texImage2D = (delegate* unmanaged<uint, int, int, int, int, int, uint, uint, void*, void>)Fn("glTexImage2D");
+        _texParameteri = (delegate* unmanaged<uint, uint, int, void>)Fn("glTexParameteri");
+        _framebufferTexture2D = (delegate* unmanaged<uint, uint, uint, uint, int, void>)Fn("glFramebufferTexture2D");
+        _renderbufferStorage = (delegate* unmanaged<uint, uint, int, int, void>)Fn("glRenderbufferStorage");
+        _framebufferRenderbuffer = (delegate* unmanaged<uint, uint, uint, uint, void>)Fn("glFramebufferRenderbuffer");
+        _checkFramebufferStatus = (delegate* unmanaged<uint, uint>)Fn("glCheckFramebufferStatus");
+        _readPixels = (delegate* unmanaged<int, int, int, int, uint, uint, void*, void>)Fn("glReadPixels");
+        _pixelStorei = (delegate* unmanaged<uint, int, void>)Fn("glPixelStorei");
 
         _depth = depth;
         _stencil = stencil;
