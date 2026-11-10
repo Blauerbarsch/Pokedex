@@ -1,0 +1,37 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- DexHub für Android (Handy, Tablet, Handhelds wie Retroid/Ayn). Benötigt: dotnet workload install android -->
+  <PropertyGroup>
+    <TargetFramework>net10.0-android</TargetFramework>
+    <SupportedOSPlatformVersion>24</SupportedOSPlatformVersion>
+    <OutputType>Exe</OutputType>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <RootNamespace>DexHub.Mobile</RootNamespace>
+    <AssemblyName>DexHub.Android</AssemblyName>
+    <ApplicationId>de.blauerbarsch.dexhub</ApplicationId>
+    <ApplicationTitle>DexHub</ApplicationTitle>
+    <ApplicationVersion>1</ApplicationVersion>
+    <ApplicationDisplayVersion>0.4</ApplicationDisplayVersion>
+    <AndroidPackageFormat>apk</AndroidPackageFormat>
+    <!-- Die Emulator-Cores gibt es nur für 64-Bit-ARM (praktisch alle aktuellen Geräte) -->
+    <RuntimeIdentifiers>android-arm64</RuntimeIdentifiers>
+    <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Avalonia.Android" Version="11.3.0" />
+    <PackageReference Include="Avalonia.Themes.Fluent" Version="11.3.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\DexHub.Core\DexHub.Core.csproj" />
+  </ItemGroup>
+
+  <!-- Emulator-Cores (von scripts/FetchCores.cs mit "android" heruntergeladen) -->
+  <ItemGroup>
+    <AndroidNativeLibrary Include="cores\arm64-v8a\*.so" Abi="arm64-v8a" />
+  </ItemGroup>
+
+</Project>

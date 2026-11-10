@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" android:installLocation="auto">
+  <uses-permission android:name="android.permission.INTERNET" />
+  <!-- extractNativeLibs: die Emulator-Cores liegen dann als Datei vor und können geladen werden -->
+  <application android:label="DexHub" android:extractNativeLibs="true" android:usesCleartextTraffic="false" />
+  <uses-feature android:name="android.hardware.touchscreen" android:required="false" />
+  <uses-feature android:name="android.hardware.gamepad" android:required="false" />
+</manifest>
