@@ -14,6 +14,8 @@ public sealed class AndroidGamepad : IInputProvider
 {
     public static readonly AndroidGamepad Instance = new();
 
+    public bool StickAsDpad { get; set; } = true;
+
     /// <summary>Nur während ein Spiel läuft, gehen Tasten an den Emulator (sonst steuern sie die Oberfläche).</summary>
     public static bool Active { get; set; }
 

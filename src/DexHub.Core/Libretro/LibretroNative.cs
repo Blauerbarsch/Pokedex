@@ -19,11 +19,13 @@ public enum JoypadButton
     B = 0, Y = 1, Select = 2, Start = 3,
     Up = 4, Down = 5, Left = 6, Right = 7,
     A = 8, X = 9, L = 10, R = 11,
+    L2 = 12, R2 = 13, L3 = 14, R3 = 15,
 }
 
 internal static class Retro
 {
     public const uint DeviceJoypad = 1;
+    public const uint DeviceAnalog = 5;
     public const uint DevicePointer = 6;
     public const uint JoypadMask = 256;
 
@@ -40,6 +42,8 @@ internal static class Retro
     public const uint EnvSetPerformanceLevel = 8;
     public const uint EnvGetSystemDirectory = 9;
     public const uint EnvSetPixelFormat = 10;
+    public const uint EnvSetHwRender = 14;
+    public const uint EnvGetPreferredHwRender = 56;
     public const uint EnvSetInputDescriptors = 11;
     public const uint EnvGetVariable = 15;
     public const uint EnvSetVariables = 16;
@@ -182,6 +186,12 @@ internal static class RetroFn
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     public delegate void InputPoll();
+
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+    public delegate nuint GetCurrentFramebuffer();
+
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+    public delegate IntPtr GetProcAddress(IntPtr symbol);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     public delegate short InputState(uint port, uint device, uint index, uint id);

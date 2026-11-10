@@ -68,7 +68,7 @@ public sealed unsafe class SdlGamepad : IInputProvider
             foreach (var (button, control) in settings.Gamepad)
                 if (IsPressed(control)) buttons |= 1 << (int)button;
 
-            if (settings.LeftStickAsDpad)
+            if (settings.LeftStickAsDpad && StickAsDpad)
             {
                 if (IsPressed(PadControl.LeftStickUp)) buttons |= 1 << (int)JoypadButton.Up;
                 if (IsPressed(PadControl.LeftStickDown)) buttons |= 1 << (int)JoypadButton.Down;
@@ -80,18 +80,29 @@ public sealed unsafe class SdlGamepad : IInputProvider
             foreach (var (action, control) in settings.HotkeyGamepad)
                 if (IsPressed(control)) hotkeys |= 1 << (int)action;
 
-            // Rechter Stick für den Touch-Zeiger: stärkste Auslenkung aller Controller
-            float cx = 0, cy = 0;
+            // Sticks: jeweils die stärkste Auslenkung aller Controller
+            // (rechter Stick auch für den Touch-Zeiger beim DS)
+            short lx = 0, ly = 0, rx = 0, ry = 0;
             foreach (var ptr in _controllers)
             {
                 var c = (GameController*)ptr;
-                float x = Axis(c, 2) / 32767f, y = Axis(c, 3) / 32767f;
-                if (Math.Abs(x) > Math.Abs(cx)) cx = x;
-                if (Math.Abs(y) > Math.Abs(cy)) cy = y;
+                Strongest(ref lx, Axis(c, 0));
+                Strongest(ref ly, Axis(c, 1));
+                Strongest(ref rx, Axis(c, 2));
+                Strongest(ref ry, Axis(c, 3));
             }
 
-            return new InputSnapshot(buttons, hotkeys, cx, cy);
+            return new InputSnapshot(buttons, hotkeys, rx / 32767f, ry / 32767f, lx, ly, rx, ry);
         }
+    }
+
+    /// <summary>Für Konsolen mit Analog-Stick ausgeschaltet (siehe IInputProvider).</summary>
+    public bool StickAsDpad { get; set; } = true;
+
+    private static void Strongest(ref short current, short value)
+    {
+        if (value == short.MinValue) value = -short.MaxValue;
+        if (Math.Abs((int)value) > Math.Abs((int)current)) current = value;
     }
 
     /// <summary>Ist diese Controller-Taste gerade gedrückt? (für die Menü-Steuerung im Großbild-Modus)</summary>

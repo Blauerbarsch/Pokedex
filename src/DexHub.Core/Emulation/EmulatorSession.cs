@@ -85,6 +85,7 @@ public sealed unsafe class EmulatorSession : ICoreHost, IDisposable
     public void Start()
     {
         if (_thread is not null) return;
+        if (InputProvider is not null) InputProvider.StickAsDpad = !HasAnalogStick;
         _thread = new Thread(RunLoop) { IsBackground = true, Name = "Emulator" };
         _thread.Start();
     }
@@ -211,6 +212,7 @@ public sealed unsafe class EmulatorSession : ICoreHost, IDisposable
     {
         try
         {
+            CoreCatalog.EnsureSystemFiles(CoreName);
             _core = new LibretroCore(_corePath, this, AppSettings.SystemFolder, AppSettings.SavesFolder);
             foreach (var (key, value) in CoreOptions) _core.OptionOverrides[key] = value;
             _core.LoadGame(Game.RomPath);
@@ -245,6 +247,7 @@ public sealed unsafe class EmulatorSession : ICoreHost, IDisposable
                 // Eingaben sammeln: Tastatur (vom UI-Thread) + Controller
                 var pad = PollInputProvider();
                 Volatile.Write(ref _effectiveButtons, Volatile.Read(ref _buttons) | pad.Buttons);
+                _analog = (pad.LeftX, pad.LeftY, pad.RightX, pad.RightY);
                 bool fastForward = ResolveFastForward(_fastForwardKey || pad.Has(HotkeyAction.FastForward));
                 UpdateTouchCursor(pad, frameCounter);
                 HandlePadHotkeys(pad);
@@ -644,6 +647,11 @@ public sealed unsafe class EmulatorSession : ICoreHost, IDisposable
     }
     private volatile bool _acceptControllerInput = true;
 
+    private (short LX, short LY, short RX, short RY) _analog;
+
+    /// <summary>Konsole mit Analog-Stick: Pfeiltasten steuern dann (ohne Controller) den Stick.</summary>
+    public bool HasAnalogStick => Game.Info.Platform is Platform.Nintendo64 or Platform.GameCube or Platform.Wii or Platform.Nintendo3DS;
+
     private InputSnapshot PollInputProvider()
     {
         if (InputProvider is null || !_acceptControllerInput) return default;
@@ -674,6 +682,27 @@ public sealed unsafe class EmulatorSession : ICoreHost, IDisposable
                 int buttons = Volatile.Read(ref _effectiveButtons);
                 if (id == Retro.JoypadMask) return (short)(buttons & 0xFFFF);
                 return (short)((buttons >> (int)id) & 1);
+
+            // Analog-Sticks (N64, GameCube …). Ohne Controller: Steuerkreuz/Pfeiltasten als voller Ausschlag
+            case Retro.DeviceAnalog:
+                var (lx, ly, rx, ry) = _analog;
+                int held = Volatile.Read(ref _effectiveButtons);
+                bool Has(JoypadButton b) => (held & (1 << (int)b)) != 0;
+                if (index == 0)
+                {
+                    if (lx == 0 && ly == 0 && !HasAnalogStick)
+                        return 0;
+                    if (lx == 0 && ly == 0)
+                    {
+                        // Tastatur: Pfeiltasten bewegen den Stick
+                        if (id == 0) return (short)((Has(JoypadButton.Right) ? 0x7FFF : 0) - (Has(JoypadButton.Left) ? 0x7FFF : 0));
+                        return (short)((Has(JoypadButton.Down) ? 0x7FFF : 0) - (Has(JoypadButton.Up) ? 0x7FFF : 0));
+                    }
+                    return id == 0 ? lx : ly;
+                }
+                if (index == 1) return id == 0 ? rx : ry;
+                if (index == 2) return (short)((held >> (int)id & 1) != 0 ? 0x7FFF : 0); // analoge Tasten (Schultertasten)
+                return 0;
 
             case Retro.DevicePointer when index == 0:
                 return id switch

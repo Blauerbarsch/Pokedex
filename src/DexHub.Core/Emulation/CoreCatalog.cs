@@ -17,7 +17,11 @@ public static class CoreCatalog
         [Platform.GameBoyColor]   = "gambatte_libretro",
         [Platform.GameBoyAdvance] = "mgba_libretro",
         [Platform.NintendoDS]     = "melondsds_libretro",
-        // N64, GameCube, Wii, 3DS brauchen 3D-Hardware-Rendering -> kommt in einem späteren Schritt
+        // 3D-Konsolen: brauchen OpenGL (siehe HwRender.cs), nur Windows/Linux
+        [Platform.Nintendo64]     = "mupen64plus_next_libretro",
+        [Platform.GameCube]       = "dolphin_libretro",
+        [Platform.Wii]            = "dolphin_libretro",
+        [Platform.Nintendo3DS]    = "citra_libretro",
     };
 
     public static string Extension =>
@@ -32,6 +36,32 @@ public static class CoreCatalog
     ];
 
     public static bool IsPlatformSupported(Platform platform) => Cores.ContainsKey(platform);
+
+    /// <summary>
+    /// Systemdateien, die manche Cores brauchen (Dolphin: Schriften und Datenbanken), beim ersten Start
+    /// aus dem mitgelieferten ZIP in den System-Ordner entpacken.
+    /// </summary>
+    public static void EnsureSystemFiles(string coreName)
+    {
+        if (!coreName.StartsWith("dolphin", StringComparison.Ordinal)) return;
+        var target = Path.Combine(AppSettings.SystemFolder, "dolphin-emu", "Sys");
+        if (Directory.Exists(target)) return;
+        foreach (var folder in SearchFolders)
+        {
+            var zip = Path.Combine(folder, "system", "Dolphin.zip");
+            if (!File.Exists(zip)) continue;
+            try
+            {
+                System.IO.Compression.ZipFile.ExtractToDirectory(zip, AppSettings.SystemFolder, overwriteFiles: true);
+                Console.WriteLine("[DexHub] Dolphin-Systemdateien entpackt");
+            }
+            catch (Exception ex) when (ex is IOException or InvalidDataException)
+            {
+                Console.WriteLine("[DexHub] Dolphin-Systemdateien: " + ex.Message);
+            }
+            return;
+        }
+    }
 
     /// <summary>Android: Ordner, in dem die App ihre nativen Bibliotheken (die Cores) entpackt.</summary>
     public static string? AndroidLibraryFolder { get; set; }

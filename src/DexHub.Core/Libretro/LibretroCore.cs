@@ -194,6 +194,7 @@ public sealed unsafe class LibretroCore : IDisposable
         AvInfo = av;
 
         _setControllerPortDevice(0, Retro.DeviceJoypad);
+        StartHwRendering();
     }
 
     /// <summary>Emuliert genau ein Bild (bei Game Boy also ca. 1/60 Sekunde).</summary>
@@ -273,9 +274,98 @@ public sealed unsafe class LibretroCore : IDisposable
 
     private void OnVideoRefresh(IntPtr data, uint width, uint height, nuint pitch)
     {
+        // 3D-Cores: das Bild liegt in unserem OpenGL-Framebuffer
+        if (data == HwFrameBufferValid)
+        {
+            if (_hwFramebuffer is null || width == 0 || height == 0) return;
+            var pixels = _hwFramebuffer.Read((int)width, (int)height, _hwCallback.BottomLeftOrigin);
+            int w = Math.Min((int)width, _hwFramebuffer.Width), h = Math.Min((int)height, _hwFramebuffer.Height);
+            _host.OnVideoFrame(pixels, w, h, w * 4, RetroPixelFormat.XRGB8888);
+            return;
+        }
         // data == 0 heißt: Bild ist unverändert ("dupe")
         if (data != IntPtr.Zero)
             _host.OnVideoFrame(data, (int)width, (int)height, (int)pitch, PixelFormat);
+    }
+
+    // =====================================================================
+    // 3D-Grafik (OpenGL) – für N64, GameCube, 3DS
+    // =====================================================================
+
+    private const uint HwContextOpenGl = 1, HwContextOpenGlCore = 3;
+    private static readonly IntPtr HwFrameBufferValid = -1;
+
+    private RetroHwRenderCallback _hwCallback;
+    private bool _hwRequested;
+    private IGlContext? _gl;
+    private HwFramebuffer? _hwFramebuffer;
+    private RetroFn.GetCurrentFramebuffer? _getFramebufferCb;
+    private RetroFn.GetProcAddress? _getProcAddressCb;
+
+    /// <summary>Ob dieser Core 3D-Grafik nutzt (dann läuft ein OpenGL-Kontext mit).</summary>
+    public bool UsesHardwareRendering => _hwRequested;
+
+    private bool AcceptHwRender(IntPtr data)
+    {
+        if (GlContextFactory.Create is null || data == IntPtr.Zero) return false;
+        var cb = Marshal.PtrToStructure<RetroHwRenderCallback>(data);
+        if (cb.ContextType is not (HwContextOpenGl or HwContextOpenGlCore))
+        {
+            Console.WriteLine($"[DexHub] {LibraryNameOrPath} möchte Grafik-Schnittstelle {cb.ContextType} – nur OpenGL wird unterstützt");
+            return false;
+        }
+
+        _getFramebufferCb ??= () => (nuint)(_hwFramebuffer?.Framebuffer ?? 0);
+        _getProcAddressCb ??= name => _gl?.GetProcAddress(Marshal.PtrToStringUTF8(name) ?? "") ?? IntPtr.Zero;
+        cb.GetCurrentFramebuffer = Marshal.GetFunctionPointerForDelegate(_getFramebufferCb);
+        cb.GetProcAddress = Marshal.GetFunctionPointerForDelegate(_getProcAddressCb);
+        Marshal.StructureToPtr(cb, data, false);
+
+        _hwCallback = cb;
+        _hwRequested = true;
+        Console.WriteLine($"[DexHub] {LibraryNameOrPath}: OpenGL {(cb.ContextType == HwContextOpenGlCore ? "Core " : "")}{cb.VersionMajor}.{cb.VersionMinor}");
+        return true;
+    }
+
+    /// <summary>Nach dem Laden des Spiels: Kontext anlegen und dem Core Bescheid geben (context_reset).</summary>
+    private void StartHwRendering()
+    {
+        if (!_hwRequested || GlContextFactory.Create is null) return;
+        _gl = GlContextFactory.Create();
+        if (!_gl.Create((int)_hwCallback.VersionMajor, (int)_hwCallback.VersionMinor,
+                _hwCallback.ContextType == HwContextOpenGlCore, _hwCallback.DebugContext))
+            throw new InvalidOperationException("OpenGL konnte nicht gestartet werden (Grafiktreiber?).");
+        _gl.MakeCurrent();
+        Console.WriteLine("[DexHub] OpenGL: " + _gl.Description);
+
+        var g = AvInfo.Geometry;
+        _hwFramebuffer = new HwFramebuffer(_gl, (int)Math.Max(g.MaxWidth, g.BaseWidth), (int)Math.Max(g.MaxHeight, g.BaseHeight),
+            _hwCallback.Depth, _hwCallback.Stencil);
+
+        if (_hwCallback.ContextReset != IntPtr.Zero)
+            Marshal.GetDelegateForFunctionPointer<RetroFn.Void>(_hwCallback.ContextReset)();
+    }
+
+    private void ResizeHwFramebuffer()
+    {
+        if (_hwFramebuffer is null) return;
+        var g = AvInfo.Geometry;
+        int w = (int)Math.Max(g.MaxWidth, g.BaseWidth), h = (int)Math.Max(g.MaxHeight, g.BaseHeight);
+        if (w > _hwFramebuffer.Width || h > _hwFramebuffer.Height)
+            _hwFramebuffer.Resize(Math.Max(w, _hwFramebuffer.Width), Math.Max(h, _hwFramebuffer.Height));
+    }
+
+    private void StopHwRendering()
+    {
+        if (_gl is null) return;
+        try
+        {
+            _gl.MakeCurrent();
+            if (_hwCallback.ContextDestroy != IntPtr.Zero)
+                Marshal.GetDelegateForFunctionPointer<RetroFn.Void>(_hwCallback.ContextDestroy)();
+            _hwFramebuffer?.Dispose();
+        }
+        catch (Exception ex) { Console.WriteLine("[DexHub] OpenGL beenden: " + ex.Message); }
     }
 
     private void OnAudioSample(short left, short right)
@@ -304,6 +394,14 @@ public sealed unsafe class LibretroCore : IDisposable
             {
                 case Retro.EnvGetCanDupe:
                     *(byte*)data = 1;
+                    return true;
+
+                case Retro.EnvSetHwRender:
+                    return AcceptHwRender(data);
+
+                case Retro.EnvGetPreferredHwRender:
+                    if (GlContextFactory.Create is null) return false;
+                    *(uint*)data = HwContextOpenGl;
                     return true;
 
                 case Retro.EnvSetPixelFormat:
@@ -363,10 +461,12 @@ public sealed unsafe class LibretroCore : IDisposable
                     var av = AvInfo;
                     av.Geometry = *(RetroGameGeometry*)data;
                     AvInfo = av;
+                    ResizeHwFramebuffer();
                     return true;
 
                 case Retro.EnvSetSystemAvInfo:
                     AvInfo = *(RetroSystemAvInfo*)data;
+                    ResizeHwFramebuffer();
                     return true;
 
                 case Retro.EnvGetInputBitmasks:
@@ -483,8 +583,11 @@ public sealed unsafe class LibretroCore : IDisposable
 
     public void Dispose()
     {
+        StopHwRendering();
         if (_gameLoaded) { _retroUnloadGame(); _gameLoaded = false; }
         if (_initialized) { _retroDeinit(); _initialized = false; }
+        _gl?.Dispose();
+        _gl = null;
         if (_lib != IntPtr.Zero) { NativeLibrary.Free(_lib); _lib = IntPtr.Zero; }
 
         foreach (var p in _allocations) Marshal.FreeCoTaskMem(p);

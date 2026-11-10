@@ -4,6 +4,7 @@ using DexHub.App.Audio;
 using DexHub.App.Input;
 using DexHub.Core.Detection;
 using DexHub.Core.Emulation;
+using DexHub.Core.Libretro;
 using DexHub.Core.Settings;
 
 namespace DexHub.App;
@@ -46,6 +47,10 @@ public static class PlayerHost
                    ?? throw new InvalidOperationException("Unbekannte ROM: " + play.RomPath);
         var corePath = CoreCatalog.FindCore(game.Info.Platform)
                        ?? throw new InvalidOperationException($"Kein Emulator für {game.PlatformName} gefunden.");
+
+        // 3D-Konsolen (N64, GameCube, 3DS) zeichnen mit OpenGL. Auf dem Mac müsste das Fenster dafür im
+        // Hauptthread entstehen – dort vorerst nicht.
+        if (!OperatingSystem.IsMacOS()) GlContextFactory.Create = () => new Video.SdlGlContext();
 
         var session = new EmulatorSession(game, corePath, new SdlAudioSink());
         SdlGamepad.Instance.Settings = settings.Input;

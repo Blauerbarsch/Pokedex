@@ -19,6 +19,14 @@ string[] cores =
     "pokemini_libretro",  // Pokémon Mini
 ];
 
+// 3D-Konsolen (brauchen OpenGL). Nicht für jedes System verfügbar – fehlen sie, ist das kein Fehler.
+string[] optional =
+[
+    "mupen64plus_next_libretro", // Nintendo 64 (Pokémon Stadium, Snap, Puzzle League)
+    "dolphin_libretro",          // GameCube/Wii (Colosseum, XD, Box, Battle Revolution)
+    "citra_libretro",            // Nintendo 3DS (X/Y bis Ultrasonne) – ROMs müssen entschlüsselt sein
+];
+
 bool android = args.Contains("android");
 string platformPath, extension;
 if (android)
@@ -58,6 +66,8 @@ http.DefaultRequestHeaders.UserAgent.ParseAdd("DexHub-FetchCores/0.1");
 int failed = 0;
 // Für Android zusätzlich das klassische melonDS als Ersatz, falls melonDS DS dort fehlt
 if (android) cores = [.. cores, "melonds_libretro"];
+HashSet<string> optionalSet = android ? [] : optional.ToHashSet();
+if (!android) cores = [.. cores, .. optional];
 
 foreach (var core in cores)
 {
@@ -78,11 +88,31 @@ foreach (var core in cores)
         entry.ExtractToFile(Path.Combine(target, targetName), overwrite: true);
         Console.WriteLine($"ok ({zipBytes.Length / 1024} KB)");
     }
+    catch (Exception ex) when (optionalSet.Contains(core))
+    {
+        Console.WriteLine($"übersprungen ({ex.Message})");
+    }
     catch (Exception ex)
     {
         failed++;
         Console.WriteLine($"FEHLER: {ex.Message}");
         Console.WriteLine($"    Adresse: {url}");
+    }
+}
+
+// Dolphin braucht seine Systemdateien (Schriften, Datenbanken). DexHub entpackt sie beim ersten Start.
+if (!android)
+{
+    try
+    {
+        var sys = await http.GetByteArrayAsync("https://buildbot.libretro.com/assets/system/Dolphin.zip");
+        Directory.CreateDirectory(Path.Combine(target, "system"));
+        File.WriteAllBytes(Path.Combine(target, "system", "Dolphin.zip"), sys);
+        Console.WriteLine($"Dolphin-Systemdateien         ok ({sys.Length / 1024} KB)");
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine("Dolphin-Systemdateien         übersprungen (" + ex.Message + ")");
     }
 }
 

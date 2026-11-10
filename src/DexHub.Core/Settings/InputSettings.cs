@@ -76,6 +76,8 @@ public sealed class InputSettings
         [JoypadButton.Y] = "A",
         [JoypadButton.L] = "Q",
         [JoypadButton.R] = "W",
+        [JoypadButton.L2] = "E",
+        [JoypadButton.R2] = "R",
         [JoypadButton.Start] = "Return",
         [JoypadButton.Select] = "Back",
     };
@@ -96,6 +98,8 @@ public sealed class InputSettings
         [JoypadButton.Y] = PadControl.West,
         [JoypadButton.L] = PadControl.LeftShoulder,
         [JoypadButton.R] = PadControl.RightShoulder,
+        [JoypadButton.L2] = PadControl.LeftTrigger,
+        [JoypadButton.R2] = PadControl.None, // rechter Trigger = Vorspulen
         [JoypadButton.Start] = PadControl.Start,
         [JoypadButton.Select] = PadControl.Back,
     };
@@ -163,6 +167,8 @@ public sealed class InputSettings
         (JoypadButton.Y, "Y (DS)"),
         (JoypadButton.L, "L"),
         (JoypadButton.R, "R"),
+        (JoypadButton.L2, "L2 (N64: Z, GameCube: L)"),
+        (JoypadButton.R2, "R2 (GameCube: R)"),
         (JoypadButton.Start, "Start"),
         (JoypadButton.Select, "Select"),
     ];
