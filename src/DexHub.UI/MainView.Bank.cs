@@ -7,13 +7,13 @@ using DexHub.Core.Saves;
 using DexHub.Core.Settings;
 using DexHub.Core.Trading;
 
-namespace DexHub.App;
+namespace DexHub.UI;
 
 /// <summary>
 /// Pokémon-Bank: Pokémon aus einem Spiel herausnehmen und in ein anderes legen
 /// (auch Gen 3 → Gen 4 wie der Pal-Park).
 /// </summary>
-public partial class MainWindow
+public partial class MainView
 {
     private TradeColumn? _bankGame;
     private WrapPanel? _bankTiles;

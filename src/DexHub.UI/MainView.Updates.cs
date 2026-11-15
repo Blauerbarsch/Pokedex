@@ -3,15 +3,22 @@ using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Interactivity;
 using DexHub.Core.Updates;
 
-namespace DexHub.App;
+namespace DexHub.UI;
 
 /// <summary>Update-Knopf: neue Releases von GitHub laden und installieren.</summary>
-public partial class MainWindow
+public partial class MainView
 {
     private UpdateInfo? _update;
 
     private void InitUpdates()
     {
+        // Android: Updates kommen über die APK, nicht über den Knopf im Programm
+        if (Host.IsMobile)
+        {
+            UpdatesExpander.IsVisible = false;
+            return;
+        }
+
         VersionText.Text = UpdateService.IsDevelopmentBuild
             ? "Entwicklerversion (aus dem Git-Ordner gestartet) – Update mit „git pull“ im Terminal."
             : $"Installierte Version: {UpdateService.CurrentVersionText}";

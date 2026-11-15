@@ -11,7 +11,7 @@ namespace DexHub.App.Input;
 /// Liest Controller über SDL2 (Xbox, PlayStation, Switch Pro, Steam Deck …).
 /// Wird sowohl vom Emulator-Thread (im Spiel) als auch vom UI-Thread (Tasten belegen) benutzt.
 /// </summary>
-public sealed unsafe class SdlGamepad : IInputProvider
+public sealed unsafe class SdlGamepad : IInputProvider, DexHub.UI.IGamepadInfo
 {
     public static SdlGamepad Instance { get; } = new();
 
@@ -41,6 +41,9 @@ public sealed unsafe class SdlGamepad : IInputProvider
     // =====================================================================
 
     /// <summary>Namen der angeschlossenen Controller.</summary>
+    IReadOnlyList<string> DexHub.UI.IGamepadInfo.ConnectedNames() => ConnectedNames();
+    IReadOnlyList<string> DexHub.UI.IGamepadInfo.UnmappedDevices => UnmappedDevices;
+
     public List<string> ConnectedNames()
     {
         lock (SdlApi.Lock)

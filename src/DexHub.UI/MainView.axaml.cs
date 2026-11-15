@@ -9,8 +9,6 @@ using Avalonia.Media.Imaging;
 using Avalonia.Platform.Storage;
 using Avalonia.Threading;
 using Avalonia.Controls.Primitives;
-using DexHub.App.Audio;
-using DexHub.App.Input;
 using DexHub.Core.Libretro;
 using DexHub.Core.Covers;
 using DexHub.Core.Detection;
@@ -23,9 +21,9 @@ using DexHub.Core.Settings;
 using DexHub.Core.Trading;
 using GamePlatform = DexHub.Core.Models.Platform;
 
-namespace DexHub.App;
+namespace DexHub.UI;
 
-public partial class MainWindow : Window
+public partial class MainView : UserControl
 {
     private readonly AppSettings _settings = AppSettings.Load();
     private readonly PokeApiRepository _pokeApi = new();
@@ -37,9 +35,25 @@ public partial class MainWindow : Window
     private CancellationTokenSource? _spriteCts;
     private bool _ready; // verhindert, dass Events beim Laden der Oberfläche zu früh feuern
 
-    public MainWindow()
+    /// <summary>Die App (Desktop oder Android) setzt das vor dem Erzeugen der Oberfläche.</summary>
+    public static IPlatform Host { get; set; } = new NullPlatform();
+
+    private IStorageProvider StorageProvider => TopLevel.GetTopLevel(this)!.StorageProvider;
+
+    /// <summary>Wird einmal ausgelöst, sobald die Oberfläche angezeigt wird (wie Window.Opened).</summary>
+    private event EventHandler? Opened;
+
+    public MainView()
     {
         InitializeComponent();
+
+        // Android: ROMs liegen im Ordner der App und werden über "ROMs hinzufügen" hineinkopiert
+        if (Host.DefaultRomFolder is { } romFolder)
+        {
+            Directory.CreateDirectory(romFolder);
+            _settings.RomFolder = romFolder;
+            RomFolderButton.Content = "＋ ROMs hinzufügen…";
+        }
         FillSettingsForm();
         FillProfiles();
         _ready = true;
@@ -52,7 +66,24 @@ public partial class MainWindow : Window
         DexHub.Core.Live.LiveDexStore.Clear();
         InitBackup();
 
-        if (Program.StartInBigPicture)
+        bool opened = false;
+        AttachedToVisualTree += (_, _) =>
+        {
+            if (opened) return;
+            opened = true;
+            Opened?.Invoke(this, EventArgs.Empty);
+        };
+        Host.GameExited += (game, profile) => Dispatcher.UIThread.Post(() =>
+        {
+            BuildVideoPanel(); // jetzt sind evtl. neue Emulator-Optionen bekannt
+            foreach (var g in _games) g.SavePath = SaveLocator.Find(g);
+            RefreshGamesList();
+            RebuildDex();
+            SetStatus($"{game.Title} ({profile}) beendet.");
+        });
+        SizeChanged += (_, _) => UpdateCompactLayout();
+
+        if (Host.StartInBigPicture)
             Opened += async (_, _) =>
             {
                 await ScanLibraryAsync();
@@ -110,6 +141,13 @@ public partial class MainWindow : Window
         BuildTradePanel();
         BuildBankPanel();
         SetStatus($"{_games.Count} Spiel(e) gefunden.");
+
+        // Automatischer Test: Spiel sofort starten
+        if (Host.AutostartRom is { } autostart && _games.FirstOrDefault(g => g.FileName == autostart) is { } auto)
+        {
+            Console.WriteLine("[DexHub] Autostart: " + auto.Title);
+            await LaunchGameAsync(auto, resume: false);
+        }
     }
 
     // ---------- Kachel-Ansicht ----------
@@ -317,14 +355,9 @@ public partial class MainWindow : Window
         await LaunchGameAsync(_selectedGame, resume);
     }
 
-    /// <summary>Laufende Spiele (jedes in einem eigenen Prozess).</summary>
-    private sealed record RunningGame(GameEntry Game, string Profile, Process Process);
-    private readonly List<RunningGame> _running = [];
+    private bool AnyGameRunning => Host.AnyRunning();
 
-    private bool AnyGameRunning => _running.Any(r => !r.Process.HasExited);
-
-    private bool IsRunning(GameEntry game, string profile) =>
-        _running.Any(r => !r.Process.HasExited && r.Game.RomPath == game.RomPath && r.Profile == profile);
+    private bool IsRunning(GameEntry game, string profile) => Host.IsRunning(game, profile);
 
     /// <summary>
     /// N64-Spiel mit eingestecktem Game-Boy-Spiel (Transfer Pak) starten. Pokémon Stadium kann dann Team und
@@ -393,30 +426,20 @@ public partial class MainWindow : Window
             return;
         }
 
-        Process process;
+        string? error;
         try
         {
-            process = Process.Start(PlayerHost.CreateStartInfo(game.RomPath, profile, resume && _settings.AutoResume, options, fullscreen))
-                      ?? throw new InvalidOperationException("Prozess konnte nicht gestartet werden.");
+            error = await Host.LaunchAsync(game, profile, resume && _settings.AutoResume, options, fullscreen);
         }
         catch (Exception ex)
         {
-            await ShowMessageAsync("Spiel konnte nicht gestartet werden", ex.Message);
+            error = ex.Message;
+        }
+        if (error is not null)
+        {
+            await ShowMessageAsync("Spiel konnte nicht gestartet werden", error);
             return;
         }
-
-        var running = new RunningGame(game, profile, process);
-        _running.Add(running);
-        process.EnableRaisingEvents = true;
-        process.Exited += (_, _) => Dispatcher.UIThread.Post(() =>
-        {
-            _running.Remove(running);
-            BuildVideoPanel(); // jetzt sind evtl. neue Emulator-Optionen bekannt
-            foreach (var g in _games) g.SavePath = SaveLocator.Find(g);
-            RefreshGamesList();
-            RebuildDex();
-            SetStatus($"{game.Title} ({running.Profile}) beendet.");
-        });
 
         SetStatus($"{game.Title} läuft für {profile}…");
     }
@@ -1481,40 +1504,6 @@ public partial class MainWindow : Window
         RebuildDex();
     }
 
-    private async Task<bool> ConfirmAsync(string title, string message)
-    {
-        bool result = false;
-        var yes = new Button { Content = "Ja", Classes = { "accent" }, MinWidth = 80, IsDefault = true };
-        var no = new Button { Content = "Abbrechen", MinWidth = 80, IsCancel = true };
-        var dialog = new Window
-        {
-            Title = title,
-            Width = 480,
-            SizeToContent = SizeToContent.Height,
-            CanResize = false,
-            WindowStartupLocation = WindowStartupLocation.CenterOwner,
-            Content = new StackPanel
-            {
-                Margin = new Thickness(20),
-                Spacing = 16,
-                Children =
-                {
-                    new TextBlock { Text = message, TextWrapping = TextWrapping.Wrap },
-                    new StackPanel
-                    {
-                        Orientation = Orientation.Horizontal,
-                        Spacing = 8,
-                        HorizontalAlignment = HorizontalAlignment.Right,
-                        Children = { no, yes },
-                    },
-                },
-            },
-        };
-        yes.Click += (_, _) => { result = true; dialog.Close(); };
-        no.Click += (_, _) => dialog.Close();
-        await dialog.ShowDialog(this);
-        return result;
-    }
 
     // =====================================================================
     // Benutzer
@@ -1522,16 +1511,10 @@ public partial class MainWindow : Window
 
     private void OnBigPictureClick(object? sender, RoutedEventArgs e) => OpenBigPicture();
 
-    private BigPictureWindow? _bigPicture;
-
     private void OpenBigPicture()
     {
-        if (_bigPicture is not null)
-        {
-            _bigPicture.Activate();
-            return;
-        }
-        _bigPicture = new BigPictureWindow(
+        if (!Host.SupportsBigPicture) return;
+        Host.OpenBigPicture(
             () => _games,
             (game, resume) => LaunchGameAsync(game, resume, fullscreen: true),
             _settings,
@@ -1542,14 +1525,14 @@ public partial class MainWindow : Window
                 _ready = true;
                 SwitchProfile(profile);
             });
-        _bigPicture.Closed += (_, _) => _bigPicture = null;
-        _bigPicture.Show();
     }
 
     private void FillProfiles()
     {
         ProfileBox.ItemsSource = _settings.Profiles.ToList();
         ProfileBox.SelectedItem = _settings.CurrentProfile;
+        CompactProfileBox.ItemsSource = _settings.Profiles.ToList();
+        CompactProfileBox.SelectedItem = _settings.CurrentProfile;
         UpdateProfileBadge();
     }
 
@@ -1558,6 +1541,7 @@ public partial class MainWindow : Window
     {
         var name = _settings.CurrentProfile.Trim();
         ProfileInitial.Text = name.Length > 0 ? char.ToUpperInvariant(name[0]).ToString() : "?";
+        if (!Equals(CompactProfileBox.SelectedItem, name)) CompactProfileBox.SelectedItem = name;
     }
 
     private void OnProfileChanged(object? sender, SelectionChangedEventArgs e)
@@ -1602,45 +1586,6 @@ public partial class MainWindow : Window
         SwitchProfile(name);
     }
 
-    /// <summary>Einfaches Eingabefenster.</summary>
-    private async Task<string?> PromptAsync(string title, string label)
-    {
-        var box = new TextBox { MinWidth = 300 };
-        var ok = new Button { Content = "OK", IsDefault = true, MinWidth = 80 };
-        var cancel = new Button { Content = "Abbrechen", IsCancel = true, MinWidth = 80 };
-        string? result = null;
-
-        var dialog = new Window
-        {
-            Title = title,
-            Width = 420,
-            SizeToContent = SizeToContent.Height,
-            CanResize = false,
-            WindowStartupLocation = WindowStartupLocation.CenterOwner,
-            Content = new StackPanel
-            {
-                Margin = new Thickness(20),
-                Spacing = 12,
-                Children =
-                {
-                    new TextBlock { Text = label },
-                    box,
-                    new StackPanel
-                    {
-                        Orientation = Orientation.Horizontal,
-                        Spacing = 8,
-                        HorizontalAlignment = HorizontalAlignment.Right,
-                        Children = { cancel, ok },
-                    },
-                },
-            },
-        };
-        ok.Click += (_, _) => { result = box.Text; dialog.Close(); };
-        cancel.Click += (_, _) => dialog.Close();
-        dialog.Opened += (_, _) => box.Focus();
-        await dialog.ShowDialog(this);
-        return result;
-    }
 
     // =====================================================================
     // Bild-Einstellungen pro Konsole
@@ -1829,13 +1774,13 @@ public partial class MainWindow : Window
             Opacity = 0.8,
         });
 
-        var names = SdlGamepad.Instance.ConnectedNames();
+        var names = Host.Gamepad.ConnectedNames();
         ControlsPanel.Children.Add(new TextBlock
         {
             Text = names.Count > 0 ? "🎮 Verbunden: " + string.Join(", ", names)
-                : SdlGamepad.Instance.InitError is { } err ? "🎮 Controller-Unterstützung nicht verfügbar: " + err
-                : SdlGamepad.Instance.UnmappedDevices.Count > 0
-                    ? "🎮 Gerät gefunden, aber ohne Tastenzuordnung: " + string.Join(", ", SdlGamepad.Instance.UnmappedDevices)
+                : Host.Gamepad.InitError is { } err ? "🎮 Controller-Unterstützung nicht verfügbar: " + err
+                : Host.Gamepad.UnmappedDevices.Count > 0
+                    ? "🎮 Gerät gefunden, aber ohne Tastenzuordnung: " + string.Join(", ", Host.Gamepad.UnmappedDevices)
                 : "🎮 Kein Controller gefunden. Anschließen und auf „Controller suchen“ klicken.",
             TextWrapping = TextWrapping.Wrap,
             FontWeight = FontWeight.SemiBold,
@@ -1990,7 +1935,7 @@ public partial class MainWindow : Window
         var timer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(30) };
         timer.Tick += (_, _) =>
         {
-            var pressed = SdlGamepad.Instance.FirstPressed();
+            var pressed = Host.Gamepad.FirstPressed();
             if (!released)
             {
                 released = pressed == PadControl.None; // erst warten, bis alles losgelassen ist
@@ -2029,6 +1974,11 @@ public partial class MainWindow : Window
 
     private async void OnBrowseRomFolderClick(object? sender, RoutedEventArgs e)
     {
+        if (Host.DefaultRomFolder is not null)
+        {
+            await ImportRomsAsync();
+            return;
+        }
         var folders = await StorageProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions
         {
             Title = "ROM-Ordner wählen",
@@ -2048,29 +1998,31 @@ public partial class MainWindow : Window
 
     private void SetStatus(string text) => StatusText.Text = text;
 
-    /// <summary>Einfaches Meldungsfenster (Avalonia bringt keine MessageBox mit).</summary>
-    private async Task ShowMessageAsync(string title, string message)
+    /// <summary>Android: ROM-Dateien auswählen und in den Ordner der App kopieren.</summary>
+    private async Task ImportRomsAsync()
     {
-        var ok = new Button { Content = "OK", HorizontalAlignment = HorizontalAlignment.Right, MinWidth = 80 };
-        var dialog = new Window
+        var files = await StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions { Title = "ROMs auswählen", AllowMultiple = true });
+        if (files.Count == 0) return;
+        int copied = 0;
+        foreach (var file in files)
         {
-            Title = title,
-            Width = 480,
-            SizeToContent = SizeToContent.Height,
-            CanResize = false,
-            WindowStartupLocation = WindowStartupLocation.CenterOwner,
-            Content = new StackPanel
+            var name = file.Name;
+            if (!GameDetector.IsRomFile(name)) continue;
+            SetStatus($"Kopiere {name} …");
+            try
             {
-                Margin = new Thickness(20),
-                Spacing = 16,
-                Children =
-                {
-                    new TextBlock { Text = message, TextWrapping = TextWrapping.Wrap },
-                    ok,
-                },
-            },
-        };
-        ok.Click += (_, _) => dialog.Close();
-        await dialog.ShowDialog(this);
+                await using var source = await file.OpenReadAsync();
+                await using var target = File.Create(Path.Combine(_settings.RomFolder, name));
+                await source.CopyToAsync(target);
+                copied++;
+            }
+            catch (Exception ex)
+            {
+                await ShowMessageAsync("ROM konnte nicht kopiert werden", $"{name}: {ex.Message}");
+            }
+        }
+        SetStatus(copied == 0 ? "Keine passenden Dateien gewählt (.gb, .gbc, .gba, .nds, .min …)." : $"{copied} Datei(en) hinzugefügt.");
+        await ScanLibraryAsync();
     }
+
 }

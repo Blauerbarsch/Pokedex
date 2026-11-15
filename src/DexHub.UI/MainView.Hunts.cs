@@ -5,10 +5,10 @@ using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using DexHub.Core.Stats;
 
-namespace DexHub.App;
+namespace DexHub.UI;
 
 /// <summary>Shiny-Jagden im Statistik-Reiter: laufende Zähler, neue Jagd, gefundene Shinys.</summary>
-public partial class MainWindow
+public partial class MainView
 {
     private StackPanel _huntPanel = new();
 

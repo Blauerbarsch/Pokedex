@@ -26,6 +26,7 @@
   <ItemGroup>
     <PackageReference Include="Avalonia.Android" Version="11.3.0" />
     <PackageReference Include="Avalonia.Themes.Fluent" Version="11.3.0" />
+    <PackageReference Include="Avalonia.Fonts.Inter" Version="11.3.0" />
   </ItemGroup>
 
   <!-- Android-eigene Standard-usings weglassen: Button, CheckBox, Application … gibt es sonst doppelt (Avalonia) -->
@@ -36,11 +37,13 @@
   </ItemGroup>
 
   <ItemGroup>
-    <TrimmerRootAssembly Include="DexHub.Core" />
+    <TrimmerRootAssembly Include="DexHub.Core" RootMode="All" />
+    <TrimmerRootAssembly Include="DexHub.UI" RootMode="All" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\DexHub.Core\DexHub.Core.csproj" />
+    <ProjectReference Include="..\DexHub.UI\DexHub.UI.csproj" />
   </ItemGroup>
 
   <!-- Emulator-Cores (von scripts/FetchCores.cs mit "android" heruntergeladen) -->

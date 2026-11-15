@@ -4,10 +4,10 @@ using Avalonia.Platform.Storage;
 using Avalonia.Threading;
 using DexHub.Core.Stats;
 
-namespace DexHub.App;
+namespace DexHub.UI;
 
 /// <summary>Automatische Sicherung der Spielstände in einen frei wählbaren Ordner (z. B. auf dem NAS).</summary>
-public partial class MainWindow
+public partial class MainView
 {
     private DispatcherTimer? _backupTimer;
     private bool _backupRunning;

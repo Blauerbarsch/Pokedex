@@ -5,10 +5,10 @@ using DexHub.Core.Pokemon;
 using DexHub.Core.Stats;
 using DexHub.Core.Trading;
 
-namespace DexHub.App;
+namespace DexHub.UI;
 
 /// <summary>Erfolge im Statistik-Reiter.</summary>
-public partial class MainWindow
+public partial class MainView
 {
     private Expander BuildAchievementsSection(List<OwnedPokemon> mons)
     {

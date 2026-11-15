@@ -29,6 +29,9 @@ public static class GameDetector
 
     public static IReadOnlyCollection<string> SupportedExtensions => ExtensionMap.Keys;
 
+    /// <summary>Hat die Datei eine bekannte ROM-Endung?</summary>
+    public static bool IsRomFile(string fileName) => ExtensionMap.ContainsKey(Path.GetExtension(fileName).ToLowerInvariant());
+
     /// <summary>
     /// Ordner ohne Zugriffsrechte und versteckte Ordner (z. B. ".ipfs", ".Trash") werden übersprungen,
     /// statt das Programm abstürzen zu lassen – wichtig bei Netzlaufwerken.

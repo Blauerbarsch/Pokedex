@@ -7,13 +7,13 @@ using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using DexHub.Core.Guide;
 
-namespace DexHub.App;
+namespace DexHub.UI;
 
 /// <summary>
 /// Der Guide: Pokémon (Typen, Schwächen, Werte, Fähigkeiten, Entwicklungen, Attacken), Typen und Attacken.
 /// Alles ist verlinkt; "Zurück" führt zur vorigen Seite.
 /// </summary>
-public partial class MainWindow
+public partial class MainView
 {
     private GuideData? _guide;
     private bool _guideLoading;

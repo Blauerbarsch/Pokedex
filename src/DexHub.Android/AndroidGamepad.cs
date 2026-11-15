@@ -2,107 +2,165 @@ using Android.Views;
 using DexHub.Core.Emulation;
 using DexHub.Core.Libretro;
 using DexHub.Core.Settings;
+using DexHub.UI;
 
 namespace DexHub.Mobile;
 
 /// <summary>
-/// Controller-Eingaben unter Android (Bluetooth-Controller, eingebaute Tasten von Handhelds).
-/// Belegung nach Position wie bei Nintendo: unten = B, rechts = A, links = Y, oben = X.
-/// R2 = Vorspulen, L2 = Touch (DS).
+/// Controller unter Android (Bluetooth-Controller, eingebaute Tasten von Handhelds wie Retroid/Ayn/Odin).
+/// Tasten werden wie am PC nach Position erfasst (Süd/Ost/West/Nord …) und über die Belegung aus
+/// "Steuerung" auf Spieltasten gelegt – die Seite funktioniert also genauso wie am PC.
 /// </summary>
-public sealed class AndroidGamepad : IInputProvider
+public sealed class AndroidGamepad : IInputProvider, IGamepadInfo
 {
     public static readonly AndroidGamepad Instance = new();
 
-    public bool StickAsDpad { get; set; } = true;
-
-    /// <summary>Nur während ein Spiel läuft, gehen Tasten an den Emulator (sonst steuern sie die Oberfläche).</summary>
+    /// <summary>Während ein Spiel läuft, gehen die Tasten nur an den Emulator (sonst steuern sie die Oberfläche).</summary>
     public static bool Active { get; set; }
 
-    private static int _buttons, _hotkeys, _axisButtons;
-    private static float _cursorX, _cursorY;
+    /// <summary>Belegung (wird beim Spielstart gesetzt).</summary>
+    public static InputSettings? Settings { get; set; }
 
-    private static readonly Dictionary<Keycode, JoypadButton> Map = new()
+    public bool StickAsDpad { get; set; } = true;
+
+    /// <summary>Eine Controller-Taste wurde im Spiel gedrückt (Bildschirmtasten ausblenden).</summary>
+    public static event Action? Used;
+
+    private static readonly object Gate = new();
+    private static readonly HashSet<PadControl> Pressed = [];
+    private static float _lx, _ly, _rx, _ry, _lt, _rt, _hatX, _hatY;
+
+    private static readonly Dictionary<Keycode, PadControl> Keys = new()
     {
-        [Keycode.ButtonA] = JoypadButton.B,
-        [Keycode.ButtonB] = JoypadButton.A,
-        [Keycode.ButtonX] = JoypadButton.Y,
-        [Keycode.ButtonY] = JoypadButton.X,
-        [Keycode.ButtonL1] = JoypadButton.L,
-        [Keycode.ButtonR1] = JoypadButton.R,
-        [Keycode.ButtonStart] = JoypadButton.Start,
-        [Keycode.ButtonSelect] = JoypadButton.Select,
-        [Keycode.DpadUp] = JoypadButton.Up,
-        [Keycode.DpadDown] = JoypadButton.Down,
-        [Keycode.DpadLeft] = JoypadButton.Left,
-        [Keycode.DpadRight] = JoypadButton.Right,
+        [Keycode.ButtonA] = PadControl.South,
+        [Keycode.ButtonB] = PadControl.East,
+        [Keycode.ButtonX] = PadControl.West,
+        [Keycode.ButtonY] = PadControl.North,
+        [Keycode.ButtonSelect] = PadControl.Back,
+        [Keycode.ButtonMode] = PadControl.Guide,
+        [Keycode.ButtonStart] = PadControl.Start,
+        [Keycode.ButtonThumbl] = PadControl.LeftStickClick,
+        [Keycode.ButtonThumbr] = PadControl.RightStickClick,
+        [Keycode.ButtonL1] = PadControl.LeftShoulder,
+        [Keycode.ButtonR1] = PadControl.RightShoulder,
+        [Keycode.ButtonL2] = PadControl.LeftTrigger,
+        [Keycode.ButtonR2] = PadControl.RightTrigger,
+        [Keycode.DpadUp] = PadControl.DpadUp,
+        [Keycode.DpadDown] = PadControl.DpadDown,
+        [Keycode.DpadLeft] = PadControl.DpadLeft,
+        [Keycode.DpadRight] = PadControl.DpadRight,
     };
 
-    private static readonly Dictionary<Keycode, HotkeyAction> HotkeyMap = new()
-    {
-        [Keycode.ButtonR2] = HotkeyAction.FastForward,
-        [Keycode.ButtonL2] = HotkeyAction.Touch,
-        [Keycode.ButtonThumbr] = HotkeyAction.Touch,
-    };
-
+    /// <summary>Taste gedrückt/losgelassen. true = an den Emulator gegangen (nicht an die Oberfläche weitergeben).</summary>
     public static bool Handle(KeyEvent e)
     {
-        bool down = e.Action == KeyEventActions.Down;
-        if (e.Action is not (KeyEventActions.Down or KeyEventActions.Up)) return false;
-
-        if (Map.TryGetValue(e.KeyCode, out var button))
+        if (!Keys.TryGetValue(e.KeyCode, out var control)) return false;
+        if (e.Action is not (KeyEventActions.Down or KeyEventActions.Up)) return Active;
+        lock (Gate)
         {
-            Set(ref _buttons, 1 << (int)button, down);
-            return true;
+            if (e.Action == KeyEventActions.Down) Pressed.Add(control);
+            else Pressed.Remove(control);
         }
-        if (HotkeyMap.TryGetValue(e.KeyCode, out var hotkey))
-        {
-            Set(ref _hotkeys, 1 << (int)hotkey, down);
-            return true;
-        }
-        return false;
+        if (Active && e.Action == KeyEventActions.Down) Used?.Invoke();
+        return Active;
     }
 
+    /// <summary>Sticks, Steuerkreuz als Achse, analoge Schultertasten.</summary>
     public static bool HandleMotion(MotionEvent e)
     {
         if ((e.Source & (InputSourceType.Joystick | InputSourceType.Gamepad)) == 0) return false;
-        float x = e.GetAxisValue(Axis.X), y = e.GetAxisValue(Axis.Y);
-        float hatX = e.GetAxisValue(Axis.HatX), hatY = e.GetAxisValue(Axis.HatY);
-        const float dead = 0.5f;
-
-        int axis = 0;
-        if (x < -dead || hatX < -dead) axis |= 1 << (int)JoypadButton.Left;
-        if (x > dead || hatX > dead) axis |= 1 << (int)JoypadButton.Right;
-        if (y < -dead || hatY < -dead) axis |= 1 << (int)JoypadButton.Up;
-        if (y > dead || hatY > dead) axis |= 1 << (int)JoypadButton.Down;
-        Volatile.Write(ref _axisButtons, axis);
-
-        // Rechter Stick bewegt den Touch-Zeiger (DS)
-        float rx = e.GetAxisValue(Axis.Z), ry = e.GetAxisValue(Axis.Rz);
-        _cursorX = Math.Abs(rx) > 0.15f ? rx : 0;
-        _cursorY = Math.Abs(ry) > 0.15f ? ry : 0;
-
-        // Analoge Schultertasten als Vorspulen
-        Set(ref _hotkeys, 1 << (int)HotkeyAction.FastForward, e.GetAxisValue(Axis.Rtrigger) > 0.5f || e.GetAxisValue(Axis.Gas) > 0.5f);
-        return true;
+        lock (Gate)
+        {
+            _lx = e.GetAxisValue(Axis.X);
+            _ly = e.GetAxisValue(Axis.Y);
+            _rx = e.GetAxisValue(Axis.Z);
+            _ry = e.GetAxisValue(Axis.Rz);
+            _hatX = e.GetAxisValue(Axis.HatX);
+            _hatY = e.GetAxisValue(Axis.HatY);
+            _lt = Math.Max(e.GetAxisValue(Axis.Ltrigger), e.GetAxisValue(Axis.Brake));
+            _rt = Math.Max(e.GetAxisValue(Axis.Rtrigger), e.GetAxisValue(Axis.Gas));
+        }
+        return Active;
     }
 
-    private static void Set(ref int field, int bit, bool on)
+    private static bool IsPressed(PadControl control)
     {
-        int old, updated;
-        do
+        const float dead = 0.5f;
+        return control switch
         {
-            old = field;
-            updated = on ? old | bit : old & ~bit;
-        } while (Interlocked.CompareExchange(ref field, updated, old) != old);
+            PadControl.None => false,
+            PadControl.LeftStickUp => _ly < -dead,
+            PadControl.LeftStickDown => _ly > dead,
+            PadControl.LeftStickLeft => _lx < -dead,
+            PadControl.LeftStickRight => _lx > dead,
+            PadControl.LeftTrigger => _lt > dead || Pressed.Contains(PadControl.LeftTrigger),
+            PadControl.RightTrigger => _rt > dead || Pressed.Contains(PadControl.RightTrigger),
+            PadControl.DpadUp => _hatY < -dead || Pressed.Contains(control),
+            PadControl.DpadDown => _hatY > dead || Pressed.Contains(control),
+            PadControl.DpadLeft => _hatX < -dead || Pressed.Contains(control),
+            PadControl.DpadRight => _hatX > dead || Pressed.Contains(control),
+            _ => Pressed.Contains(control),
+        };
     }
 
     public static void Reset()
     {
-        _buttons = _hotkeys = _axisButtons = 0;
-        _cursorX = _cursorY = 0;
+        lock (Gate)
+        {
+            Pressed.Clear();
+            _lx = _ly = _rx = _ry = _lt = _rt = _hatX = _hatY = 0;
+        }
     }
 
-    public InputSnapshot Poll() =>
-        new(Volatile.Read(ref _buttons) | Volatile.Read(ref _axisButtons), Volatile.Read(ref _hotkeys), _cursorX, _cursorY);
+    public InputSnapshot Poll()
+    {
+        var settings = Settings;
+        if (settings is null) return default;
+        lock (Gate)
+        {
+            int buttons = 0;
+            foreach (var (button, control) in settings.Gamepad)
+                if (IsPressed(control)) buttons |= 1 << (int)button;
+            if (settings.LeftStickAsDpad && StickAsDpad)
+            {
+                if (IsPressed(PadControl.LeftStickUp)) buttons |= 1 << (int)JoypadButton.Up;
+                if (IsPressed(PadControl.LeftStickDown)) buttons |= 1 << (int)JoypadButton.Down;
+                if (IsPressed(PadControl.LeftStickLeft)) buttons |= 1 << (int)JoypadButton.Left;
+                if (IsPressed(PadControl.LeftStickRight)) buttons |= 1 << (int)JoypadButton.Right;
+            }
+            int hotkeys = 0;
+            foreach (var (action, control) in settings.HotkeyGamepad)
+                if (IsPressed(control)) hotkeys |= 1 << (int)action;
+
+            static short S(float v) => (short)Math.Clamp(v * 32767f, -32767f, 32767f);
+            return new InputSnapshot(buttons, hotkeys, _rx, _ry, S(_lx), S(_ly), S(_rx), S(_ry));
+        }
+    }
+
+    // ---------- für die Seite "Steuerung" ----------
+
+    public IReadOnlyList<string> ConnectedNames()
+    {
+        var names = new List<string>();
+        foreach (var id in InputDevice.GetDeviceIds() ?? [])
+        {
+            var device = InputDevice.GetDevice(id);
+            if (device is null) continue;
+            var sources = device.Sources;
+            if ((sources & InputSourceType.Gamepad) == InputSourceType.Gamepad || (sources & InputSourceType.Joystick) == InputSourceType.Joystick)
+                names.Add(device.Name ?? "Controller");
+        }
+        return names;
+    }
+
+    public string? InitError => null;
+    public IReadOnlyList<string> UnmappedDevices => [];
+
+    public PadControl FirstPressed()
+    {
+        lock (Gate)
+            foreach (var control in Enum.GetValues<PadControl>())
+                if (IsPressed(control)) return control;
+        return PadControl.None;
+    }
 }

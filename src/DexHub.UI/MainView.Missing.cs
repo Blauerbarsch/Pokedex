@@ -4,13 +4,13 @@ using Avalonia.Layout;
 using DexHub.Core.Guide;
 using DexHub.Core.Models;
 
-namespace DexHub.App;
+namespace DexHub.UI;
 
 /// <summary>
 /// "Was fehlt mir noch?": Zu einem Pokémon zeigen, in welchen eigenen Spielen und wo man es bekommt –
 /// wild, durch Entwicklung oder durch Zucht. Nutzt die Fundorte aus den Guide-Daten.
 /// </summary>
-public partial class MainWindow
+public partial class MainView
 {
     /// <summary>Art -> Editionen aus der eigenen Bibliothek, in denen man sie bekommen kann.</summary>
     private Dictionary<int, List<string>> _obtainable = [];

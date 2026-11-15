@@ -3,7 +3,9 @@ using Avalonia.Controls;
 using Avalonia.Headless;
 using Avalonia.Threading;
 using DexHub.App;
+using Avalonia.VisualTree;
 using DexHub.Core.Settings;
+using DexHub.UI;
 
 // Aufruf: dotnet run --project tools/DexHub.Screenshots -- <Zielordner>
 var output = Path.GetFullPath(args.Length > 0 ? args[0] : "screenshots");
@@ -56,16 +58,34 @@ var main = new MainWindow { Width = 1280, Height = 820 };
 main.Show();
 Pump(25); // Pokédex-Daten und Cover laden
 
-var tabs = main.FindControl<TabControl>("MainTabs")!;
-for (int i = 0; i < tabs.ItemCount; i++)
+TabControl Tabs(Window w) => w.GetVisualDescendants().OfType<TabControl>().First(t => t.Name == "MainTabs");
+
+void CapturePages(Window window, string prefix, Func<string, bool> include)
 {
-    if (tabs.Items[i] is not TabItem { IsEnabled: true } item) continue;
-    tabs.SelectedIndex = i;
-    var title = (item.Header?.ToString() ?? $"seite{i}").Trim();
-    title = new string(title.Where(char.IsLetter).ToArray());
-    Pump(title == "Guide" ? 60 : 3);
-    Capture(main, $"{i:00}-{title}");
+    var tabs = Tabs(window);
+    for (int i = 0; i < tabs.ItemCount; i++)
+    {
+        if (tabs.Items[i] is not TabItem { IsEnabled: true } item) continue;
+        var title = new string((item.Header?.ToString() ?? $"seite{i}").Where(char.IsLetter).ToArray());
+        if (!include(title)) continue;
+        tabs.SelectedIndex = i;
+        Pump(title == "Guide" ? 60 : 3);
+        Capture(window, $"{prefix}{i:00}-{title}");
+    }
 }
+
+CapturePages(main, "", _ => true);
+
+// Handy-Ansicht (wie in der Android-App): Hoch- und Querformat
+MainView.Host = new NullPlatform { IsMobile = true };
+var phone = new Window { Width = 412, Height = 892, Content = new MainView() };
+phone.Show();
+Pump(15);
+CapturePages(phone, "phone-", t => t is "Bibliothek" or "Pokédex" or "Statistik" or "Guide" or "Einstellungen");
+phone.Width = 892;
+phone.Height = 412;
+Pump(3);
+CapturePages(phone, "phone-quer-", t => t is "Bibliothek" or "Pokédex");
 
 // Großbild-Modus
 var big = new BigPictureWindow(() => [], (_, _) => Task.CompletedTask, settings, _ => { }) { Width = 1280, Height = 720 };

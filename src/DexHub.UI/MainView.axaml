@@ -1,19 +1,40 @@
-<Window xmlns="https://github.com/avaloniaui"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:m="clr-namespace:DexHub.Core.Models;assembly=DexHub.Core"
-        xmlns:p="clr-namespace:DexHub.Core.Pokedex;assembly=DexHub.Core"
-        x:Class="DexHub.App.MainWindow"
-        Title="DexHub"
-        Width="1280" Height="820"
-        MinWidth="980" MinHeight="620">
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:m="clr-namespace:DexHub.Core.Models;assembly=DexHub.Core"
+             xmlns:p="clr-namespace:DexHub.Core.Pokedex;assembly=DexHub.Core"
+             x:Class="DexHub.UI.MainView"
+             Background="{StaticResource DexBackground}"
+             Foreground="{StaticResource DexText}"
+             FontFamily="{StaticResource DexFont}">
 
-  <Grid RowDefinitions="*,Auto">
+  <Panel>
+  <Grid x:Name="Shell" RowDefinitions="Auto,*,Auto">
+
+    <!-- Kompakte Kopfleiste (nur auf schmalen Bildschirmen, z. B. Handy) -->
+    <Border x:Name="CompactHeader" IsVisible="False" Padding="12,8">
+      <Border.Background>
+        <LinearGradientBrush StartPoint="0%,0%" EndPoint="100%,100%">
+          <GradientStop Offset="0" Color="#EE1C3A" />
+          <GradientStop Offset="1" Color="#A3081F" />
+        </LinearGradientBrush>
+      </Border.Background>
+      <Grid ColumnDefinitions="Auto,Auto,*,Auto">
+        <Grid Width="34" Height="34" VerticalAlignment="Center">
+          <Ellipse Fill="#F4F6FA" />
+          <Ellipse Width="26" Height="26" Fill="#3BA7FF" Stroke="#1E2A3A" StrokeThickness="1.5" />
+          <Ellipse Width="7" Height="7" Fill="White" Opacity="0.75" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,9,0,0" />
+        </Grid>
+        <TextBlock Grid.Column="1" Text="DexHub" FontSize="20" FontWeight="Bold" Foreground="White"
+                   VerticalAlignment="Center" Margin="10,0,0,0" />
+        <ComboBox Grid.Column="3" x:Name="CompactProfileBox" MinWidth="130" SelectionChanged="OnCompactProfileChanged" />
+      </Grid>
+    </Border>
 
     <!-- Seitenleiste: Hintergrund -->
-    <Border Width="236" HorizontalAlignment="Left" Background="{StaticResource DexSidebar}"
+    <Border x:Name="SidebarBackground" Grid.Row="1" Width="236" HorizontalAlignment="Left" Background="{StaticResource DexSidebar}"
             BorderBrush="{StaticResource DexBorder}" BorderThickness="0,0,1,0" />
 
-    <TabControl x:Name="MainTabs" SelectedIndex="1" SelectionChanged="OnMainTabChanged">
+    <TabControl x:Name="MainTabs" Grid.Row="1" SelectedIndex="1" SelectionChanged="OnMainTabChanged">
 
       <TabItem Classes="group" IsEnabled="False" Header="SPIELEN" />
       <!-- ============ Bibliothek ============ -->
@@ -28,7 +49,7 @@
             <TextBox x:Name="LibrarySearchBox" HorizontalAlignment="Left" Width="320" Watermark="Spiel suchen…"
                      TextChanged="OnLibrarySearchChanged" />
             <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
-              <Button Content="ROM-Ordner…" Click="OnBrowseRomFolderClick" />
+              <Button x:Name="RomFolderButton" Content="ROM-Ordner…" Click="OnBrowseRomFolderClick" />
               <Button Content="Neu scannen" Click="OnRescanClick" />
             </StackPanel>
           </Grid>
@@ -70,7 +91,7 @@
             <TextBlock Classes="h1" Text="Pokédex" />
             <TextBlock Classes="muted" Text="Alle Pokémon – was du gefangen ● und gesehen ○ hast, über alle deine Spiele." TextWrapping="Wrap" />
           </StackPanel>
-        <Grid ColumnDefinitions="*,300" RowDefinitions="Auto,*" Margin="0,8,0,0">
+        <Grid x:Name="DexGrid" ColumnDefinitions="*,300" RowDefinitions="Auto,*" Margin="0,8,0,0">
           <StackPanel Orientation="Horizontal" Spacing="8" Grid.ColumnSpan="2">
             <TextBox x:Name="SearchBox" Width="240" Watermark="Name oder Nummer…"
                      TextChanged="OnSearchChanged" />
@@ -104,7 +125,7 @@
           </ScrollViewer>
 
           <!-- Detailansicht -->
-          <ScrollViewer Grid.Row="1" Grid.Column="1" Margin="0,8,0,0">
+          <ScrollViewer x:Name="DexDetail" Grid.Row="1" Grid.Column="1" Margin="0,8,0,0">
           <StackPanel Spacing="10" Margin="0,0,12,0">
             <!-- Pokédex-Bildschirm -->
             <Border CornerRadius="14" Padding="10" Background="#D9DDE4">
@@ -138,11 +159,11 @@
             <TextBlock Classes="h1" Text="Statistik" />
             <TextBlock Classes="muted" Text="Deine Pokémon, Fortschritt, Erfolge, Shiny-Jagden und der Rückblick." TextWrapping="Wrap" />
           </StackPanel>
-        <Grid ColumnDefinitions="*,330" Margin="0,8,0,0">
+        <Grid x:Name="StatsGrid" ColumnDefinitions="*,330" Margin="0,8,0,0">
           <ScrollViewer Margin="0,0,8,0">
             <StackPanel x:Name="StatsPanel" Spacing="8" />
           </ScrollViewer>
-          <Border Grid.Column="1" Classes="card" Padding="14">
+          <Border x:Name="StatsDetail" Grid.Column="1" Classes="card" Padding="14">
             <ScrollViewer>
               <StackPanel x:Name="PokemonDetailPanel" Spacing="8">
                 <TextBlock Text="Pokémon anklicken, um Details zu sehen." Opacity="0.6" TextWrapping="Wrap" />
@@ -195,8 +216,8 @@
             <ComboBox x:Name="GuideVersionBox" Width="280" SelectionChanged="OnGuideVersionChanged" />
             <TextBlock x:Name="GuideStatus" VerticalAlignment="Center" Opacity="0.7" />
           </StackPanel>
-          <Grid ColumnDefinitions="260,*">
-            <DockPanel>
+          <Grid x:Name="GuideGrid" ColumnDefinitions="260,*">
+            <DockPanel x:Name="GuideSide">
               <TextBox x:Name="GuideSearchBox" DockPanel.Dock="Top" Watermark="Suchen (Name oder Nummer)…"
                        TextChanged="OnGuideSearchChanged" Margin="0,0,0,6" />
               <ListBox x:Name="GuideList" SelectionChanged="OnGuideListSelectionChanged" />
@@ -289,7 +310,7 @@
               </Grid>
             </Expander>
 
-            <Expander Header="Updates" HorizontalAlignment="Stretch">
+            <Expander x:Name="UpdatesExpander" Header="Updates" HorizontalAlignment="Stretch">
               <StackPanel Spacing="8">
                 <TextBlock x:Name="VersionText" />
                 <StackPanel Orientation="Horizontal" Spacing="8">
@@ -320,7 +341,7 @@
     </TabControl>
 
     <!-- Pokédex-Kopfteil oben links: rotes Gehäuse mit Linse und Lämpchen -->
-    <Border Width="236" Height="160" HorizontalAlignment="Left" VerticalAlignment="Top"
+    <Border x:Name="SidebarHeader" Grid.Row="1" Width="236" Height="160" HorizontalAlignment="Left" VerticalAlignment="Top"
             CornerRadius="0,0,18,0" ClipToBounds="True">
       <Border.Background>
         <LinearGradientBrush StartPoint="0%,0%" EndPoint="100%,100%">
@@ -362,7 +383,7 @@
     </Border>
 
     <!-- Trainerkarte unten links -->
-    <Border Width="236" Height="132" HorizontalAlignment="Left" VerticalAlignment="Bottom" Padding="12,0,12,10">
+    <Border x:Name="TrainerCard" Grid.Row="1" Width="236" Height="132" HorizontalAlignment="Left" VerticalAlignment="Bottom" Padding="12,0,12,10">
       <Border Classes="card" Padding="10">
         <StackPanel Spacing="7">
           <TextBlock Classes="eyebrow" Text="TRAINER" />
@@ -386,7 +407,7 @@
     </Border>
 
     <!-- Statuszeile -->
-    <Border Grid.Row="1" Padding="16,6" Background="#111318" BorderBrush="{StaticResource DexBorder}" BorderThickness="0,1,0,0">
+    <Border Grid.Row="2" Padding="16,6" Background="#111318" BorderBrush="{StaticResource DexBorder}" BorderThickness="0,1,0,0">
       <Grid ColumnDefinitions="*,Auto">
         <TextBlock x:Name="StatusText" Text="Bereit." FontSize="12" Foreground="{StaticResource DexMuted}" VerticalAlignment="Center" />
         <Button Grid.Column="1" x:Name="UpdateButton" Classes="primary" Content="⬆ Update installieren" IsVisible="False"
@@ -394,4 +415,11 @@
       </Grid>
     </Border>
   </Grid>
-</Window>
+
+  <!-- Dialoge (Meldung, Frage, Eingabe) erscheinen hier über allem – funktioniert auch auf Android -->
+  <Border x:Name="DialogLayer" IsVisible="False" Background="#B0000000">
+    <Border x:Name="DialogCard" Classes="card" MaxWidth="520" Margin="20" Padding="22"
+            HorizontalAlignment="Center" VerticalAlignment="Center" BoxShadow="0 10 40 0 #80000000" />
+  </Border>
+  </Panel>
+</UserControl>

@@ -16,24 +16,31 @@ public class MainActivity : AvaloniaMainActivity<App>
 {
     public static MainActivity? Current { get; private set; }
 
+    protected override AppBuilder CustomizeAppBuilder(AppBuilder builder) =>
+        base.CustomizeAppBuilder(builder).WithInterFont();
+
     protected override void OnCreate(Bundle? savedInstanceState)
     {
         Current = this;
         CoreCatalog.AndroidLibraryFolder = ApplicationInfo?.NativeLibraryDir;
+        // ROMs liegen im App-Ordner auf dem gemeinsamen Speicher (per USB/Dateimanager erreichbar:
+        // Android/data/de.blauerbarsch.dexhub/files/roms) – dorthin kopiert auch "ROMs hinzufügen".
+        AndroidPlatform.RomFolder = System.IO.Path.Combine(GetExternalFilesDir(null)?.AbsolutePath ?? FilesDir!.AbsolutePath, "roms");
+        AndroidPlatform.Autostart = Intent?.GetStringExtra("autostart");
         base.OnCreate(savedInstanceState);
         BackRequested += (_, e) => e.Handled = App.HandleBack();
     }
 
     protected override void OnPause()
     {
-        App.View?.SetBackground(true);
+        App.Shell?.SetBackground(true);
         base.OnPause();
     }
 
     protected override void OnResume()
     {
         base.OnResume();
-        App.View?.SetBackground(false);
+        App.Shell?.SetBackground(false);
     }
 
     /// <summary>Controller-Tasten gehen direkt an den Emulator, solange ein Spiel läuft.</summary>

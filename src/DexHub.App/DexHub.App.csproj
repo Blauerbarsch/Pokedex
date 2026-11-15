@@ -25,6 +25,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\DexHub.Core\DexHub.Core.csproj" />
+    <ProjectReference Include="..\DexHub.UI\DexHub.UI.csproj" />
   </ItemGroup>
 
   <!-- Die Emulator-Cores (von scripts/FetchCores.cs heruntergeladen) neben das Programm kopieren -->

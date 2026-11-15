@@ -239,6 +239,13 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           name: DexHub-android
+      # Freies Homebrew-Spiel (µCity, GPL) zum Testen des Emulators
+      - name: Homebrew-Spiel laden
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release download -R AntonioND/ucity -p '*.gbc' -O homebrew.gbc || echo "kein Homebrew-Spiel"
+          ls -la homebrew.gbc || true
       - name: KVM freischalten
         run: |
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules

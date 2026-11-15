@@ -9,10 +9,10 @@ using DexHub.Core.Models;
 using DexHub.Core.Saves;
 using DexHub.Core.Settings;
 
-namespace DexHub.App;
+namespace DexHub.UI;
 
 /// <summary>Übersicht aller Spielstände aller Benutzer – mit Import, Export, Ordner öffnen und Löschen.</summary>
-public partial class MainWindow
+public partial class MainView
 {
     private void BuildSavesPanel()
     {
@@ -235,7 +235,7 @@ public partial class MainWindow
 
     private async Task ImportProfileZipAsync(string profile)
     {
-        if (_running.Any(r => r.Profile == profile && !r.Process.HasExited))
+        if (Host.AnyRunning(profile))
         {
             await ShowMessageAsync("Importieren", $"Bitte zuerst alle Spiele von {profile} beenden.");
             return;
@@ -305,13 +305,6 @@ public partial class MainWindow
     /// <summary>Ordner im Dateimanager öffnen (Windows Explorer, Finder, Linux-Dateimanager).</summary>
     private void OpenFolder(string folder)
     {
-        try
-        {
-            Process.Start(new ProcessStartInfo(folder) { UseShellExecute = true });
-        }
-        catch (Exception ex)
-        {
-            SetStatus($"Ordner: {folder} ({ex.Message})");
-        }
+        if (!Host.OpenFolder(folder)) SetStatus($"Ordner: {folder}");
     }
 }

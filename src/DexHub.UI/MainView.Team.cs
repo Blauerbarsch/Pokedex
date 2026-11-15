@@ -6,14 +6,14 @@ using Avalonia.Media.Imaging;
 using DexHub.Core.Pokemon;
 using DexHub.Core.Settings;
 
-namespace DexHub.App;
+namespace DexHub.UI;
 
 /// <summary>
 /// Team-Planer im Guide: bis zu 6 eigene Pokémon (oder beliebige Arten) zusammenstellen und sehen,
 /// gegen welche Typen das Team gut aufgestellt ist, wo es Lücken hat und was helfen würde.
 /// Gerechnet wird mit der Typ-Tabelle der gewählten Edition; Fähigkeiten wie Schwebe zählen nicht mit.
 /// </summary>
-public partial class MainWindow
+public partial class MainView
 {
     private List<TeamMember> Team
     {
