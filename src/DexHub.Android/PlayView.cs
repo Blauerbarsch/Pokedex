@@ -78,7 +78,7 @@ public sealed class PlayView : UserControl
         _surface.Children.Add(_screenB);
         HookTouchScreen();
 
-        _ffButton = new BarToggle("⏩", on =>
+        _ffButton = new BarToggle("»", on =>
         {
             _session.SetFastForward(on);
             ShowOsd(on ? "Vorspulen an" : "Vorspulen aus");
@@ -176,10 +176,14 @@ public sealed class PlayView : UserControl
     // Bild
     // =====================================================================
 
+    private int _traceFrames;
+
     private void OnAnimationFrame(TimeSpan _)
     {
         if (_closing) return;
         var (w, h) = _session.FrameSize;
+        if (DexHub.Core.Libretro.LibretroCore.Trace && _traceFrames++ % 120 == 0)
+            Console.WriteLine($"[DexHub] Anzeige: Bild {w}x{h}, Fläche {_surface.Bounds.Size}, Nr. {_lastFrameId}, Bildquelle {_screenA.Source is not null}, Größe {_screenA.Bounds.Size}");
         if (w > 0 && h > 0)
         {
             if (_bitmap is null || _bitmap.PixelSize.Width != w || _bitmap.PixelSize.Height != h)
@@ -367,6 +371,8 @@ public sealed class PlayView : UserControl
             stack.Children.Add(shoulders);
         }
         stack.Children.Add(main);
+        // Für ~400 dp Breite gestaltet; schmalere Handys verkleinern die Tasten gleichmäßig
+        stack.Width = 400;
 
         return new Border
         {
@@ -374,7 +380,7 @@ public sealed class PlayView : UserControl
             CornerRadius = new CornerRadius(22, 22, 0, 0),
             BorderBrush = new SolidColorBrush(Color.Parse("#2F3440")),
             BorderThickness = new Thickness(0, 1, 0, 0),
-            Child = stack,
+            Child = new Viewbox { Stretch = Stretch.Uniform, StretchDirection = StretchDirection.DownOnly, Child = stack },
         };
     }
 

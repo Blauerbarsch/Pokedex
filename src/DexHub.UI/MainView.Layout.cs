@@ -40,10 +40,10 @@ public partial class MainView
         // Nach dem Wechsel der Reiter-Vorlage den Seiteninhalt neu einhängen (sonst bleibt er leer)
         Avalonia.Threading.Dispatcher.UIThread.Post(() =>
         {
-            var selected = MainTabs.SelectedItem;
-            MainTabs.SelectedItem = null;
-            MainTabs.SelectedItem = selected;
-        });
+            var index = Math.Max(0, MainTabs.SelectedIndex);
+            MainTabs.SelectedIndex = -1;
+            MainTabs.SelectedIndex = index;
+        }, Avalonia.Threading.DispatcherPriority.Loaded);
     }
 
     /// <summary>Zweite Spalte (Details) unter den Hauptinhalt legen bzw. zurück daneben.</summary>

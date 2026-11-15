@@ -419,7 +419,7 @@ public sealed unsafe class LibretroCore : IDisposable
 
     private bool OnEnvironment(uint cmd, IntPtr data)
     {
-        if (Trace) Console.WriteLine($"[DexHub] env {cmd & ~Retro.Experimental} data=0x{data:X}");
+        if (Trace && (cmd & ~Retro.Experimental) is not (15 or 17)) Console.WriteLine($"[DexHub] env {cmd & ~Retro.Experimental} data=0x{data:X}");
         try
         {
             switch (cmd & ~Retro.Experimental)
