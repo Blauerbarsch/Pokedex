@@ -228,3 +228,37 @@ jobs:
         with:
           tag_name: ${{ env.RELEASE_TAG }}
           files: DexHub-android.apk
+
+  # Startet die Android-App im Emulator, macht Bildschirmfotos und sammelt das Log (Zweig "android-test")
+  android-test:
+    needs: android
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: DexHub-android
+      - name: KVM freischalten
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+      - name: Emulator starten und testen
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 33
+          arch: x86_64
+          target: google_apis
+          disable-animations: true
+          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim
+          script: sh scripts/android-smoke.sh
+      - name: Ergebnisse in Zweig "android-test"
+        if: always()
+        run: |
+          cd android-shots
+          git init -q
+          git checkout -q -b android-test
+          git add -A
+          git -c user.name="DexHub CI" -c user.email="ci@users.noreply.github.com" commit -q -m "Android-Test ${GITHUB_SHA::7}"
+          git push -q -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" android-test

@@ -8,7 +8,7 @@ using DexHub.Core.Emulation;
 
 namespace DexHub.Mobile;
 
-[Activity(Label = "DexHub", Theme = "@style/Theme.AppCompat.NoActionBar", MainLauncher = true, Exported = true,
+[Activity(Name = "de.blauerbarsch.dexhub.MainActivity", Label = "DexHub", Theme = "@style/Theme.AppCompat.NoActionBar", MainLauncher = true, Exported = true,
     ScreenOrientation = ScreenOrientation.FullUser,
     ConfigurationChanges = ConfigChanges.Orientation | ConfigChanges.ScreenSize | ConfigChanges.UiMode
                            | ConfigChanges.Keyboard | ConfigChanges.KeyboardHidden | ConfigChanges.Navigation)]

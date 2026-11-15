@@ -16,7 +16,10 @@
     <ApplicationDisplayVersion>0.4</ApplicationDisplayVersion>
     <AndroidPackageFormat>apk</AndroidPackageFormat>
     <!-- Die Emulator-Cores gibt es nur für 64-Bit-ARM (praktisch alle aktuellen Geräte) -->
-    <RuntimeIdentifiers>android-arm64</RuntimeIdentifiers>
+    <RuntimeIdentifiers>android-arm64;android-x64</RuntimeIdentifiers>
+    <!-- Kürzen (Trimming) würde per Reflexion genutzte Teile entfernen (JSON-Einstellungen, Avalonia) -->
+    <JsonSerializerIsReflectionEnabledByDefault>true</JsonSerializerIsReflectionEnabledByDefault>
+    <TrimMode>partial</TrimMode>
     <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
   </PropertyGroup>
 
@@ -33,12 +36,17 @@
   </ItemGroup>
 
   <ItemGroup>
+    <TrimmerRootAssembly Include="DexHub.Core" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\DexHub.Core\DexHub.Core.csproj" />
   </ItemGroup>
 
   <!-- Emulator-Cores (von scripts/FetchCores.cs mit "android" heruntergeladen) -->
   <ItemGroup>
     <AndroidNativeLibrary Include="cores\arm64-v8a\*.so" Abi="arm64-v8a" />
+    <AndroidNativeLibrary Include="cores\x86_64\*.so" Abi="x86_64" />
   </ItemGroup>
 
 </Project>

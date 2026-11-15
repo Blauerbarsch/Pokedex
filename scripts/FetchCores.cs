@@ -66,18 +66,26 @@ http.DefaultRequestHeaders.UserAgent.ParseAdd("DexHub-FetchCores/0.1");
 int failed = 0;
 // Für Android zusätzlich das klassische melonDS als Ersatz, falls melonDS DS dort fehlt
 if (android) cores = [.. cores, "melonds_libretro"];
-HashSet<string> optionalSet = android ? [] : optional.ToHashSet();
+// Android: optional ist dort alles außer den Game-Boy-Cores (fehlt ein Core, fehlt nur die Konsole)
+HashSet<string> optionalSet = android
+    ? cores.Where(c => c is not ("gambatte_libretro" or "mgba_libretro")).ToHashSet()
+    : optional.ToHashSet();
 if (!android) cores = [.. cores, .. optional];
 
+// Android: 64-Bit-ARM (Handys) und x86_64 (Emulator für automatische Tests, ChromeOS)
+string[] abis = android ? ["arm64-v8a", "x86_64"] : [""];
+foreach (var abi in abis)
 foreach (var core in cores)
 {
     var fileName = core + extension;
     var url = android
-        ? $"https://buildbot.libretro.com/nightly/android/latest/arm64-v8a/{fileName}.zip"
+        ? $"https://buildbot.libretro.com/nightly/android/latest/{abi}/{fileName}.zip"
         : $"https://buildbot.libretro.com/nightly/{platformPath}/latest/{fileName}.zip";
     // Android verlangt "lib…so" als Dateiname
     var targetName = android ? "lib" + core + ".so" : fileName;
-    Console.Write($"{fileName,-28} ");
+    var folder = android ? Path.Combine(target, "..", abi) : target;
+    Directory.CreateDirectory(folder);
+    Console.Write($"{abi} {fileName,-28} ");
 
     try
     {
@@ -85,7 +93,7 @@ foreach (var core in cores)
         using var zip = new ZipArchive(new MemoryStream(zipBytes));
         var entry = zip.Entries.FirstOrDefault(e => e.Name == fileName)
                     ?? throw new InvalidDataException("Datei nicht im Archiv gefunden");
-        entry.ExtractToFile(Path.Combine(target, targetName), overwrite: true);
+        entry.ExtractToFile(Path.Combine(folder, targetName), overwrite: true);
         Console.WriteLine($"ok ({zipBytes.Length / 1024} KB)");
     }
     catch (Exception ex) when (optionalSet.Contains(core))
@@ -121,4 +129,4 @@ Console.WriteLine(failed == 0
     ? $"Fertig. Cores liegen in {target}"
     : $"{failed} Core(s) fehlgeschlagen. Die anderen liegen in {target}");
 // Android: ein fehlender DS-Core (es gibt zwei zur Auswahl) soll den Build nicht abbrechen
-return failed == 0 || (android && failed <= 1) ? 0 : 1;
+return failed == 0 ? 0 : 1;
