@@ -512,7 +512,7 @@ public partial class GameWindow : Window
     {
         HuntBorder.IsVisible = hunt is { Count: > 0 };
         if (hunt is null) return;
-        HuntText.Text = $"✨ {hunt.Count}";
+        HuntText.Text = $"✨ {hunt.Count}";
         ToolTip.SetTip(HuntBorder, $"Shiny-Jagd: {hunt.Count} Begegnungen · Chance bisher {hunt.ChanceSoFar:P0}");
     }
 

@@ -30,13 +30,15 @@
     <!-- Shiny-Jagd-Zähler -->
     <Border x:Name="HuntBorder" IsVisible="False" IsHitTestVisible="False"
             VerticalAlignment="Top" HorizontalAlignment="Right"
-            Margin="10" Padding="10,4" CornerRadius="4" Background="#B0000000">
+            Margin="12" Padding="12,5" CornerRadius="10" Background="#D01A1D23"
+            BorderBrush="#F5C542" BorderThickness="1">
       <TextBlock x:Name="HuntText" Foreground="#FFD54F" FontWeight="SemiBold" FontSize="16" />
     </Border>
 
     <Border x:Name="OsdBorder" IsVisible="False"
             VerticalAlignment="Bottom" HorizontalAlignment="Left"
-            Margin="10" Padding="10,5" CornerRadius="4" Background="#B0000000">
+            Margin="12" Padding="12,7" CornerRadius="10" Background="#E01A1D23"
+            BorderBrush="#DC0A2D" BorderThickness="3,0,0,0">
       <TextBlock x:Name="OsdText" Foreground="White" TextWrapping="Wrap" />
     </Border>
   </Grid>

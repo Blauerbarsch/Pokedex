@@ -198,7 +198,7 @@
         <ControlTemplate>
           <Grid ColumnDefinitions="236,*">
             <!-- Platz oben für das Pokédex-Kopfteil und unten für die Benutzerkarte (liegen darüber) -->
-            <ScrollViewer Margin="0,168,0,150" HorizontalScrollBarVisibility="Disabled">
+            <ScrollViewer Margin="0,160,0,132" HorizontalScrollBarVisibility="Disabled">
               <ItemsPresenter Name="PART_ItemsPresenter" ItemsPanel="{TemplateBinding ItemsPanel}" Margin="10,4" />
             </ScrollViewer>
             <ContentPresenter Name="PART_SelectedContentHost" Grid.Column="1"

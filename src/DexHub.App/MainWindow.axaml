@@ -122,7 +122,7 @@
             <TextBlock x:Name="DetailName" FontSize="22" FontWeight="Bold"
                        Text="Pokémon auswählen" />
             <TextBlock x:Name="DetailText" TextWrapping="Wrap" />
-            <Button x:Name="OpenInGuideButton" Content="📖 Im Guide öffnen" Click="OnOpenInGuideClick" IsVisible="False" />
+            <Button x:Name="OpenInGuideButton" Content="📖 Im Guide öffnen" Click="OnOpenInGuideClick" IsVisible="False" />
             <StackPanel x:Name="WhereToFindPanel" Spacing="4" />
             <TextBlock Opacity="0.5" FontSize="12" TextWrapping="Wrap"
                        Text="● gefangen   ○ gesehen. Zählt, was im Spiel gespeichert wurde (Gen 1 bis 5)." />
@@ -320,7 +320,7 @@
     </TabControl>
 
     <!-- Pokédex-Kopfteil oben links: rotes Gehäuse mit Linse und Lämpchen -->
-    <Border Width="236" Height="168" HorizontalAlignment="Left" VerticalAlignment="Top"
+    <Border Width="236" Height="160" HorizontalAlignment="Left" VerticalAlignment="Top"
             CornerRadius="0,0,18,0" ClipToBounds="True">
       <Border.Background>
         <LinearGradientBrush StartPoint="0%,0%" EndPoint="100%,100%">
@@ -362,9 +362,9 @@
     </Border>
 
     <!-- Trainerkarte unten links -->
-    <Border Width="236" Height="150" HorizontalAlignment="Left" VerticalAlignment="Bottom" Padding="12,0,12,12">
-      <Border Classes="card" Padding="12">
-        <StackPanel Spacing="8">
+    <Border Width="236" Height="132" HorizontalAlignment="Left" VerticalAlignment="Bottom" Padding="12,0,12,10">
+      <Border Classes="card" Padding="10">
+        <StackPanel Spacing="7">
           <TextBlock Classes="eyebrow" Text="TRAINER" />
           <Grid ColumnDefinitions="Auto,*">
             <Border Width="32" Height="32" CornerRadius="16" Background="{StaticResource DexRed}" Margin="0,0,8,0">
@@ -389,7 +389,7 @@
     <Border Grid.Row="1" Padding="16,6" Background="#111318" BorderBrush="{StaticResource DexBorder}" BorderThickness="0,1,0,0">
       <Grid ColumnDefinitions="*,Auto">
         <TextBlock x:Name="StatusText" Text="Bereit." FontSize="12" Foreground="{StaticResource DexMuted}" VerticalAlignment="Center" />
-        <Button Grid.Column="1" x:Name="UpdateButton" Classes="primary" Content="⬆ Update installieren" IsVisible="False"
+        <Button Grid.Column="1" x:Name="UpdateButton" Classes="primary" Content="⬆ Update installieren" IsVisible="False"
                 Padding="12,3" FontSize="12" Click="OnUpdateClick" />
       </Grid>
     </Border>

@@ -30,7 +30,7 @@ public partial class MainWindow
         {
             var fresh = Achievements.Update(profile, context);
             if (fresh.Count is > 0 and <= 3)
-                SetStatus("🏆 Erfolg freigeschaltet: " + string.Join(", ", fresh.Select(a => a.Title)));
+                SetStatus("🏆 Erfolg freigeschaltet: " + string.Join(", ", fresh.Select(a => a.Title)));
         }
         var unlocked = Achievements.LoadUnlocked(profile);
 
@@ -74,6 +74,6 @@ public partial class MainWindow
             wrap.Children.Add(tile);
         }
 
-        return StatsSection($"🏆 Erfolge ({unlocked.Count} / {Achievements.All.Count})", wrap, expanded: false);
+        return StatsSection($"🏆 Erfolge ({unlocked.Count} / {Achievements.All.Count})", wrap, expanded: false);
     }
 }

@@ -63,7 +63,7 @@ public partial class MainWindow
             panel.Children.Add(Text($"Gefunden ({found.Count})", 15, bold: true));
             foreach (var h in found)
                 panel.Children.Add(Text(
-                    $"✨ {(h.Species > 0 ? SpeciesName(h.Species) : "Shiny")} nach {h.Count:N0} Begegnungen – {h.GameTitle}, " +
+                    $"✨ {(h.Species > 0 ? SpeciesName(h.Species) : "Shiny")} nach {h.Count:N0} Begegnungen – {h.GameTitle}, " +
                     $"{h.Found:dd.MM.yyyy}  (Glück: {LuckText(h)})", 13));
         }
     }
@@ -133,7 +133,7 @@ public partial class MainWindow
                             Spacer(),
                             Small("−1", () => HuntStore.Edit(hunt.Id, h => h.Count = Math.Max(0, h.Count - 1))),
                             Spacer(),
-                            Small("✨ Gefunden!", () => HuntStore.Edit(hunt.Id, h => h.Found = DateTime.Now)),
+                            Small("✨ Gefunden!", () => HuntStore.Edit(hunt.Id, h => h.Found = DateTime.Now)),
                             Spacer(),
                             Small("Löschen", () => HuntStore.Delete(hunt.Id)),
                         },

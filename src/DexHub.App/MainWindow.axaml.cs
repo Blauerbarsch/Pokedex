@@ -232,9 +232,9 @@ public partial class MainWindow : Window
         var menu = new List<object> { play, fresh };
         if (game.Info.Platform is GamePlatform.GameBoy or GamePlatform.GameBoyColor)
         {
-            var host = new MenuItem { Header = "🔗 Linkkabel: als Gastgeber starten" };
+            var host = new MenuItem { Header = "🔗 Linkkabel: als Gastgeber starten" };
             host.Click += async (_, _) => await LaunchWithLinkAsync(game, host: true);
-            var join = new MenuItem { Header = "🔗 Linkkabel: mit Gastgeber verbinden" };
+            var join = new MenuItem { Header = "🔗 Linkkabel: mit Gastgeber verbinden" };
             join.Click += async (_, _) => await LaunchWithLinkAsync(game, host: false);
             menu.Add(new Separator());
             menu.Add(host);
@@ -243,7 +243,7 @@ public partial class MainWindow : Window
         if (game.Info.Platform == GamePlatform.Nintendo64)
         {
             // Transfer Pak: Game-Boy-Spiel einstecken (Pokémon Stadium liest Team und Boxen)
-            var pak = new MenuItem { Header = "🎮 Mit Transfer Pak starten" };
+            var pak = new MenuItem { Header = "🎮 Mit Transfer Pak starten" };
             var gbGames = _games.Where(g => g.Info.SaveFormat is SaveFormat.Gen1 or SaveFormat.Gen2GoldSilver or SaveFormat.Gen2Crystal)
                                 .OrderBy(g => g.Info.Generation).ThenBy(g => g.Title).ToList();
             foreach (var gb in gbGames)
@@ -871,7 +871,7 @@ public partial class MainWindow : Window
         StatsPanel.Children.Add(StatsSection($"Meine Pokémon ({mons.Count})", BuildMyPokemon(mons), expanded: true));
         StatsPanel.Children.Add(StatsSection("Rückblick", BuildTimeline(mons), expanded: false));
         _huntPanel = new StackPanel { Spacing = 10 };
-        StatsPanel.Children.Add(StatsSection("✨ Shiny-Jagden", _huntPanel, expanded: true));
+        StatsPanel.Children.Add(StatsSection("✨ Shiny-Jagden", _huntPanel, expanded: true));
         RebuildHunts();
     }
 
@@ -1085,7 +1085,7 @@ public partial class MainWindow : Window
         panel.Children.Add(sprite);
 
         panel.Children.Add(Text(NickOrName(p), 22, bold: true));
-        panel.Children.Add(Text($"#{p.Species:0000} {SpeciesName(p.Species)} {p.Gender}{(p.IsShiny ? "  ✨ schillernd" : "")}", opacity: 0.8));
+        panel.Children.Add(Text($"#{p.Species:0000} {SpeciesName(p.Species)} {p.Gender}{(p.IsShiny ? "  ✨ schillernd" : "")}", opacity: 0.8));
         panel.Children.Add(Text(p.HasNature
             ? $"Level {p.Level} · Wesen: {_gameData?.Nature(p.Nature) ?? p.Nature.ToString()}"
             : $"Level {p.Level} · Gen {p.Generation}"));
@@ -1173,8 +1173,8 @@ public partial class MainWindow : Window
             .Where(p => p != GamePlatform.Unknown)
             .Select(p => (p.DisplayName() + ":").PadRight(20) + (
                 !CoreCatalog.IsPlatformSupported(p) ? "kommt später"
-                : CoreCatalog.FindCore(p) is not null ? $"✓ {CoreCatalog.Cores[p]}"
-                : $"✗ {CoreCatalog.Cores[p]} fehlt"));
+                : CoreCatalog.FindCore(p) is not null ? $"✓ {CoreCatalog.Cores[p]}"
+                : $"✗ {CoreCatalog.Cores[p]} fehlt"));
         CoreStatusText.Text = string.Join("\n", lines);
 
         VolumeSlider.Value = _settings.Volume;
@@ -1823,7 +1823,7 @@ public partial class MainWindow : Window
 
         ControlsPanel.Children.Add(new TextBlock
         {
-            Text = "Auf eine Belegung klicken und dann die gewünschte Taste drücken. Esc bricht ab, ✕ löscht eine Belegung. " +
+            Text = "Auf eine Belegung klicken und dann die gewünschte Taste drücken. Esc bricht ab, ✕ löscht eine Belegung. " +
                    "Änderungen gelten sofort, auch im laufenden Spiel.",
             TextWrapping = TextWrapping.Wrap,
             Opacity = 0.8,
@@ -1832,11 +1832,11 @@ public partial class MainWindow : Window
         var names = SdlGamepad.Instance.ConnectedNames();
         ControlsPanel.Children.Add(new TextBlock
         {
-            Text = names.Count > 0 ? "🎮 Verbunden: " + string.Join(", ", names)
-                : SdlGamepad.Instance.InitError is { } err ? "🎮 Controller-Unterstützung nicht verfügbar: " + err
+            Text = names.Count > 0 ? "🎮 Verbunden: " + string.Join(", ", names)
+                : SdlGamepad.Instance.InitError is { } err ? "🎮 Controller-Unterstützung nicht verfügbar: " + err
                 : SdlGamepad.Instance.UnmappedDevices.Count > 0
-                    ? "🎮 Gerät gefunden, aber ohne Tastenzuordnung: " + string.Join(", ", SdlGamepad.Instance.UnmappedDevices)
-                : "🎮 Kein Controller gefunden. Anschließen und auf „Controller suchen“ klicken.",
+                    ? "🎮 Gerät gefunden, aber ohne Tastenzuordnung: " + string.Join(", ", SdlGamepad.Instance.UnmappedDevices)
+                : "🎮 Kein Controller gefunden. Anschließen und auf „Controller suchen“ klicken.",
             TextWrapping = TextWrapping.Wrap,
             FontWeight = FontWeight.SemiBold,
         });

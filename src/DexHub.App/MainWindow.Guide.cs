@@ -181,7 +181,7 @@ public partial class MainWindow
 
         IEnumerable<GuideListItem> items = _guideMode switch
         {
-            "types" => new[] { new GuideListItem("chart", 0, "📊 Typ-Tabelle") }.Concat(
+            "types" => new[] { new GuideListItem("chart", 0, "📊 Typ-Tabelle") }.Concat(
                 _guide.TypesIn(GuideGeneration).Where(t => Match(t.Name, t.Id))
                       .Select(t => new GuideListItem("type", t.Id, t.Name))),
             "team" => TeamCandidates(query, number),
@@ -303,7 +303,7 @@ public partial class MainWindow
             },
         };
         if (p.Generation > gen)
-            head.Children.Add(Text($"⚠ Dieses Pokémon gibt es in der gewählten Edition noch nicht.", opacity: 0.8));
+            head.Children.Add(Text($"⚠ Dieses Pokémon gibt es in der gewählten Edition noch nicht.", opacity: 0.8));
         GuideContent.Children.Add(new Grid
         {
             ColumnDefinitions = new ColumnDefinitions("140,*"),
@@ -424,7 +424,7 @@ public partial class MainWindow
 
         // Zucht und Daten
         string gender = p.GenderRate < 0 ? "geschlechtslos"
-            : $"♂ {100 - p.GenderRate * 12.5:0.#} % · ♀ {p.GenderRate * 12.5:0.#} %";
+            : $"♂ {100 - p.GenderRate * 12.5:0.#} % · ♀ {p.GenderRate * 12.5:0.#} %";
         string[] growth = ["", "Langsam", "Mittel", "Schnell", "Mittel-langsam", "Unregelmäßig", "Schwankend"];
         var info = new StackPanel
         {

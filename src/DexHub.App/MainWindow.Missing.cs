@@ -142,7 +142,7 @@ public partial class MainWindow
         if (versions.Count == 0) return;
 
         bool caught = _dexById.TryGetValue(id, out var entry) && entry.IsCaught;
-        WhereToFindPanel.Children.Add(Text(caught ? "🔎 Wo bekomme ich es (noch einmal)?" : "🔎 Wo bekomme ich es?", 16, bold: true));
+        WhereToFindPanel.Children.Add(Text(caught ? "🔎 Wo bekomme ich es (noch einmal)?" : "🔎 Wo bekomme ich es?", 16, bold: true));
 
         if (_guide is null)
         {

@@ -199,7 +199,7 @@ public sealed class BigPictureWindow : Window
 
     private void Rebuild()
     {
-        _profileText.Text = "👤 " + _settings.CurrentProfile;
+        _profileText.Text = "👤 " + _settings.CurrentProfile;
         _grid.Children.Clear();
         _tiles.Clear();
 

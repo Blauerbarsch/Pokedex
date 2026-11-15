@@ -43,7 +43,7 @@ public partial class MainWindow
             var p = owned[i];
             var name = NickOrName(p);
             if (Match(name, p.Species) || Match(SpeciesName(p.Species), p.Species))
-                yield return new GuideListItem("teamown", i, $"★ Lv. {p.Level} {name} ({p.GameTitle})");
+                yield return new GuideListItem("teamown", i, $"★ Lv. {p.Level} {name} ({p.GameTitle})");
         }
         foreach (var p in _guide!.Pokemon.Values.OrderBy(p => p.Id))
             if (Match(p.Name, p.Id))
@@ -98,7 +98,7 @@ public partial class MainWindow
 
         GuideContent.Children.Add(Text("Team-Planer", 26, bold: true));
         GuideContent.Children.Add(Text(
-            "Links Pokémon anklicken, um sie ins Team zu holen (★ = deine eigenen, mit ihren echten Attacken). " +
+            "Links Pokémon anklicken, um sie ins Team zu holen (★ = deine eigenen, mit ihren echten Attacken). " +
             $"Gerechnet wird mit der Typ-Tabelle von „{(GuideVersionBox.SelectedItem as DexHub.Core.Guide.VersionGroupInfo)?.Name}“. " +
             "Fähigkeiten (z. B. Schwebe) sind nicht berücksichtigt.", 13, opacity: 0.75));
 
@@ -139,7 +139,7 @@ public partial class MainWindow
         var attack = new StackPanel { Spacing = 6 };
         attack.Children.Add(Wrap([Text("Eure Angriffstypen:  ", 13, opacity: 0.8), .. attackTypes.Select(t => TypeBadge(t, 12))]));
         attack.Children.Add(uncovered.Count == 0
-            ? Text("✓ Gegen jeden Typ habt ihr eine sehr effektive Attacke.", 13)
+            ? Text("✓ Gegen jeden Typ habt ihr eine sehr effektive Attacke.", 13)
             : Wrap([Text("Keine sehr effektive Attacke gegen:  ", 13), .. uncovered.Select(t => TypeBadge(t, 12))]));
         if (walls.Count > 0)
             attack.Children.Add(Wrap([Text("Nur schwacher Schaden gegen:  ", 13, opacity: 0.8), .. walls.Select(t => TypeBadge(t, 12))]));
