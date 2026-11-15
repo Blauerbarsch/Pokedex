@@ -1,0 +1,600 @@
+11-15 21:15:22.506 W/PeoplePU( 5817): 	at android.os.Parcel.createException(Parcel.java:2995)
+11-15 21:15:22.506 W/PeoplePU( 5817): 	at android.os.Parcel.readException(Parcel.java:2978)
+11-15 21:15:22.506 W/PeoplePU( 5817): 	at android.os.Parcel.readException(Parcel.java:2920)
+11-15 21:15:22.508 W/PeoplePU( 5817): java.lang.IllegalArgumentException: Unknown component: ComponentInfo{com.google.android.syncadapters.contacts/com.google.android.syncadapters.contacts.ProxyGalProvider}
+11-15 21:15:22.508 W/PeoplePU( 5817): 	at android.os.Parcel.createExceptionOrNull(Parcel.java:3015)
+11-15 21:15:22.508 W/PeoplePU( 5817): 	at android.os.Parcel.createException(Parcel.java:2995)
+11-15 21:15:22.508 W/PeoplePU( 5817): 	at android.os.Parcel.readException(Parcel.java:2978)
+11-15 21:15:22.508 W/PeoplePU( 5817): 	at android.os.Parcel.readException(Parcel.java:2920)
+11-15 21:15:22.897 W/NetworkScheduler( 5749): java.lang.IllegalArgumentException: Only the following extra parameter types are supported: Integer, Long, Double, String, Boolean, and nested Bundles with the same restrictions.
+11-15 21:15:23.215 I/ActivityTaskManager(  482): Displayed de.blauerbarsch.dexhub/.MainActivity: +10s235ms
+11-15 21:15:23.265 W/InputManager-JNI(  482): Input channel object '18077a2 Splash Screen de.blauerbarsch.dexhub (client)' was disposed without first being removed with the input manager!
+11-15 21:15:23.341 I/DOTNET  ( 6265): [DexHub] Autostart: homebrew
+11-15 21:15:23.358 I/erbarsch.dexhub( 6265): Explicit concurrent copying GC freed 570(95KB) AllocSpace objects, 0(0B) LOS objects, 49% free, 2234KB/4468KB, paused 36us,4us total 2.730ms
+11-15 21:15:23.373 I/DOTNET  ( 6265): [DexHub] Trace: lade Core
+11-15 21:15:23.398 I/DOTNET  ( 6265): [DexHub] env 52 data=0x78708724D20C
+11-15 21:15:23.399 I/DOTNET  ( 6265): [DexHub] env 16 data=0x787354DDC3D0
+11-15 21:15:23.419 I/DOTNET  ( 6265): [DexHub] env 69 data=0x78708724D1F8
+11-15 21:15:23.419 I/DOTNET  ( 6265): [DexHub] env 45 data=0x78708724D1F8
+11-15 21:15:23.420 I/DOTNET  ( 6265): [DexHub] Core libgambatte_libretro.so fragt nach nicht unterstützter Funktion 45
+11-15 21:15:23.420 I/DOTNET  ( 6265): [DexHub] env 27 data=0x78708724D210
+11-15 21:15:23.420 I/DOTNET  ( 6265): [DexHub] Core libgambatte_libretro.so fragt nach nicht unterstützter Funktion 27
+11-15 21:15:23.420 I/DOTNET  ( 6265): [DexHub] env 8 data=0x78708724D200
+11-15 21:15:23.421 I/erbarsch.dexhub( 6265): Explicit concurrent copying GC freed 180(62KB) AllocSpace objects, 0(0B) LOS objects, 49% free, 2236KB/4472KB, paused 35us,5us total 2.778ms
+11-15 21:15:23.424 I/DOTNET  ( 6265): [DexHub] env 70 data=0x0
+11-15 21:15:23.424 I/DOTNET  ( 6265): [DexHub] env 59 data=0x7870835897A0
+11-15 21:15:23.431 I/DOTNET  ( 6265): [DexHub] Core libgambatte_libretro.so fragt nach nicht unterstützter Funktion 59
+11-15 21:15:23.452 I/DOTNET  ( 6265): [DexHub] env 39 data=0x78708724D200
+11-15 21:15:23.456 I/DOTNET  ( 6265): [DexHub] env 51 data=0x0
+11-15 21:15:23.456 I/DOTNET  ( 6265): [DexHub] env 64 data=0x0
+11-15 21:15:23.456 I/DOTNET  ( 6265): [DexHub] Trace: Core geladen
+11-15 21:15:23.465 I/DOTNET  ( 6265): [DexHub] env 3 data=0x78708724BD6F
+11-15 21:15:23.465 I/DOTNET  ( 6265): [DexHub] env 23 data=0x7870835855C8
+11-15 21:15:23.466 I/DOTNET  ( 6265): [DexHub] Core Gambatte fragt nach nicht unterstützter Funktion 23
+11-15 21:15:23.466 I/DOTNET  ( 6265): [DexHub] env 11 data=0x78708724BD70
+11-15 21:15:23.466 I/DOTNET  ( 6265): [DexHub] env 10 data=0x78708724BD68
+11-15 21:15:23.466 I/DOTNET  ( 6265): [DexHub] env 9 data=0x78708724BD58
+11-15 21:15:23.467 I/erbarsch.dexhub( 6265): Explicit concurrent copying GC freed 39(32KB) AllocSpace objects, 0(0B) LOS objects, 49% free, 2236KB/4472KB, paused 34us,6us total 4.492ms
+11-15 21:15:23.467 I/DOTNET  ( 6265): [DexHub] env 9 data=0x78708724A9E8
+11-15 21:15:23.467 I/DOTNET  ( 6265): [DexHub] env 36 data=0x78708724BD48
+11-15 21:15:23.468 I/DOTNET  ( 6265): [DexHub] env 42 data=0x78708724BD47
+11-15 21:15:23.516 I/DOTNET  ( 6265): [DexHub] Trace: Spiel geladen, öffne Ton
+11-15 21:15:23.545 I/erbarsch.dexhub( 6265): Explicit concurrent copying GC freed 84(31KB) AllocSpace objects, 0(0B) LOS objects, 49% free, 2236KB/4472KB, paused 34us,2.814ms total 5.851ms
+11-15 21:15:23.558 I/DOTNET  ( 6265): [DexHub] Core-Tonrate: 32768 Hz
+11-15 21:15:23.618 I/DOTNET  ( 6265): [DexHub] Anzeige: Bild 0x0, Fläche 0, 0, Nr. -1, Bildquelle False, Größe 0, 0
+11-15 21:15:23.671 I/DOTNET  ( 6265): [DexHub] Ton: AudioTrack 32768 Hz
+11-15 21:15:23.671 I/DOTNET  ( 6265): [DexHub] Trace: Ton offen
+11-15 21:15:23.672 I/DOTNET  ( 6265): [DexHub] Core Gambatte v0.5.0-netlink 77f2567, 59.73 fps
+11-15 21:15:23.675 I/DOTNET  ( 6265): [DexHub] Trace: Bild 0
+11-15 21:15:23.678 I/DOTNET  ( 6265): [DexHub] Trace: Bild 0 fertig
+11-15 21:15:23.688 I/DOTNET  ( 6265): [DexHub] Trace: Bild 1
+11-15 21:15:23.689 I/DOTNET  ( 6265): [DexHub] Trace: Bild 1 fertig
+11-15 21:15:23.705 I/DOTNET  ( 6265): [DexHub] Trace: Bild 2
+11-15 21:15:23.705 I/DOTNET  ( 6265): [DexHub] Trace: Bild 2 fertig
+11-15 21:15:23.805 I/erbarsch.dexhub( 6265): Explicit concurrent copying GC freed 960(122KB) AllocSpace objects, 0(0B) LOS objects, 49% free, 2242KB/4484KB, paused 42us,8us total 3.235ms
+11-15 21:15:23.852 I/erbarsch.dexhub( 6265): Explicit concurrent copying GC freed 3(16KB) AllocSpace objects, 0(0B) LOS objects, 49% free, 2242KB/4484KB, paused 35us,6us total 2.569ms
+11-15 21:15:23.874 I/erbarsch.dexhub( 6265): Explicit concurrent copying GC freed 3(16KB) AllocSpace objects, 0(0B) LOS objects, 49% free, 2242KB/4484KB, paused 40us,8us total 3.313ms
+11-15 21:15:24.215 I/AVALONIA( 6265): Surface Changed
+11-15 21:15:24.243 D/ProfileInstaller( 6265): Installing profile for de.blauerbarsch.dexhub
+11-15 21:15:24.247 I/GoogleInputMethodService( 1460): GoogleInputMethodService.onStartInput():1877 onStartInput(EditorInfo{inputType=0x0(NULL) imeOptions=0x0 privateImeOptions=null actionName=UNSPECIFIED actionLabel=null actionId=0 initialSelStart=-1 initialSelEnd=-1 initialCapsMode=0x0 hintText=null label=null packageName=de.blauerbarsch.dexhub fieldId=-1 fieldName=null extras=null}, false)
+11-15 21:15:25.151 I/erbarsch.dexhub( 6265): Explicit concurrent copying GC freed 5735(354KB) AllocSpace objects, 0(0B) LOS objects, 49% free, 2736KB/5472KB, paused 27us,7us total 6.746ms
+11-15 21:15:26.257 I/erbarsch.dexhub( 6265): Explicit concurrent copying GC freed 3896(264KB) AllocSpace objects, 0(0B) LOS objects, 49% free, 2759KB/5518KB, paused 78us,7us total 7.950ms
+11-15 21:15:26.355 I/DOTNET  ( 6265): [DexHub] Anzeige: Bild 160x144, Fläche 320, 404, Nr. 160, Bildquelle True, Größe 320, 288
+11-15 21:15:26.356 I/DOTNET  ( 6265): [DexHub] Pixel: Mitte 0xFFF7F3F7, Summe 3818714045, Format Rgba8888, Zeile 640
+11-15 21:15:28.321 I/DOTNET  ( 6265): [DexHub] Anzeige: Bild 160x144, Fläche 320, 404, Nr. 277, Bildquelle True, Größe 320, 288
+11-15 21:15:28.321 I/DOTNET  ( 6265): [DexHub] Pixel: Mitte 0xFFF7F3F7, Summe 3737464810, Format Rgba8888, Zeile 640
+11-15 21:15:28.674 I/erbarsch.dexhub( 6265): Explicit concurrent copying GC freed 8763(543KB) AllocSpace objects, 0(0B) LOS objects, 49% free, 2728KB/5456KB, paused 15us,6us total 4.024ms
+11-15 21:15:28.678 I/DOTNET  ( 6265): [DexHub] Core stellt keinen Spielstand-Speicher bereit
+11-15 21:15:30.319 I/DOTNET  ( 6265): [DexHub] Anzeige: Bild 160x144, Fläche 320, 404, Nr. 397, Bildquelle True, Größe 320, 288
+11-15 21:15:30.319 I/DOTNET  ( 6265): [DexHub] Pixel: Mitte 0xFFF7F3F7, Summe 3704965116, Format Rgba8888, Zeile 640
+11-15 21:15:31.158 I/erbarsch.dexhub( 6265): Explicit concurrent copying GC freed 8987(560KB) AllocSpace objects, 0(0B) LOS objects, 49% free, 2728KB/5456KB, paused 32us,5us total 3.262ms
+11-15 21:15:32.269 I/DOTNET  ( 6265): [DexHub] Anzeige: Bild 160x144, Fläche 320, 404, Nr. 513, Bildquelle True, Größe 320, 288
+11-15 21:15:32.269 I/DOTNET  ( 6265): [DexHub] Pixel: Mitte 0xFFF7F3F7, Summe 3737464810, Format Rgba8888, Zeile 640
+11-15 21:15:33.210 E/AssistantConnector( 6387): java.lang.IllegalStateException: Failed to query AGSA value. This is most likely caused by a Google signature check failure. Please make sure both of the AGSA app and the client app are either release or dev builds.
+11-15 21:15:34.270 I/DOTNET  ( 6265): [DexHub] Anzeige: Bild 160x144, Fläche 320, 404, Nr. 633, Bildquelle True, Größe 320, 288
+11-15 21:15:34.270 I/DOTNET  ( 6265): [DexHub] Pixel: Mitte 0xFFF7F3F7, Summe 3737464810, Format Rgba8888, Zeile 640
+11-15 21:15:36.202 I/DOTNET  ( 6265): [DexHub] Anzeige: Bild 160x144, Fläche 320, 404, Nr. 748, Bildquelle True, Größe 320, 288
+11-15 21:15:36.202 I/DOTNET  ( 6265): [DexHub] Pixel: Mitte 0xFFF7F3F7, Summe 3737464810, Format Rgba8888, Zeile 640
+11-15 21:15:37.523 I/erbarsch.dexhub( 6265): Explicit concurrent copying GC freed 22819(1312KB) AllocSpace objects, 0(0B) LOS objects, 49% free, 2728KB/5456KB, paused 64us,6us total 3.564ms
+11-15 21:15:37.660 W/WifiService(  482): Permission violation - getConfiguredNetworks not allowed for uid=10107, packageName=com.google.android.settings.intelligence, reason=java.lang.SecurityException: UID 10107 has no location permission
+11-15 21:15:38.114 D/SettingsSliceProvider( 1089): java.lang.IllegalStateException: Invalid Slices key from path: wifi_calling
+11-15 21:15:38.240 I/erbarsch.dexhub( 6265): Explicit concurrent copying GC freed 2179(192KB) AllocSpace objects, 0(0B) LOS objects, 49% free, 2727KB/5455KB, paused 136us,9us total 14.965ms
+11-15 21:15:38.319 I/DOTNET  ( 6265): [DexHub] Anzeige: Bild 160x144, Fläche 320, 404, Nr. 875, Bildquelle True, Größe 320, 288
+11-15 21:15:39.125 I/erbarsch.dexhub( 6265): Explicit concurrent copying GC freed 3231(239KB) AllocSpace objects, 0(0B) LOS objects, 49% free, 2728KB/5456KB, paused 10us,6us total 3.506ms
+11-15 21:15:39.707 I/erbarsch.dexhub( 6265): Explicit concurrent copying GC freed 2029(160KB) AllocSpace objects, 0(0B) LOS objects, 49% free, 2728KB/5456KB, paused 10us,6us total 3.128ms
+11-15 21:15:40.275 I/erbarsch.dexhub( 6265): Explicit concurrent copying GC freed 2011(160KB) AllocSpace objects, 0(0B) LOS objects, 49% free, 2728KB/5456KB, paused 10us,5us total 3.191ms
+11-15 21:15:40.304 I/DOTNET  ( 6265): [DexHub] Anzeige: Bild 160x144, Fläche 320, 404, Nr. 993, Bildquelle True, Größe 320, 288
+11-15 21:15:40.304 I/DOTNET  ( 6265): [DexHub] Pixel: Mitte 0xFFF7F3F7, Summe 3656215575, Format Rgba8888, Zeile 640
+11-15 21:15:40.840 I/erbarsch.dexhub( 6265): Explicit concurrent copying GC freed 2005(160KB) AllocSpace objects, 0(0B) LOS objects, 49% free, 2728KB/5456KB, paused 38us,5us total 3.575ms
+11-15 21:15:41.708 I/erbarsch.dexhub( 6265): Explicit concurrent copying GC freed 3085(208KB) AllocSpace objects, 0(0B) LOS objects, 49% free, 2728KB/5456KB, paused 10us,6us total 3.371ms
+11-15 21:15:42.270 I/DOTNET  ( 6265): [DexHub] Anzeige: Bild 160x144, Fläche 320, 404, Nr. 1110, Bildquelle True, Größe 320, 288
+11-15 21:15:42.270 I/DOTNET  ( 6265): [DexHub] Pixel: Mitte 0xFFF7F3F7, Summe 3656215575, Format Rgba8888, Zeile 640
+11-15 21:15:42.624 I/erbarsch.dexhub( 6265): Explicit concurrent copying GC freed 3451(256KB) AllocSpace objects, 0(0B) LOS objects, 49% free, 2728KB/5456KB, paused 107us,37us total 3.716ms
+11-15 21:15:42.750 E/PermissionControllerManager(  482): java.util.concurrent.TimeoutException
+11-15 21:15:42.757 W/TapAndPay( 5749): java.lang.NullPointerException: NfcAdapter is null
+11-15 21:15:43.773 I/erbarsch.dexhub( 6265): Explicit concurrent copying GC freed 4063(272KB) AllocSpace objects, 0(0B) LOS objects, 49% free, 2728KB/5456KB, paused 13us,5us total 3.603ms
+11-15 21:15:44.041 I/erbarsch.dexhub( 6265): Explicit concurrent copying GC freed 956(112KB) AllocSpace objects, 0(0B) LOS objects, 49% free, 2728KB/5456KB, paused 43us,6us total 4.627ms
+11-15 21:15:44.270 I/DOTNET  ( 6265): [DexHub] Anzeige: Bild 160x144, Fläche 320, 404, Nr. 1230, Bildquelle True, Größe 320, 288
+11-15 21:15:44.271 I/DOTNET  ( 6265): [DexHub] Pixel: Mitte 0xFFF7F3F7, Summe 3656215575, Format Rgba8888, Zeile 640
+11-15 21:15:44.907 I/erbarsch.dexhub( 6265): Explicit concurrent copying GC freed 3028(207KB) AllocSpace objects, 0(0B) LOS objects, 49% free, 2728KB/5456KB, paused 18us,6us total 3.737ms
+11-15 21:15:46.173 I/erbarsch.dexhub( 6265): Explicit concurrent copying GC freed 4683(320KB) AllocSpace objects, 0(0B) LOS objects, 49% free, 2728KB/5456KB, paused 13us,5us total 3.815ms
+11-15 21:15:46.271 I/DOTNET  ( 6265): [DexHub] Anzeige: Bild 160x144, Fläche 320, 404, Nr. 1349, Bildquelle True, Größe 320, 288
+11-15 21:15:46.271 I/DOTNET  ( 6265): [DexHub] Pixel: Mitte 0xFFF7F3F7, Summe 3656215575, Format Rgba8888, Zeile 640
+11-15 21:15:47.040 I/erbarsch.dexhub( 6265): Explicit concurrent copying GC freed 3071(208KB) AllocSpace objects, 0(0B) LOS objects, 49% free, 2728KB/5456KB, paused 15us,6us total 4.101ms
+11-15 21:15:47.908 I/erbarsch.dexhub( 6265): Explicit concurrent copying GC freed 3045(208KB) AllocSpace objects, 0(0B) LOS objects, 49% free, 2728KB/5456KB, paused 10us,7us total 3.462ms
+11-15 21:15:48.287 I/DOTNET  ( 6265): [DexHub] Anzeige: Bild 160x144, Fläche 320, 404, Nr. 1470, Bildquelle True, Größe 320, 288
+11-15 21:15:48.288 I/DOTNET  ( 6265): [DexHub] Pixel: Mitte 0xFFF7F3F7, Summe 3656215575, Format Rgba8888, Zeile 640
+11-15 21:15:48.550 I/erbarsch.dexhub( 6265): Explicit concurrent copying GC freed 1998(176KB) AllocSpace objects, 0(0B) LOS objects, 49% free, 2728KB/5456KB, paused 10us,7us total 3.408ms
+11-15 21:15:48.692 W/InputDispatcher(  482): Not sending touch gesture to acf02c0 ActivityRecordInputSink de.blauerbarsch.dexhub/.MainActivity because it is not responsive
+11-15 21:15:49.098 I/erbarsch.dexhub( 6265): Explicit concurrent copying GC freed 1991(160KB) AllocSpace objects, 0(0B) LOS objects, 49% free, 2727KB/5455KB, paused 10us,7us total 3.502ms
+11-15 21:15:49.407 I/erbarsch.dexhub( 6265): Explicit concurrent copying GC freed 1114(111KB) AllocSpace objects, 0(0B) LOS objects, 49% free, 2728KB/5456KB, paused 10us,6us total 3.358ms
+11-15 21:15:50.266 E/d       ( 1675): RuntimeException while executing runnable cb{com.google.apps.tiktok.tracing.ej@55f1a4d} with executor MoreExecutors.directExecutor()
+11-15 21:15:50.266 E/d       ( 1675): java.lang.NullPointerException: Attempt to read from field 'java.lang.String com.google.android.libraries.mdi.download.ae.b' on a null object reference in method 'void com.google.android.libraries.mdi.download.h.bq.gH(java.lang.Object)'
+11-15 21:15:50.274 E/d       ( 1675): RuntimeException while executing runnable cb{com.google.apps.tiktok.tracing.ej@dd7c} with executor MoreExecutors.directExecutor()
+11-15 21:15:50.274 E/d       ( 1675): java.lang.NullPointerException: Attempt to read from field 'java.lang.String com.google.android.libraries.mdi.download.ae.b' on a null object reference in method 'void com.google.android.libraries.mdi.download.h.bq.gH(java.lang.Object)'
+11-15 21:15:50.274 E/d       ( 1675): RuntimeException while executing runnable cb{com.google.apps.tiktok.tracing.ej@22b4c50} with executor MoreExecutors.directExecutor()
+11-15 21:15:50.274 E/d       ( 1675): java.lang.NullPointerException: Attempt to read from field 'java.lang.String com.google.android.libraries.mdi.download.ae.b' on a null object reference in method 'void com.google.android.libraries.mdi.download.h.bq.gH(java.lang.Object)'
+11-15 21:15:50.319 I/DOTNET  ( 6265): [DexHub] Anzeige: Bild 160x144, Fläche 320, 404, Nr. 1591, Bildquelle True, Größe 320, 288
+11-15 21:15:50.319 I/DOTNET  ( 6265): [DexHub] Pixel: Mitte 0xFFF7F3F7, Summe 3656215575, Format Rgba8888, Zeile 640
+11-15 21:15:50.567 I/erbarsch.dexhub( 6265): Explicit concurrent copying GC freed 3997(272KB) AllocSpace objects, 0(0B) LOS objects, 49% free, 2728KB/5456KB, paused 13us,8us total 4.453ms
+11-15 21:15:50.927 I/erbarsch.dexhub( 6265): Explicit concurrent copying GC freed 984(96KB) AllocSpace objects, 0(0B) LOS objects, 49% free, 2728KB/5456KB, paused 21us,6us total 3.865ms
+11-15 21:15:51.259 I/erbarsch.dexhub( 6265): Explicit concurrent copying GC freed 1005(96KB) AllocSpace objects, 0(0B) LOS objects, 49% free, 2728KB/5456KB, paused 26us,6us total 4.098ms
+11-15 21:15:51.880 I/erbarsch.dexhub( 6265): Explicit concurrent copying GC freed 2016(159KB) AllocSpace objects, 0(0B) LOS objects, 49% free, 2728KB/5456KB, paused 14us,12us total 6.606ms
+11-15 21:15:52.553 I/DOTNET  ( 6265): [DexHub] Anzeige: Bild 160x144, Fläche 320, 404, Nr. 1725, Bildquelle True, Größe 320, 288
+11-15 21:15:52.553 I/DOTNET  ( 6265): [DexHub] Pixel: Mitte 0xFFF7F3F7, Summe 3656215575, Format Rgba8888, Zeile 640
+11-15 21:15:53.261 I/AVALONIA( 6265): Surface Changed
+11-15 21:15:53.286 I/GoogleInputMethodService( 1460): GoogleInputMethodService.onStartInput():1877 onStartInput(EditorInfo{inputType=0x0(NULL) imeOptions=0x0 privateImeOptions=null actionName=UNSPECIFIED actionLabel=null actionId=0 initialSelStart=-1 initialSelEnd=-1 initialCapsMode=0x0 hintText=null label=null packageName=de.blauerbarsch.dexhub fieldId=-1 fieldName=null extras=null}, true)
+11-15 21:15:53.390 E/SystemServiceRegistry(  922): android.os.ServiceManager$ServiceNotFoundException: No service published for: ethernet
+11-15 21:15:53.413 I/WindowManager(  482): finishDrawing of orientation change: Window{8c5ebfd u0 de.blauerbarsch.dexhub/de.blauerbarsch.dexhub.MainActivity} 201ms
+11-15 21:15:53.422 I/WindowManager(  482): Screen frozen for +351ms due to Window{8c5ebfd u0 de.blauerbarsch.dexhub/de.blauerbarsch.dexhub.MainActivity}
+11-15 21:15:53.579 I/erbarsch.dexhub( 6265): Explicit concurrent copying GC freed 5350(349KB) AllocSpace objects, 0(0B) LOS objects, 49% free, 2731KB/5463KB, paused 11us,7us total 3.688ms
+11-15 21:15:55.069 I/DOTNET  ( 6265): [DexHub] Anzeige: Bild 160x144, Fläche 640, 282, Nr. 1875, Bildquelle True, Größe 314, 282
+11-15 21:15:55.069 I/DOTNET  ( 6265): [DexHub] Pixel: Mitte 0xFFF7F3F7, Summe 3623715881, Format Rgba8888, Zeile 640
+11-15 21:15:55.725 I/erbarsch.dexhub( 6265): Explicit concurrent copying GC freed 6626(416KB) AllocSpace objects, 0(0B) LOS objects, 49% free, 2731KB/5462KB, paused 11us,7us total 3.512ms
+11-15 21:15:56.974 I/erbarsch.dexhub( 6265): Explicit concurrent copying GC freed 4669(304KB) AllocSpace objects, 0(0B) LOS objects, 49% free, 2731KB/5462KB, paused 11us,5us total 3.474ms
+11-15 21:15:57.086 I/DOTNET  ( 6265): [DexHub] Anzeige: Bild 160x144, Fläche 640, 282, Nr. 1995, Bildquelle True, Größe 314, 282
+11-15 21:15:57.086 I/DOTNET  ( 6265): [DexHub] Pixel: Mitte 0xFFF7F3F7, Summe 3623715881, Format Rgba8888, Zeile 640
+11-15 21:15:57.524 I/erbarsch.dexhub( 6265): Explicit concurrent copying GC freed 1959(160KB) AllocSpace objects, 0(0B) LOS objects, 49% free, 2731KB/5462KB, paused 38us,5us total 4.093ms
+11-15 21:15:57.807 I/erbarsch.dexhub( 6265): Explicit concurrent copying GC freed 1015(96KB) AllocSpace objects, 0(0B) LOS objects, 49% free, 2731KB/5462KB, paused 13us,6us total 3.861ms
+11-15 21:15:58.673 I/erbarsch.dexhub( 6265): Explicit concurrent copying GC freed 3077(224KB) AllocSpace objects, 0(0B) LOS objects, 49% free, 2731KB/5462KB, paused 14us,24us total 3.698ms
+11-15 21:15:59.086 I/DOTNET  ( 6265): [DexHub] Anzeige: Bild 160x144, Fläche 640, 282, Nr. 2115, Bildquelle True, Größe 314, 282
+11-15 21:15:59.086 I/DOTNET  ( 6265): [DexHub] Pixel: Mitte 0xFFF7F3F7, Summe 3623715881, Format Rgba8888, Zeile 640
+11-15 21:15:59.294 I/AVALONIA( 6265): Surface Changed
+11-15 21:15:59.295 E/SystemServiceRegistry(  922): android.os.ServiceManager$ServiceNotFoundException: No service published for: ethernet
+11-15 21:15:59.311 I/GoogleInputMethodService( 1460): GoogleInputMethodService.onStartInput():1877 onStartInput(EditorInfo{inputType=0x0(NULL) imeOptions=0x0 privateImeOptions=null actionName=UNSPECIFIED actionLabel=null actionId=0 initialSelStart=-1 initialSelEnd=-1 initialCapsMode=0x0 hintText=null label=null packageName=de.blauerbarsch.dexhub fieldId=-1 fieldName=null extras=null}, true)
+11-15 21:15:59.351 I/WindowManager(  482): finishDrawing of orientation change: Window{8c5ebfd u0 de.blauerbarsch.dexhub/de.blauerbarsch.dexhub.MainActivity} 79ms
+11-15 21:15:59.355 I/WindowManager(  482): Screen frozen for +128ms due to Window{8c5ebfd u0 de.blauerbarsch.dexhub/de.blauerbarsch.dexhub.MainActivity}
+11-15 21:15:59.446 I/erbarsch.dexhub( 6265): Explicit concurrent copying GC freed 3208(240KB) AllocSpace objects, 0(0B) LOS objects, 49% free, 2731KB/5463KB, paused 15us,6us total 6.255ms
+11-15 21:16:00.374 I/erbarsch.dexhub( 6265): Explicit concurrent copying GC freed 3412(240KB) AllocSpace objects, 0(0B) LOS objects, 49% free, 2731KB/5462KB, paused 43us,5us total 3.815ms
+11-15 21:16:00.941 I/erbarsch.dexhub( 6265): Explicit concurrent copying GC freed 2001(160KB) AllocSpace objects, 0(0B) LOS objects, 49% free, 2731KB/5462KB, paused 10us,6us total 3.421ms
+11-15 21:16:01.202 I/DOTNET  ( 6265): [DexHub] Anzeige: Bild 160x144, Fläche 320, 404, Nr. 2241, Bildquelle True, Größe 320, 288
+11-15 21:16:01.202 I/DOTNET  ( 6265): [DexHub] Pixel: Mitte 0xFFF7F3F7, Summe 3623715881, Format Rgba8888, Zeile 640
+11-15 21:16:02.117 W/PeoplePU( 5817): java.lang.IllegalArgumentException: Unknown component: ComponentInfo{com.google.android.syncadapters.contacts/com.google.android.syncadapters.contacts.ContactsSyncAdapterService}
+11-15 21:16:02.117 W/PeoplePU( 5817): 	at android.os.Parcel.createExceptionOrNull(Parcel.java:3015)
+11-15 21:16:02.117 W/PeoplePU( 5817): 	at android.os.Parcel.createException(Parcel.java:2995)
+11-15 21:16:02.117 W/PeoplePU( 5817): 	at android.os.Parcel.readException(Parcel.java:2978)
+11-15 21:16:02.117 W/PeoplePU( 5817): 	at android.os.Parcel.readException(Parcel.java:2920)
+11-15 21:16:02.117 W/PeoplePU( 5817): Caused by: android.os.RemoteException: Remote stack trace:
+11-15 21:16:02.118 W/PeoplePU( 5817): java.lang.IllegalArgumentException: Unknown component: ComponentInfo{com.google.android.syncadapters.contacts/com.google.android.syncadapters.contacts.ContactsSyncAdapterService}
+11-15 21:16:02.118 W/PeoplePU( 5817): 	at android.os.Parcel.createExceptionOrNull(Parcel.java:3015)
+11-15 21:16:02.118 W/PeoplePU( 5817): 	at android.os.Parcel.createException(Parcel.java:2995)
+11-15 21:16:02.118 W/PeoplePU( 5817): 	at android.os.Parcel.readException(Parcel.java:2978)
+11-15 21:16:02.118 W/PeoplePU( 5817): 	at android.os.Parcel.readException(Parcel.java:2920)
+11-15 21:16:02.118 W/PeoplePU( 5817): java.lang.IllegalArgumentException: Unknown component: ComponentInfo{com.google.android.syncadapters.contacts/com.google.android.syncadapters.contacts.ProxyGalProvider}
+11-15 21:16:02.118 W/PeoplePU( 5817): 	at android.os.Parcel.createExceptionOrNull(Parcel.java:3015)
+11-15 21:16:02.118 W/PeoplePU( 5817): 	at android.os.Parcel.createException(Parcel.java:2995)
+11-15 21:16:02.118 W/PeoplePU( 5817): 	at android.os.Parcel.readException(Parcel.java:2978)
+11-15 21:16:02.118 W/PeoplePU( 5817): 	at android.os.Parcel.readException(Parcel.java:2920)
+11-15 21:16:02.207 I/erbarsch.dexhub( 6265): Explicit concurrent copying GC freed 4071(288KB) AllocSpace objects, 0(0B) LOS objects, 49% free, 2731KB/5462KB, paused 57us,6us total 4.016ms
+11-15 21:16:02.360 I/ActivityManager(  482): Force stopping de.blauerbarsch.dexhub appid=10174 user=0: from pid 6741
+11-15 21:16:02.364 I/ActivityManager(  482): Killing 6265:de.blauerbarsch.dexhub/u0a174 (adj 0): stop de.blauerbarsch.dexhub due to from pid 6741
+11-15 21:16:02.378 W/ActivityTaskManager(  482): Force removing ActivityRecord{1018aec u0 de.blauerbarsch.dexhub/.MainActivity} t10 f}}: app died, no saved state
+11-15 21:16:02.388 W/InputManager-JNI(  482): Input channel object '8c5ebfd de.blauerbarsch.dexhub/de.blauerbarsch.dexhub.MainActivity (client)' was disposed without first being removed with the input manager!
+11-15 21:16:02.431 W/GmsPipelineLogger( 5817): java.lang.NullPointerException
+11-15 21:16:02.441 D/CarrierSvcBindHelper(  978): onHandleForceStop: [de.blauerbarsch.dexhub]
+11-15 21:16:02.550 I/ActivityTaskManager(  482): START u0 {flg=0x10000000 cmp=de.blauerbarsch.dexhub/.MainActivity (has extras)} from uid 2000
+11-15 21:16:02.576 V/ActivityManager(  482): Got obituary of 6265:de.blauerbarsch.dexhub
+11-15 21:16:02.630 D/CoreBackPreview(  482): Window{2a07748 u0 Splash Screen de.blauerbarsch.dexhub}: Setting back callback OnBackInvokedCallbackInfo{mCallback=android.window.IOnBackInvokedCallback$Stub$Proxy@afe5306, mPriority=0}
+11-15 21:16:02.684 I/erbarsch.dexhub( 6761): Using CollectorTypeCC GC.
+11-15 21:16:02.700 W/erbarsch.dexhub( 6761): Unexpected CPU variant for x86: x86_64.
+11-15 21:16:02.700 W/erbarsch.dexhub( 6761): Known variants: atom, sandybridge, silvermont, kabylake, default
+11-15 21:16:02.718 I/ActivityManager(  482): Start proc 6761:de.blauerbarsch.dexhub/u0a174 for next-top-activity {de.blauerbarsch.dexhub/de.blauerbarsch.dexhub.MainActivity}
+11-15 21:16:02.761 D/nativeloader( 6761): Configuring classloader-namespace for other apk /data/app/~~jHhJuF9mrRzU4ouwehGHpQ==/de.blauerbarsch.dexhub-iHJkNDLlHscTf3ERDx88bw==/base.apk. target_sdk_version=36, uses_libraries=, library_path=/data/app/~~jHhJuF9mrRzU4ouwehGHpQ==/de.blauerbarsch.dexhub-iHJkNDLlHscTf3ERDx88bw==/lib/x86_64:/data/app/~~jHhJuF9mrRzU4ouwehGHpQ==/de.blauerbarsch.dexhub-iHJkNDLlHscTf3ERDx88bw==/base.apk!/lib/x86_64, permitted_path=/data:/mnt/expand:/data/user/0/de.blauerbarsch.dexhub
+11-15 21:16:02.771 V/GraphicsEnvironment( 6761): ANGLE Developer option for 'de.blauerbarsch.dexhub' set to: 'default'
+11-15 21:16:02.772 V/GraphicsEnvironment( 6761): ANGLE GameManagerService for de.blauerbarsch.dexhub: false
+11-15 21:16:02.874 W/NetworkScheduler( 5749): java.lang.IllegalArgumentException: Only the following extra parameter types are supported: Integer, Long, Double, String, Boolean, and nested Bundles with the same restrictions.
+11-15 21:16:02.888 D/DOTNET  ( 6761): AndroidCryptoNative_InitLibraryOnLoad: jint AndroidCryptoNative_InitLibraryOnLoad(JavaVM *, void *) in /__w/1/s/src/runtime/src/native/libs/System.Security.Cryptography.Native.Android/pal_jni.c
+11-15 21:16:02.888 D/DOTNET  ( 6761): GetOptionalClassGRef: optional class com/android/org/conscrypt/OpenSSLEngineImpl was not found
+11-15 21:16:02.919 I/SemanticLocation( 5749): java.io.FileNotFoundException: /data/user/0/com.google.android.gms/files/model_bundle_metadata.pb: open failed: ENOENT (No such file or directory)
+11-15 21:16:02.919 I/SemanticLocation( 5749): Caused by: android.system.ErrnoException: open failed: ENOENT (No such file or directory)
+11-15 21:16:02.994 I/SemanticLocation( 5749): java.io.FileNotFoundException: /data/user/0/com.google.android.gms/files/model_bundle_metadata.pb: open failed: ENOENT (No such file or directory)
+11-15 21:16:02.994 I/SemanticLocation( 5749): Caused by: android.system.ErrnoException: open failed: ENOENT (No such file or directory)
+11-15 21:16:03.767 I/erbarsch.dexhub( 6761): Explicit concurrent copying GC freed 12835(739KB) AllocSpace objects, 0(0B) LOS objects, 49% free, 2032KB/4064KB, paused 16us,4us total 2.142ms
+11-15 21:16:04.399 D/CoreBackPreview(  482): Window{5ef6c96 u0 de.blauerbarsch.dexhub/de.blauerbarsch.dexhub.MainActivity}: Setting back callback OnBackInvokedCallbackInfo{mCallback=android.window.IOnBackInvokedCallback$Stub$Proxy@d4ddc04, mPriority=0}
+11-15 21:16:04.541 I/erbarsch.dexhub( 6761): Explicit concurrent copying GC freed 2041(235KB) AllocSpace objects, 0(0B) LOS objects, 49% free, 2233KB/4467KB, paused 38us,5us total 2.679ms
+11-15 21:16:04.662 I/AVALONIA( 6761): Surface Created
+11-15 21:16:07.720 W/monodroid-assembly( 6761): Timeout while waiting for shared library 'libandroid.so' to load.
+11-15 21:16:10.122 I/AndroidRuntime( 6842): VM exiting with result code 0, cleanup skipped.
+11-15 21:16:10.193 I/AndroidRuntime( 6865): VM exiting with result code 0, cleanup skipped.
+11-15 21:16:10.244 I/AndroidRuntime( 6883): VM exiting with result code 0, cleanup skipped.
+11-15 21:16:10.292 I/AndroidRuntime( 6900): VM exiting with result code 0, cleanup skipped.
+11-15 21:16:10.724 W/monodroid-assembly( 6761): Timeout while waiting for shared library 'android' to load.
+11-15 21:16:10.724 W/monodroid-assembly( 6761): Shared library 'android' not loaded, p/invoke 'ANativeWindow_fromSurface' may fail
+11-15 21:16:10.862 I/erbarsch.dexhub( 6761): Explicit concurrent copying GC freed 217(82KB) AllocSpace objects, 0(0B) LOS objects, 49% free, 2231KB/4463KB, paused 36us,5us total 3.943ms
+11-15 21:16:10.906 I/AVALONIA( 6761): Surface Changed
+11-15 21:16:11.636 I/ActivityTaskManager(  482): Displayed de.blauerbarsch.dexhub/.MainActivity: +9s52ms
+11-15 21:16:11.668 D/CoreBackPreview(  482): Window{2a07748 u0 Splash Screen de.blauerbarsch.dexhub EXITING}: Setting back callback null
+11-15 21:16:11.673 W/InputManager-JNI(  482): Input channel object '2a07748 Splash Screen de.blauerbarsch.dexhub (client)' was disposed without first being removed with the input manager!
+11-15 21:16:11.824 I/erbarsch.dexhub( 6761): Explicit concurrent copying GC freed 501(93KB) AllocSpace objects, 0(0B) LOS objects, 49% free, 2234KB/4468KB, paused 37us,6us total 6.853ms
+11-15 21:16:11.905 W/CorpusConfigHelper( 1675): android.util.MalformedJsonException: Use JsonReader.setLenient(true) to accept malformed JSON at line 123 column 2
+11-15 21:16:11.941 W/PeoplePU( 5817): java.lang.IllegalArgumentException: Unknown component: ComponentInfo{com.google.android.syncadapters.contacts/com.google.android.syncadapters.contacts.ContactsSyncAdapterService}
+11-15 21:16:11.941 W/PeoplePU( 5817): 	at android.os.Parcel.createExceptionOrNull(Parcel.java:3015)
+11-15 21:16:11.941 W/PeoplePU( 5817): 	at android.os.Parcel.createException(Parcel.java:2995)
+11-15 21:16:11.941 W/PeoplePU( 5817): 	at android.os.Parcel.readException(Parcel.java:2978)
+11-15 21:16:11.941 W/PeoplePU( 5817): 	at android.os.Parcel.readException(Parcel.java:2920)
+11-15 21:16:11.941 W/PeoplePU( 5817): Caused by: android.os.RemoteException: Remote stack trace:
+11-15 21:16:11.941 W/PeoplePU( 5817): java.lang.IllegalArgumentException: Unknown component: ComponentInfo{com.google.android.syncadapters.contacts/com.google.android.syncadapters.contacts.ContactsSyncAdapterService}
+11-15 21:16:11.941 W/PeoplePU( 5817): 	at android.os.Parcel.createExceptionOrNull(Parcel.java:3015)
+11-15 21:16:11.941 W/PeoplePU( 5817): 	at android.os.Parcel.createException(Parcel.java:2995)
+11-15 21:16:11.941 W/PeoplePU( 5817): 	at android.os.Parcel.readException(Parcel.java:2978)
+11-15 21:16:11.941 W/PeoplePU( 5817): 	at android.os.Parcel.readException(Parcel.java:2920)
+11-15 21:16:11.942 W/PeoplePU( 5817): java.lang.IllegalArgumentException: Unknown component: ComponentInfo{com.google.android.syncadapters.contacts/com.google.android.syncadapters.contacts.ProxyGalProvider}
+11-15 21:16:11.942 W/PeoplePU( 5817): 	at android.os.Parcel.createExceptionOrNull(Parcel.java:3015)
+11-15 21:16:11.942 W/PeoplePU( 5817): 	at android.os.Parcel.createException(Parcel.java:2995)
+11-15 21:16:11.942 W/PeoplePU( 5817): 	at android.os.Parcel.readException(Parcel.java:2978)
+11-15 21:16:11.942 W/PeoplePU( 5817): 	at android.os.Parcel.readException(Parcel.java:2920)
+11-15 21:16:12.102 I/erbarsch.dexhub( 6761): Explicit concurrent copying GC freed 245(32KB) AllocSpace objects, 0(0B) LOS objects, 49% free, 2233KB/4467KB, paused 10us,5us total 2.317ms
+11-15 21:16:12.476 I/GoogleInputMethodService( 1460): GoogleInputMethodService.onStartInput():1877 onStartInput(EditorInfo{inputType=0x0(NULL) imeOptions=0x0 privateImeOptions=null actionName=UNSPECIFIED actionLabel=null actionId=0 initialSelStart=-1 initialSelEnd=-1 initialCapsMode=0x0 hintText=null label=null packageName=de.blauerbarsch.dexhub fieldId=-1 fieldName=null extras=null}, false)
+11-15 21:16:12.482 D/ProfileInstaller( 6761): Installing profile for de.blauerbarsch.dexhub
+11-15 21:16:23.940 I/ActivityManager(  482): Force stopping de.blauerbarsch.dexhub appid=10174 user=0: from pid 6994
+11-15 21:16:23.941 I/ActivityManager(  482): Killing 6761:de.blauerbarsch.dexhub/u0a174 (adj 0): stop de.blauerbarsch.dexhub due to from pid 6994
+11-15 21:16:23.946 W/ActivityTaskManager(  482): Force removing ActivityRecord{a3ad818 u0 de.blauerbarsch.dexhub/.MainActivity} t11 f}}: app died, no saved state
+11-15 21:16:23.956 W/InputManager-JNI(  482): Input channel object '5ef6c96 de.blauerbarsch.dexhub/de.blauerbarsch.dexhub.MainActivity (client)' was disposed without first being removed with the input manager!
+11-15 21:16:24.031 V/ActivityManager(  482): Got obituary of 6761:de.blauerbarsch.dexhub
+11-15 21:16:24.042 D/CarrierSvcBindHelper(  978): onHandleForceStop: [de.blauerbarsch.dexhub]
+11-15 21:16:24.065 I/ActivityTaskManager(  482): START u0 {flg=0x10000000 cmp=de.blauerbarsch.dexhub/.MainActivity (has extras)} from uid 2000
+11-15 21:16:24.133 D/CoreBackPreview(  482): Window{3a84992 u0 Splash Screen de.blauerbarsch.dexhub}: Setting back callback OnBackInvokedCallbackInfo{mCallback=android.window.IOnBackInvokedCallback$Stub$Proxy@67d6cde, mPriority=0}
+11-15 21:16:24.142 I/ActivityManager(  482): Start proc 7006:de.blauerbarsch.dexhub/u0a174 for next-top-activity {de.blauerbarsch.dexhub/de.blauerbarsch.dexhub.MainActivity}
+11-15 21:16:24.144 I/erbarsch.dexhub( 7006): Using CollectorTypeCC GC.
+11-15 21:16:24.145 W/erbarsch.dexhub( 7006): Unexpected CPU variant for x86: x86_64.
+11-15 21:16:24.145 W/erbarsch.dexhub( 7006): Known variants: atom, sandybridge, silvermont, kabylake, default
+11-15 21:16:24.184 D/nativeloader( 7006): Configuring classloader-namespace for other apk /data/app/~~jHhJuF9mrRzU4ouwehGHpQ==/de.blauerbarsch.dexhub-iHJkNDLlHscTf3ERDx88bw==/base.apk. target_sdk_version=36, uses_libraries=, library_path=/data/app/~~jHhJuF9mrRzU4ouwehGHpQ==/de.blauerbarsch.dexhub-iHJkNDLlHscTf3ERDx88bw==/lib/x86_64:/data/app/~~jHhJuF9mrRzU4ouwehGHpQ==/de.blauerbarsch.dexhub-iHJkNDLlHscTf3ERDx88bw==/base.apk!/lib/x86_64, permitted_path=/data:/mnt/expand:/data/user/0/de.blauerbarsch.dexhub
+11-15 21:16:24.194 V/GraphicsEnvironment( 7006): ANGLE Developer option for 'de.blauerbarsch.dexhub' set to: 'default'
+11-15 21:16:24.194 V/GraphicsEnvironment( 7006): ANGLE GameManagerService for de.blauerbarsch.dexhub: false
+11-15 21:16:24.242 D/DOTNET  ( 7006): AndroidCryptoNative_InitLibraryOnLoad: jint AndroidCryptoNative_InitLibraryOnLoad(JavaVM *, void *) in /__w/1/s/src/runtime/src/native/libs/System.Security.Cryptography.Native.Android/pal_jni.c
+11-15 21:16:24.242 D/DOTNET  ( 7006): GetOptionalClassGRef: optional class com/android/org/conscrypt/OpenSSLEngineImpl was not found
+11-15 21:16:24.759 I/erbarsch.dexhub( 7006): Explicit concurrent copying GC freed 12837(756KB) AllocSpace objects, 0(0B) LOS objects, 49% free, 2046KB/4092KB, paused 80us,4us total 2.308ms
+11-15 21:16:25.346 D/CoreBackPreview(  482): Window{77ee2f9 u0 de.blauerbarsch.dexhub/de.blauerbarsch.dexhub.MainActivity}: Setting back callback OnBackInvokedCallbackInfo{mCallback=android.window.IOnBackInvokedCallback$Stub$Proxy@f02f89f, mPriority=0}
+11-15 21:16:25.482 I/erbarsch.dexhub( 7006): Explicit concurrent copying GC freed 2040(233KB) AllocSpace objects, 0(0B) LOS objects, 49% free, 2234KB/4468KB, paused 12us,6us total 2.322ms
+11-15 21:16:25.592 I/AVALONIA( 7006): Surface Created
+11-15 21:16:28.653 W/monodroid-assembly( 7006): Timeout while waiting for shared library 'libandroid.so' to load.
+11-15 21:16:31.366 E/d       ( 1675): RuntimeException while executing runnable cb{com.google.apps.tiktok.tracing.ej@d355a91} with executor MoreExecutors.directExecutor()
+11-15 21:16:31.366 E/d       ( 1675): java.lang.NullPointerException: Attempt to read from field 'java.lang.String com.google.android.libraries.mdi.download.ae.b' on a null object reference in method 'void com.google.android.libraries.mdi.download.h.bq.gH(java.lang.Object)'
+11-15 21:16:31.604 E/d       ( 1675): RuntimeException while executing runnable cb{com.google.apps.tiktok.tracing.ej@5a32a63} with executor MoreExecutors.directExecutor()
+11-15 21:16:31.604 E/d       ( 1675): java.lang.NullPointerException: Attempt to read from field 'java.lang.String com.google.android.libraries.mdi.download.ae.b' on a null object reference in method 'void com.google.android.libraries.mdi.download.h.bq.gH(java.lang.Object)'
+11-15 21:16:31.660 W/monodroid-assembly( 7006): Timeout while waiting for shared library 'android' to load.
+11-15 21:16:31.660 W/monodroid-assembly( 7006): Shared library 'android' not loaded, p/invoke 'ANativeWindow_fromSurface' may fail
+11-15 21:16:31.748 I/erbarsch.dexhub( 7006): Explicit concurrent copying GC freed 216(66KB) AllocSpace objects, 0(0B) LOS objects, 49% free, 2232KB/4464KB, paused 37us,4us total 2.271ms
+11-15 21:16:31.773 I/AVALONIA( 7006): Surface Changed
+11-15 21:16:32.248 I/ActivityTaskManager(  482): Displayed de.blauerbarsch.dexhub/.MainActivity: +8s181ms
+11-15 21:16:32.259 D/CoreBackPreview(  482): Window{3a84992 u0 Splash Screen de.blauerbarsch.dexhub EXITING}: Setting back callback null
+11-15 21:16:32.259 W/InputManager-JNI(  482): Input channel object '3a84992 Splash Screen de.blauerbarsch.dexhub (client)' was disposed without first being removed with the input manager!
+11-15 21:16:32.369 I/erbarsch.dexhub( 7006): Explicit concurrent copying GC freed 294(93KB) AllocSpace objects, 0(0B) LOS objects, 49% free, 2234KB/4468KB, paused 35us,5us total 2.567ms
+11-15 21:16:32.495 I/erbarsch.dexhub( 7006): Explicit concurrent copying GC freed 128(31KB) AllocSpace objects, 0(0B) LOS objects, 49% free, 2234KB/4468KB, paused 50us,5us total 2.558ms
+11-15 21:16:32.509 I/erbarsch.dexhub( 7006): Explicit concurrent copying GC freed 3(16KB) AllocSpace objects, 0(0B) LOS objects, 49% free, 2234KB/4468KB, paused 54us,5us total 2.627ms
+11-15 21:16:32.824 I/GoogleInputMethodService( 1460): GoogleInputMethodService.onStartInput():1877 onStartInput(EditorInfo{inputType=0x0(NULL) imeOptions=0x0 privateImeOptions=null actionName=UNSPECIFIED actionLabel=null actionId=0 initialSelStart=-1 initialSelEnd=-1 initialCapsMode=0x0 hintText=null label=null packageName=de.blauerbarsch.dexhub fieldId=-1 fieldName=null extras=null}, false)
+11-15 21:16:32.828 D/ProfileInstaller( 7006): Installing profile for de.blauerbarsch.dexhub
+11-15 21:16:40.508 I/erbarsch.dexhub( 7006): Explicit concurrent copying GC freed 11401(484KB) AllocSpace objects, 0(0B) LOS objects, 49% free, 2725KB/5451KB, paused 38us,6us total 4.069ms
+11-15 21:16:44.340 I/ActivityManager(  482): Force stopping de.blauerbarsch.dexhub appid=10174 user=0: from pid 7073
+11-15 21:16:44.341 I/ActivityManager(  482): Killing 7006:de.blauerbarsch.dexhub/u0a174 (adj 0): stop de.blauerbarsch.dexhub due to from pid 7073
+11-15 21:16:44.341 W/ActivityTaskManager(  482): Force removing ActivityRecord{cd5a748 u0 de.blauerbarsch.dexhub/.MainActivity} t12 f}}: app died, no saved state
+11-15 21:16:44.343 W/InputManager-JNI(  482): Input channel object '77ee2f9 de.blauerbarsch.dexhub/de.blauerbarsch.dexhub.MainActivity (client)' was disposed without first being removed with the input manager!
+11-15 21:16:44.380 D/CarrierSvcBindHelper(  978): onHandleForceStop: [de.blauerbarsch.dexhub]
+11-15 21:16:44.402 I/ActivityTaskManager(  482): START u0 {flg=0x10000000 cmp=de.blauerbarsch.dexhub/.MainActivity (has extras)} from uid 2000
+11-15 21:16:44.410 V/ActivityManager(  482): Got obituary of 7006:de.blauerbarsch.dexhub
+11-15 21:16:44.415 W/InputMethodManagerService(  482): Got RemoteException sending setActive(false) notification to pid 7006 uid 10174
+11-15 21:16:44.428 I/ActivityManager(  482): Start proc 7086:de.blauerbarsch.dexhub/u0a174 for next-top-activity {de.blauerbarsch.dexhub/de.blauerbarsch.dexhub.MainActivity}
+11-15 21:16:44.434 D/CoreBackPreview(  482): Window{85fa7be u0 Splash Screen de.blauerbarsch.dexhub}: Setting back callback OnBackInvokedCallbackInfo{mCallback=android.window.IOnBackInvokedCallback$Stub$Proxy@3c2f6c, mPriority=0}
+11-15 21:16:44.440 I/erbarsch.dexhub( 7086): Using CollectorTypeCC GC.
+11-15 21:16:44.441 W/erbarsch.dexhub( 7086): Unexpected CPU variant for x86: x86_64.
+11-15 21:16:44.441 W/erbarsch.dexhub( 7086): Known variants: atom, sandybridge, silvermont, kabylake, default
+11-15 21:16:44.465 D/nativeloader( 7086): Configuring classloader-namespace for other apk /data/app/~~jHhJuF9mrRzU4ouwehGHpQ==/de.blauerbarsch.dexhub-iHJkNDLlHscTf3ERDx88bw==/base.apk. target_sdk_version=36, uses_libraries=, library_path=/data/app/~~jHhJuF9mrRzU4ouwehGHpQ==/de.blauerbarsch.dexhub-iHJkNDLlHscTf3ERDx88bw==/lib/x86_64:/data/app/~~jHhJuF9mrRzU4ouwehGHpQ==/de.blauerbarsch.dexhub-iHJkNDLlHscTf3ERDx88bw==/base.apk!/lib/x86_64, permitted_path=/data:/mnt/expand:/data/user/0/de.blauerbarsch.dexhub
+11-15 21:16:44.467 V/GraphicsEnvironment( 7086): ANGLE Developer option for 'de.blauerbarsch.dexhub' set to: 'default'
+11-15 21:16:44.467 V/GraphicsEnvironment( 7086): ANGLE GameManagerService for de.blauerbarsch.dexhub: false
+11-15 21:16:44.505 D/DOTNET  ( 7086): AndroidCryptoNative_InitLibraryOnLoad: jint AndroidCryptoNative_InitLibraryOnLoad(JavaVM *, void *) in /__w/1/s/src/runtime/src/native/libs/System.Security.Cryptography.Native.Android/pal_jni.c
+11-15 21:16:44.505 D/DOTNET  ( 7086): GetOptionalClassGRef: optional class com/android/org/conscrypt/OpenSSLEngineImpl was not found
+11-15 21:16:44.892 I/erbarsch.dexhub( 7086): Explicit concurrent copying GC freed 12901(743KB) AllocSpace objects, 0(0B) LOS objects, 49% free, 2027KB/4055KB, paused 16us,4us total 2.027ms
+11-15 21:16:45.423 D/CoreBackPreview(  482): Window{404a85d u0 de.blauerbarsch.dexhub/de.blauerbarsch.dexhub.MainActivity}: Setting back callback OnBackInvokedCallbackInfo{mCallback=android.window.IOnBackInvokedCallback$Stub$Proxy@be716a3, mPriority=0}
+11-15 21:16:45.546 I/erbarsch.dexhub( 7086): Explicit concurrent copying GC freed 2037(235KB) AllocSpace objects, 0(0B) LOS objects, 49% free, 2229KB/4459KB, paused 40us,4us total 2.401ms
+11-15 21:16:45.649 I/AVALONIA( 7086): Surface Created
+11-15 21:16:48.703 W/monodroid-assembly( 7086): Timeout while waiting for shared library 'libandroid.so' to load.
+11-15 21:16:50.095 E/A       ( 1675): java.util.concurrent.CancellationException: Task was cancelled.
+11-15 21:16:50.098 E/BgTaskExecutorImpl( 1675): java.util.concurrent.CancellationException: Task was cancelled.
+11-15 21:16:50.205 E/A       ( 1675): java.util.concurrent.CancellationException: Task was cancelled.
+11-15 21:16:50.207 E/BgTaskExecutorImpl( 1675): java.util.concurrent.CancellationException: Task was cancelled.
+11-15 21:16:51.711 W/monodroid-assembly( 7086): Timeout while waiting for shared library 'android' to load.
+11-15 21:16:51.711 W/monodroid-assembly( 7086): Shared library 'android' not loaded, p/invoke 'ANativeWindow_fromSurface' may fail
+11-15 21:16:51.795 I/erbarsch.dexhub( 7086): Explicit concurrent copying GC freed 216(66KB) AllocSpace objects, 0(0B) LOS objects, 49% free, 2227KB/4455KB, paused 36us,6us total 2.897ms
+11-15 21:16:51.819 I/AVALONIA( 7086): Surface Changed
+11-15 21:16:52.207 I/ActivityTaskManager(  482): Displayed de.blauerbarsch.dexhub/.MainActivity: +7s804ms
+11-15 21:16:52.230 W/InputManager-JNI(  482): Input channel object '85fa7be Splash Screen de.blauerbarsch.dexhub (client)' was disposed without first being removed with the input manager!
+11-15 21:16:52.231 D/CoreBackPreview(  482): Window{85fa7be u0 Splash Screen de.blauerbarsch.dexhub EXITING}: Setting back callback null
+11-15 21:16:52.337 I/erbarsch.dexhub( 7086): Explicit concurrent copying GC freed 307(94KB) AllocSpace objects, 0(0B) LOS objects, 49% free, 2229KB/4459KB, paused 38us,5us total 2.723ms
+11-15 21:16:52.445 I/erbarsch.dexhub( 7086): Explicit concurrent copying GC freed 128(31KB) AllocSpace objects, 0(0B) LOS objects, 49% free, 2229KB/4459KB, paused 65us,4us total 3.332ms
+11-15 21:16:52.452 I/GoogleInputMethodService( 1460): GoogleInputMethodService.onStartInput():1877 onStartInput(EditorInfo{inputType=0x0(NULL) imeOptions=0x0 privateImeOptions=null actionName=UNSPECIFIED actionLabel=null actionId=0 initialSelStart=-1 initialSelEnd=-1 initialCapsMode=0x0 hintText=null label=null packageName=de.blauerbarsch.dexhub fieldId=-1 fieldName=null extras=null}, false)
+11-15 21:16:52.454 D/ProfileInstaller( 7086): Installing profile for de.blauerbarsch.dexhub
+11-15 21:16:52.591 I/erbarsch.dexhub( 7086): Explicit concurrent copying GC freed 2128(163KB) AllocSpace objects, 0(0B) LOS objects, 49% free, 2726KB/5452KB, paused 38us,4us total 3.639ms
+11-15 21:16:53.771 W/TapAndPay( 5749): java.lang.NullPointerException: NfcAdapter is null
+11-15 21:16:53.906 W/GLSUser ( 5749): [AppCertManager] Exception while requesting key: 
+11-15 21:16:53.906 W/GLSUser ( 5749): java.util.concurrent.ExecutionException: avvw: Parse Proto Exception.
+11-15 21:16:53.906 W/GLSUser ( 5749): Caused by: avvw: Parse Proto Exception.
+11-15 21:16:57.459 I/erbarsch.dexhub( 7086): Explicit concurrent copying GC freed 5630(232KB) AllocSpace objects, 0(0B) LOS objects, 49% free, 2717KB/5435KB, paused 50us,6us total 5.077ms
+11-15 21:17:04.298 I/ActivityManager(  482): Force stopping de.blauerbarsch.dexhub appid=10174 user=0: from pid 7175
+11-15 21:17:04.299 I/ActivityManager(  482): Killing 7086:de.blauerbarsch.dexhub/u0a174 (adj 0): stop de.blauerbarsch.dexhub due to from pid 7175
+11-15 21:17:04.299 W/ActivityTaskManager(  482): Force removing ActivityRecord{fc441e6 u0 de.blauerbarsch.dexhub/.MainActivity} t13 f}}: app died, no saved state
+11-15 21:17:04.304 W/InputManager-JNI(  482): Input channel object '404a85d de.blauerbarsch.dexhub/de.blauerbarsch.dexhub.MainActivity (client)' was disposed without first being removed with the input manager!
+11-15 21:17:04.309 D/CarrierSvcBindHelper(  978): onHandleForceStop: [de.blauerbarsch.dexhub]
+11-15 21:17:04.343 I/ActivityTaskManager(  482): START u0 {flg=0x10000000 cmp=de.blauerbarsch.dexhub/.MainActivity (has extras)} from uid 2000
+11-15 21:17:04.377 W/ActivityManager(  482): ProcessRecord{e829672 0:de.blauerbarsch.dexhub/u0a174} is attached to a previous process 7086
+11-15 21:17:04.382 V/ActivityManager(  482): Got obituary of 7086:de.blauerbarsch.dexhub
+11-15 21:17:04.394 I/ActivityManager(  482): Start proc 7189:de.blauerbarsch.dexhub/u0a174 for next-top-activity {de.blauerbarsch.dexhub/de.blauerbarsch.dexhub.MainActivity}
+11-15 21:17:04.397 D/CoreBackPreview(  482): Window{baa6498 u0 Splash Screen de.blauerbarsch.dexhub}: Setting back callback OnBackInvokedCallbackInfo{mCallback=android.window.IOnBackInvokedCallback$Stub$Proxy@694e757, mPriority=0}
+11-15 21:17:04.405 I/erbarsch.dexhub( 7189): Using CollectorTypeCC GC.
+11-15 21:17:04.407 W/erbarsch.dexhub( 7189): Unexpected CPU variant for x86: x86_64.
+11-15 21:17:04.407 W/erbarsch.dexhub( 7189): Known variants: atom, sandybridge, silvermont, kabylake, default
+11-15 21:17:04.440 D/nativeloader( 7189): Configuring classloader-namespace for other apk /data/app/~~jHhJuF9mrRzU4ouwehGHpQ==/de.blauerbarsch.dexhub-iHJkNDLlHscTf3ERDx88bw==/base.apk. target_sdk_version=36, uses_libraries=, library_path=/data/app/~~jHhJuF9mrRzU4ouwehGHpQ==/de.blauerbarsch.dexhub-iHJkNDLlHscTf3ERDx88bw==/lib/x86_64:/data/app/~~jHhJuF9mrRzU4ouwehGHpQ==/de.blauerbarsch.dexhub-iHJkNDLlHscTf3ERDx88bw==/base.apk!/lib/x86_64, permitted_path=/data:/mnt/expand:/data/user/0/de.blauerbarsch.dexhub
+11-15 21:17:04.442 V/GraphicsEnvironment( 7189): ANGLE Developer option for 'de.blauerbarsch.dexhub' set to: 'default'
+11-15 21:17:04.443 V/GraphicsEnvironment( 7189): ANGLE GameManagerService for de.blauerbarsch.dexhub: false
+11-15 21:17:04.525 D/DOTNET  ( 7189): AndroidCryptoNative_InitLibraryOnLoad: jint AndroidCryptoNative_InitLibraryOnLoad(JavaVM *, void *) in /__w/1/s/src/runtime/src/native/libs/System.Security.Cryptography.Native.Android/pal_jni.c
+11-15 21:17:04.525 D/DOTNET  ( 7189): GetOptionalClassGRef: optional class com/android/org/conscrypt/OpenSSLEngineImpl was not found
+11-15 21:17:04.873 I/erbarsch.dexhub( 7189): Explicit concurrent copying GC freed 12838(743KB) AllocSpace objects, 0(0B) LOS objects, 49% free, 2044KB/4088KB, paused 80us,3us total 2.177ms
+11-15 21:17:05.382 D/CoreBackPreview(  482): Window{ecd1e0c u0 de.blauerbarsch.dexhub/de.blauerbarsch.dexhub.MainActivity}: Setting back callback OnBackInvokedCallbackInfo{mCallback=android.window.IOnBackInvokedCallback$Stub$Proxy@5a8a16a, mPriority=0}
+11-15 21:17:05.505 I/erbarsch.dexhub( 7189): Explicit concurrent copying GC freed 2041(247KB) AllocSpace objects, 0(0B) LOS objects, 49% free, 2234KB/4468KB, paused 12us,4us total 2.320ms
+11-15 21:17:05.609 I/AVALONIA( 7189): Surface Created
+11-15 21:17:08.675 W/monodroid-assembly( 7189): Timeout while waiting for shared library 'libandroid.so' to load.
+11-15 21:17:11.677 W/monodroid-assembly( 7189): Timeout while waiting for shared library 'android' to load.
+11-15 21:17:11.678 W/monodroid-assembly( 7189): Shared library 'android' not loaded, p/invoke 'ANativeWindow_fromSurface' may fail
+11-15 21:17:11.761 I/erbarsch.dexhub( 7189): Explicit concurrent copying GC freed 216(50KB) AllocSpace objects, 0(0B) LOS objects, 49% free, 2232KB/4464KB, paused 60us,3us total 2.403ms
+11-15 21:17:11.786 I/AVALONIA( 7189): Surface Changed
+11-15 21:17:12.215 I/ActivityTaskManager(  482): Displayed de.blauerbarsch.dexhub/.MainActivity: +7s871ms
+11-15 21:17:12.221 D/CoreBackPreview(  482): Window{baa6498 u0 Splash Screen de.blauerbarsch.dexhub EXITING}: Setting back callback null
+11-15 21:17:12.222 W/InputManager-JNI(  482): Input channel object 'baa6498 Splash Screen de.blauerbarsch.dexhub (client)' was disposed without first being removed with the input manager!
+11-15 21:17:12.329 I/erbarsch.dexhub( 7189): Explicit concurrent copying GC freed 361(94KB) AllocSpace objects, 0(0B) LOS objects, 49% free, 2233KB/4467KB, paused 37us,4us total 2.501ms
+11-15 21:17:12.467 I/erbarsch.dexhub( 7189): Explicit concurrent copying GC freed 128(31KB) AllocSpace objects, 0(0B) LOS objects, 49% free, 2234KB/4468KB, paused 45us,5us total 2.892ms
+11-15 21:17:12.484 I/erbarsch.dexhub( 7189): Explicit concurrent copying GC freed 3(16KB) AllocSpace objects, 0(0B) LOS objects, 49% free, 2234KB/4468KB, paused 41us,4us total 2.908ms
+11-15 21:17:12.885 I/GoogleInputMethodService( 1460): GoogleInputMethodService.onStartInput():1877 onStartInput(EditorInfo{inputType=0x0(NULL) imeOptions=0x0 privateImeOptions=null actionName=UNSPECIFIED actionLabel=null actionId=0 initialSelStart=-1 initialSelEnd=-1 initialCapsMode=0x0 hintText=null label=null packageName=de.blauerbarsch.dexhub fieldId=-1 fieldName=null extras=null}, false)
+11-15 21:17:12.912 D/ProfileInstaller( 7189): Installing profile for de.blauerbarsch.dexhub
+11-15 21:17:24.301 I/ActivityManager(  482): Force stopping de.blauerbarsch.dexhub appid=10174 user=0: from pid 7237
+11-15 21:17:24.302 I/ActivityManager(  482): Killing 7189:de.blauerbarsch.dexhub/u0a174 (adj 0): stop de.blauerbarsch.dexhub due to from pid 7237
+11-15 21:17:24.302 W/ActivityTaskManager(  482): Force removing ActivityRecord{10b59ac u0 de.blauerbarsch.dexhub/.MainActivity} t14 f}}: app died, no saved state
+11-15 21:17:24.304 W/InputManager-JNI(  482): Input channel object 'ecd1e0c de.blauerbarsch.dexhub/de.blauerbarsch.dexhub.MainActivity (client)' was disposed without first being removed with the input manager!
+11-15 21:17:24.312 D/CarrierSvcBindHelper(  978): onHandleForceStop: [de.blauerbarsch.dexhub]
+11-15 21:17:24.337 V/ActivityManager(  482): Got obituary of 7189:de.blauerbarsch.dexhub
+11-15 21:17:24.360 I/ActivityTaskManager(  482): START u0 {flg=0x10000000 cmp=de.blauerbarsch.dexhub/.MainActivity (has extras)} from uid 2000
+11-15 21:17:24.373 I/ActivityManager(  482): Start proc 7250:de.blauerbarsch.dexhub/u0a174 for next-top-activity {de.blauerbarsch.dexhub/de.blauerbarsch.dexhub.MainActivity}
+11-15 21:17:24.376 D/CoreBackPreview(  482): Window{a0d4d93 u0 Splash Screen de.blauerbarsch.dexhub}: Setting back callback OnBackInvokedCallbackInfo{mCallback=android.window.IOnBackInvokedCallback$Stub$Proxy@6352fef, mPriority=0}
+11-15 21:17:24.383 I/erbarsch.dexhub( 7250): Using CollectorTypeCC GC.
+11-15 21:17:24.384 W/erbarsch.dexhub( 7250): Unexpected CPU variant for x86: x86_64.
+11-15 21:17:24.384 W/erbarsch.dexhub( 7250): Known variants: atom, sandybridge, silvermont, kabylake, default
+11-15 21:17:24.411 D/nativeloader( 7250): Configuring classloader-namespace for other apk /data/app/~~jHhJuF9mrRzU4ouwehGHpQ==/de.blauerbarsch.dexhub-iHJkNDLlHscTf3ERDx88bw==/base.apk. target_sdk_version=36, uses_libraries=, library_path=/data/app/~~jHhJuF9mrRzU4ouwehGHpQ==/de.blauerbarsch.dexhub-iHJkNDLlHscTf3ERDx88bw==/lib/x86_64:/data/app/~~jHhJuF9mrRzU4ouwehGHpQ==/de.blauerbarsch.dexhub-iHJkNDLlHscTf3ERDx88bw==/base.apk!/lib/x86_64, permitted_path=/data:/mnt/expand:/data/user/0/de.blauerbarsch.dexhub
+11-15 21:17:24.413 V/GraphicsEnvironment( 7250): ANGLE Developer option for 'de.blauerbarsch.dexhub' set to: 'default'
+11-15 21:17:24.413 V/GraphicsEnvironment( 7250): ANGLE GameManagerService for de.blauerbarsch.dexhub: false
+11-15 21:17:24.439 D/DOTNET  ( 7250): AndroidCryptoNative_InitLibraryOnLoad: jint AndroidCryptoNative_InitLibraryOnLoad(JavaVM *, void *) in /__w/1/s/src/runtime/src/native/libs/System.Security.Cryptography.Native.Android/pal_jni.c
+11-15 21:17:24.439 D/DOTNET  ( 7250): GetOptionalClassGRef: optional class com/android/org/conscrypt/OpenSSLEngineImpl was not found
+11-15 21:17:24.788 I/erbarsch.dexhub( 7250): Explicit concurrent copying GC freed 12883(742KB) AllocSpace objects, 0(0B) LOS objects, 49% free, 2028KB/4057KB, paused 62us,51us total 2.666ms
+11-15 21:17:25.331 D/CoreBackPreview(  482): Window{f5d52ad u0 de.blauerbarsch.dexhub/de.blauerbarsch.dexhub.MainActivity}: Setting back callback OnBackInvokedCallbackInfo{mCallback=android.window.IOnBackInvokedCallback$Stub$Proxy@591173, mPriority=0}
+11-15 21:17:25.447 I/erbarsch.dexhub( 7250): Explicit concurrent copying GC freed 2053(268KB) AllocSpace objects, 0(0B) LOS objects, 49% free, 2229KB/4459KB, paused 39us,4us total 2.319ms
+11-15 21:17:25.544 I/AVALONIA( 7250): Surface Created
+11-15 21:17:28.601 W/monodroid-assembly( 7250): Timeout while waiting for shared library 'libandroid.so' to load.
+11-15 21:17:31.604 W/monodroid-assembly( 7250): Timeout while waiting for shared library 'android' to load.
+11-15 21:17:31.604 W/monodroid-assembly( 7250): Shared library 'android' not loaded, p/invoke 'ANativeWindow_fromSurface' may fail
+11-15 21:17:31.690 I/erbarsch.dexhub( 7250): Explicit concurrent copying GC freed 216(50KB) AllocSpace objects, 0(0B) LOS objects, 49% free, 2243KB/4486KB, paused 13us,5us total 3.095ms
+11-15 21:17:31.713 I/AVALONIA( 7250): Surface Changed
+11-15 21:17:32.124 I/ActivityTaskManager(  482): Displayed de.blauerbarsch.dexhub/.MainActivity: +7s775ms
+11-15 21:17:32.145 W/InputManager-JNI(  482): Input channel object 'a0d4d93 Splash Screen de.blauerbarsch.dexhub (client)' was disposed without first being removed with the input manager!
+11-15 21:17:32.145 D/CoreBackPreview(  482): Window{a0d4d93 u0 Splash Screen de.blauerbarsch.dexhub EXITING}: Setting back callback null
+11-15 21:17:32.242 I/erbarsch.dexhub( 7250): Explicit concurrent copying GC freed 280(93KB) AllocSpace objects, 0(0B) LOS objects, 49% free, 2229KB/4459KB, paused 36us,5us total 2.561ms
+11-15 21:17:32.338 I/erbarsch.dexhub( 7250): Explicit concurrent copying GC freed 83(32KB) AllocSpace objects, 0(0B) LOS objects, 49% free, 2229KB/4458KB, paused 50us,5us total 2.724ms
+11-15 21:17:32.572 I/GoogleInputMethodService( 1460): GoogleInputMethodService.onStartInput():1877 onStartInput(EditorInfo{inputType=0x0(NULL) imeOptions=0x0 privateImeOptions=null actionName=UNSPECIFIED actionLabel=null actionId=0 initialSelStart=-1 initialSelEnd=-1 initialCapsMode=0x0 hintText=null label=null packageName=de.blauerbarsch.dexhub fieldId=-1 fieldName=null extras=null}, false)
+11-15 21:17:32.574 D/ProfileInstaller( 7250): Installing profile for de.blauerbarsch.dexhub
+11-15 21:17:44.213 I/ActivityManager(  482): Force stopping de.blauerbarsch.dexhub appid=10174 user=0: from pid 7300
+11-15 21:17:44.214 I/ActivityManager(  482): Killing 7250:de.blauerbarsch.dexhub/u0a174 (adj 0): stop de.blauerbarsch.dexhub due to from pid 7300
+11-15 21:17:44.214 W/ActivityTaskManager(  482): Force removing ActivityRecord{aed3cf6 u0 de.blauerbarsch.dexhub/.MainActivity} t15 f}}: app died, no saved state
+11-15 21:17:44.217 W/InputManager-JNI(  482): Input channel object 'f5d52ad de.blauerbarsch.dexhub/de.blauerbarsch.dexhub.MainActivity (client)' was disposed without first being removed with the input manager!
+11-15 21:17:44.230 D/CarrierSvcBindHelper(  978): onHandleForceStop: [de.blauerbarsch.dexhub]
+11-15 21:17:44.256 I/ActivityTaskManager(  482): START u0 {flg=0x10000000 cmp=de.blauerbarsch.dexhub/.MainActivity (has extras)} from uid 2000
+11-15 21:17:44.266 D/CoreBackPreview(  482): Window{6104f0 u0 Splash Screen de.blauerbarsch.dexhub}: Setting back callback OnBackInvokedCallbackInfo{mCallback=android.window.IOnBackInvokedCallback$Stub$Proxy@87f7cee, mPriority=0}
+11-15 21:17:44.273 V/ActivityManager(  482): Got obituary of 7250:de.blauerbarsch.dexhub
+11-15 21:17:44.280 I/ActivityManager(  482): Start proc 7313:de.blauerbarsch.dexhub/u0a174 for next-top-activity {de.blauerbarsch.dexhub/de.blauerbarsch.dexhub.MainActivity}
+11-15 21:17:44.292 I/erbarsch.dexhub( 7313): Using CollectorTypeCC GC.
+11-15 21:17:44.293 W/erbarsch.dexhub( 7313): Unexpected CPU variant for x86: x86_64.
+11-15 21:17:44.293 W/erbarsch.dexhub( 7313): Known variants: atom, sandybridge, silvermont, kabylake, default
+11-15 21:17:44.326 D/nativeloader( 7313): Configuring classloader-namespace for other apk /data/app/~~jHhJuF9mrRzU4ouwehGHpQ==/de.blauerbarsch.dexhub-iHJkNDLlHscTf3ERDx88bw==/base.apk. target_sdk_version=36, uses_libraries=, library_path=/data/app/~~jHhJuF9mrRzU4ouwehGHpQ==/de.blauerbarsch.dexhub-iHJkNDLlHscTf3ERDx88bw==/lib/x86_64:/data/app/~~jHhJuF9mrRzU4ouwehGHpQ==/de.blauerbarsch.dexhub-iHJkNDLlHscTf3ERDx88bw==/base.apk!/lib/x86_64, permitted_path=/data:/mnt/expand:/data/user/0/de.blauerbarsch.dexhub
+11-15 21:17:44.329 V/GraphicsEnvironment( 7313): ANGLE Developer option for 'de.blauerbarsch.dexhub' set to: 'default'
+11-15 21:17:44.329 V/GraphicsEnvironment( 7313): ANGLE GameManagerService for de.blauerbarsch.dexhub: false
+11-15 21:17:44.355 D/DOTNET  ( 7313): AndroidCryptoNative_InitLibraryOnLoad: jint AndroidCryptoNative_InitLibraryOnLoad(JavaVM *, void *) in /__w/1/s/src/runtime/src/native/libs/System.Security.Cryptography.Native.Android/pal_jni.c
+11-15 21:17:44.355 D/DOTNET  ( 7313): GetOptionalClassGRef: optional class com/android/org/conscrypt/OpenSSLEngineImpl was not found
+11-15 21:17:44.703 I/erbarsch.dexhub( 7313): Explicit concurrent copying GC freed 12824(722KB) AllocSpace objects, 0(0B) LOS objects, 49% free, 1997KB/3995KB, paused 41us,4us total 2.742ms
+11-15 21:17:45.209 D/CoreBackPreview(  482): Window{5ac576f u0 de.blauerbarsch.dexhub/de.blauerbarsch.dexhub.MainActivity}: Setting back callback OnBackInvokedCallbackInfo{mCallback=android.window.IOnBackInvokedCallback$Stub$Proxy@662b905, mPriority=0}
+11-15 21:17:45.327 I/erbarsch.dexhub( 7313): Explicit concurrent copying GC freed 2055(268KB) AllocSpace objects, 0(0B) LOS objects, 49% free, 2234KB/4469KB, paused 338us,4us total 3.155ms
+11-15 21:17:45.429 I/AVALONIA( 7313): Surface Created
+11-15 21:17:48.485 W/monodroid-assembly( 7313): Timeout while waiting for shared library 'libandroid.so' to load.
+11-15 21:17:51.489 W/monodroid-assembly( 7313): Timeout while waiting for shared library 'android' to load.
+11-15 21:17:51.489 W/monodroid-assembly( 7313): Shared library 'android' not loaded, p/invoke 'ANativeWindow_fromSurface' may fail
+11-15 21:17:51.570 I/erbarsch.dexhub( 7313): Explicit concurrent copying GC freed 227(66KB) AllocSpace objects, 0(0B) LOS objects, 49% free, 2248KB/4496KB, paused 37us,4us total 2.741ms
+11-15 21:17:51.595 I/AVALONIA( 7313): Surface Changed
+11-15 21:17:52.029 I/ActivityTaskManager(  482): Displayed de.blauerbarsch.dexhub/.MainActivity: +7s771ms
+11-15 21:17:52.047 W/InputManager-JNI(  482): Input channel object '6104f0 Splash Screen de.blauerbarsch.dexhub (client)' was disposed without first being removed with the input manager!
+11-15 21:17:52.048 D/CoreBackPreview(  482): Window{6104f0 u0 Splash Screen de.blauerbarsch.dexhub EXITING}: Setting back callback null
+11-15 21:17:52.147 I/erbarsch.dexhub( 7313): Explicit concurrent copying GC freed 296(77KB) AllocSpace objects, 0(0B) LOS objects, 49% free, 2234KB/4468KB, paused 48us,5us total 3.185ms
+11-15 21:17:52.254 I/erbarsch.dexhub( 7313): Explicit concurrent copying GC freed 92(31KB) AllocSpace objects, 0(0B) LOS objects, 49% free, 2234KB/4468KB, paused 62us,8us total 3.615ms
+11-15 21:17:52.289 I/erbarsch.dexhub( 7313): Explicit concurrent copying GC freed 23(47KB) AllocSpace objects, 0(0B) LOS objects, 49% free, 2234KB/4468KB, paused 54us,7us total 3.734ms
+11-15 21:17:52.416 I/erbarsch.dexhub( 7313): Explicit concurrent copying GC freed 102(32KB) AllocSpace objects, 0(0B) LOS objects, 49% free, 2233KB/4467KB, paused 45us,4us total 2.820ms
+11-15 21:17:52.505 I/GoogleInputMethodService( 1460): GoogleInputMethodService.onStartInput():1877 onStartInput(EditorInfo{inputType=0x0(NULL) imeOptions=0x0 privateImeOptions=null actionName=UNSPECIFIED actionLabel=null actionId=0 initialSelStart=-1 initialSelEnd=-1 initialCapsMode=0x0 hintText=null label=null packageName=de.blauerbarsch.dexhub fieldId=-1 fieldName=null extras=null}, false)
+11-15 21:17:52.506 D/ProfileInstaller( 7313): Installing profile for de.blauerbarsch.dexhub
+11-15 21:18:04.110 I/ActivityManager(  482): Force stopping de.blauerbarsch.dexhub appid=10174 user=0: from pid 7368
+11-15 21:18:04.112 I/ActivityManager(  482): Killing 7313:de.blauerbarsch.dexhub/u0a174 (adj 0): stop de.blauerbarsch.dexhub due to from pid 7368
+11-15 21:18:04.112 W/ActivityTaskManager(  482): Force removing ActivityRecord{b8e78a2 u0 de.blauerbarsch.dexhub/.MainActivity} t16 f}}: app died, no saved state
+11-15 21:18:04.116 W/InputManager-JNI(  482): Input channel object '5ac576f de.blauerbarsch.dexhub/de.blauerbarsch.dexhub.MainActivity (client)' was disposed without first being removed with the input manager!
+11-15 21:18:04.131 D/CarrierSvcBindHelper(  978): onHandleForceStop: [de.blauerbarsch.dexhub]
+11-15 21:18:04.157 I/ActivityTaskManager(  482): START u0 {flg=0x10000000 cmp=de.blauerbarsch.dexhub/.MainActivity (has extras)} from uid 2000
+11-15 21:18:04.165 W/ActivityManager(  482): ProcessRecord{be9801c 0:de.blauerbarsch.dexhub/u0a174} is attached to a previous process 7313
+11-15 21:18:04.173 W/InputMethodManagerService(  482): Got RemoteException sending setActive(false) notification to pid 7313 uid 10174
+11-15 21:18:04.176 V/ActivityManager(  482): Got obituary of 7313:de.blauerbarsch.dexhub
+11-15 21:18:04.176 D/CoreBackPreview(  482): Window{732ab4b u0 Splash Screen de.blauerbarsch.dexhub}: Setting back callback OnBackInvokedCallbackInfo{mCallback=android.window.IOnBackInvokedCallback$Stub$Proxy@134c540, mPriority=0}
+11-15 21:18:04.181 I/ActivityManager(  482): Start proc 7382:de.blauerbarsch.dexhub/u0a174 for next-top-activity {de.blauerbarsch.dexhub/de.blauerbarsch.dexhub.MainActivity}
+11-15 21:18:04.187 I/erbarsch.dexhub( 7382): Using CollectorTypeCC GC.
+11-15 21:18:04.187 W/erbarsch.dexhub( 7382): Unexpected CPU variant for x86: x86_64.
+11-15 21:18:04.187 W/erbarsch.dexhub( 7382): Known variants: atom, sandybridge, silvermont, kabylake, default
+11-15 21:18:04.207 W/CorpusConfigHelper( 1675): android.util.MalformedJsonException: Use JsonReader.setLenient(true) to accept malformed JSON at line 123 column 2
+11-15 21:18:04.212 D/nativeloader( 7382): Configuring classloader-namespace for other apk /data/app/~~jHhJuF9mrRzU4ouwehGHpQ==/de.blauerbarsch.dexhub-iHJkNDLlHscTf3ERDx88bw==/base.apk. target_sdk_version=36, uses_libraries=, library_path=/data/app/~~jHhJuF9mrRzU4ouwehGHpQ==/de.blauerbarsch.dexhub-iHJkNDLlHscTf3ERDx88bw==/lib/x86_64:/data/app/~~jHhJuF9mrRzU4ouwehGHpQ==/de.blauerbarsch.dexhub-iHJkNDLlHscTf3ERDx88bw==/base.apk!/lib/x86_64, permitted_path=/data:/mnt/expand:/data/user/0/de.blauerbarsch.dexhub
+11-15 21:18:04.223 V/GraphicsEnvironment( 7382): ANGLE Developer option for 'de.blauerbarsch.dexhub' set to: 'default'
+11-15 21:18:04.223 V/GraphicsEnvironment( 7382): ANGLE GameManagerService for de.blauerbarsch.dexhub: false
+11-15 21:18:04.254 D/DOTNET  ( 7382): AndroidCryptoNative_InitLibraryOnLoad: jint AndroidCryptoNative_InitLibraryOnLoad(JavaVM *, void *) in /__w/1/s/src/runtime/src/native/libs/System.Security.Cryptography.Native.Android/pal_jni.c
+11-15 21:18:04.255 D/DOTNET  ( 7382): GetOptionalClassGRef: optional class com/android/org/conscrypt/OpenSSLEngineImpl was not found
+11-15 21:18:04.596 I/erbarsch.dexhub( 7382): Explicit concurrent copying GC freed 12902(759KB) AllocSpace objects, 0(0B) LOS objects, 49% free, 2027KB/4055KB, paused 15us,4us total 2.135ms
+11-15 21:18:05.112 D/CoreBackPreview(  482): Window{12ae32a u0 de.blauerbarsch.dexhub/de.blauerbarsch.dexhub.MainActivity}: Setting back callback OnBackInvokedCallbackInfo{mCallback=android.window.IOnBackInvokedCallback$Stub$Proxy@fae86b8, mPriority=0}
+11-15 21:18:05.239 I/erbarsch.dexhub( 7382): Explicit concurrent copying GC freed 2035(235KB) AllocSpace objects, 0(0B) LOS objects, 49% free, 2229KB/4459KB, paused 12us,4us total 2.354ms
+11-15 21:18:05.354 I/AVALONIA( 7382): Surface Created
+11-15 21:18:08.420 W/monodroid-assembly( 7382): Timeout while waiting for shared library 'libandroid.so' to load.
+11-15 21:18:11.423 W/monodroid-assembly( 7382): Timeout while waiting for shared library 'android' to load.
+11-15 21:18:11.423 W/monodroid-assembly( 7382): Shared library 'android' not loaded, p/invoke 'ANativeWindow_fromSurface' may fail
+11-15 21:18:11.514 I/erbarsch.dexhub( 7382): Explicit concurrent copying GC freed 216(50KB) AllocSpace objects, 0(0B) LOS objects, 49% free, 2227KB/4455KB, paused 37us,4us total 2.173ms
+11-15 21:18:11.537 I/AVALONIA( 7382): Surface Changed
+11-15 21:18:11.933 I/ActivityTaskManager(  482): Displayed de.blauerbarsch.dexhub/.MainActivity: +7s773ms
+11-15 21:18:11.945 W/InputManager-JNI(  482): Input channel object '732ab4b Splash Screen de.blauerbarsch.dexhub (client)' was disposed without first being removed with the input manager!
+11-15 21:18:11.946 D/CoreBackPreview(  482): Window{732ab4b u0 Splash Screen de.blauerbarsch.dexhub EXITING}: Setting back callback null
+11-15 21:18:12.118 I/erbarsch.dexhub( 7382): Explicit concurrent copying GC freed 1064(146KB) AllocSpace objects, 0(0B) LOS objects, 49% free, 2321KB/4642KB, paused 54us,6us total 4.242ms
+11-15 21:18:12.231 D/ProfileInstaller( 7382): Installing profile for de.blauerbarsch.dexhub
+11-15 21:18:12.233 I/GoogleInputMethodService( 1460): GoogleInputMethodService.onStartInput():1877 onStartInput(EditorInfo{inputType=0x0(NULL) imeOptions=0x0 privateImeOptions=null actionName=UNSPECIFIED actionLabel=null actionId=0 initialSelStart=-1 initialSelEnd=-1 initialCapsMode=0x0 hintText=null label=null packageName=de.blauerbarsch.dexhub fieldId=-1 fieldName=null extras=null}, false)
+11-15 21:18:12.334 I/erbarsch.dexhub( 7382): Explicit concurrent copying GC freed 2210(145KB) AllocSpace objects, 0(0B) LOS objects, 49% free, 2832KB/5665KB, paused 47us,5us total 4.643ms
+11-15 21:18:12.342 I/erbarsch.dexhub( 7382): Explicit concurrent copying GC freed 169(35KB) AllocSpace objects, 0(0B) LOS objects, 49% free, 2813KB/5626KB, paused 35us,5us total 3.942ms
+11-15 21:18:12.476 I/erbarsch.dexhub( 7382): Explicit concurrent copying GC freed 177(64KB) AllocSpace objects, 0(0B) LOS objects, 49% free, 2812KB/5625KB, paused 11us,5us total 4.061ms
+11-15 21:18:13.540 I/erbarsch.dexhub( 7382): Explicit concurrent copying GC freed 2345(182KB) AllocSpace objects, 6(792KB) LOS objects, 49% free, 2887KB/5775KB, paused 10us,6us total 4.364ms
+11-15 21:18:13.912 I/erbarsch.dexhub( 7382): Waiting for a blocking GC Explicit
+11-15 21:18:13.922 I/erbarsch.dexhub( 7382): WaitForGcToComplete blocked Explicit on Background for 9.823ms
+11-15 21:18:13.926 I/erbarsch.dexhub( 7382): Explicit concurrent copying GC freed 146(20KB) AllocSpace objects, 0(0B) LOS objects, 49% free, 2887KB/5774KB, paused 31us,5us total 3.895ms
+11-15 21:18:14.956 I/erbarsch.dexhub( 7382): Waiting for a blocking GC Explicit
+11-15 21:18:15.032 I/erbarsch.dexhub( 7382): WaitForGcToComplete blocked Explicit on Background for 75.695ms
+11-15 21:18:15.054 I/erbarsch.dexhub( 7382): Explicit concurrent copying GC freed 126(48KB) AllocSpace objects, 344(44MB) LOS objects, 49% free, 7940KB/15MB, paused 44us,9us total 22.275ms
+11-15 21:18:15.164 I/erbarsch.dexhub( 7382): Explicit concurrent copying GC freed 88(80KB) AllocSpace objects, 162(20MB) LOS objects, 49% free, 2892KB/5785KB, paused 36us,7us total 6.195ms
+11-15 21:18:16.183 I/erbarsch.dexhub( 7382): Waiting for a blocking GC Explicit
+11-15 21:18:16.194 I/erbarsch.dexhub( 7382): WaitForGcToComplete blocked Explicit on Background for 11.077ms
+11-15 21:18:16.198 I/erbarsch.dexhub( 7382): Explicit concurrent copying GC freed 45(48KB) AllocSpace objects, 0(0B) LOS objects, 49% free, 2906KB/5812KB, paused 8us,3us total 3.531ms
+11-15 21:18:17.461 I/erbarsch.dexhub( 7382): Explicit concurrent copying GC freed 2476(182KB) AllocSpace objects, 33(4356KB) LOS objects, 49% free, 2921KB/5842KB, paused 13us,6us total 4.395ms
+11-15 21:18:19.438 I/erbarsch.dexhub( 7382): Waiting for a blocking GC Explicit
+11-15 21:18:19.489 I/erbarsch.dexhub( 7382): Background young concurrent copying GC freed 53(63KB) AllocSpace objects, 149(19MB) LOS objects, 0% free, 151MB/151MB, paused 28us,7us total 110.544ms
+11-15 21:18:19.489 I/erbarsch.dexhub( 7382): WaitForGcToComplete blocked Explicit on Background for 51.033ms
+11-15 21:18:19.508 I/erbarsch.dexhub( 7382): Explicit concurrent copying GC freed 1339(117KB) AllocSpace objects, 1153(148MB) LOS objects, 49% free, 2950KB/5900KB, paused 44us,5us total 17.948ms
+11-15 21:18:19.508 I/erbarsch.dexhub( 7382): WaitForGcToComplete blocked Background on Explicit for 18.010ms
+11-15 21:18:19.561 I/erbarsch.dexhub( 7382): Explicit concurrent copying GC freed 478(92KB) AllocSpace objects, 0(0B) LOS objects, 49% free, 2921KB/5843KB, paused 35us,5us total 4.347ms
+11-15 21:18:20.231 I/erbarsch.dexhub( 7382): Explicit concurrent copying GC freed 726(48KB) AllocSpace objects, 0(0B) LOS objects, 49% free, 2921KB/5841KB, paused 11us,6us total 4.183ms
+11-15 21:18:20.488 I/erbarsch.dexhub( 7382): Explicit concurrent copying GC freed 358(64KB) AllocSpace objects, 0(0B) LOS objects, 49% free, 2936KB/5873KB, paused 69us,6us total 4.610ms
+11-15 21:18:20.820 I/erbarsch.dexhub( 7382): Explicit concurrent copying GC freed 399(63KB) AllocSpace objects, 0(0B) LOS objects, 49% free, 2936KB/5873KB, paused 38us,5us total 4.251ms
+11-15 21:18:20.866 I/erbarsch.dexhub( 7382): Explicit concurrent copying GC freed 83(47KB) AllocSpace objects, 0(0B) LOS objects, 49% free, 2921KB/5842KB, paused 10us,7us total 4.085ms
+11-15 21:18:24.031 I/ActivityManager(  482): Force stopping de.blauerbarsch.dexhub appid=10174 user=0: from pid 7436
+11-15 21:18:24.033 I/ActivityManager(  482): Killing 7382:de.blauerbarsch.dexhub/u0a174 (adj 0): stop de.blauerbarsch.dexhub due to from pid 7436
+11-15 21:18:24.033 W/ActivityTaskManager(  482): Force removing ActivityRecord{5fb50e u0 de.blauerbarsch.dexhub/.MainActivity} t17 f}}: app died, no saved state
+11-15 21:18:24.037 W/InputManager-JNI(  482): Input channel object '12ae32a de.blauerbarsch.dexhub/de.blauerbarsch.dexhub.MainActivity (client)' was disposed without first being removed with the input manager!
+11-15 21:18:24.078 D/CarrierSvcBindHelper(  978): onHandleForceStop: [de.blauerbarsch.dexhub]
+11-15 21:18:24.094 V/ActivityManager(  482): Got obituary of 7382:de.blauerbarsch.dexhub
+11-15 21:18:24.115 I/ActivityTaskManager(  482): START u0 {flg=0x10000000 cmp=de.blauerbarsch.dexhub/.MainActivity (has extras)} from uid 2000
+11-15 21:18:24.138 I/ActivityManager(  482): Start proc 7449:de.blauerbarsch.dexhub/u0a174 for next-top-activity {de.blauerbarsch.dexhub/de.blauerbarsch.dexhub.MainActivity}
+11-15 21:18:24.142 I/erbarsch.dexhub( 7449): Using CollectorTypeCC GC.
+11-15 21:18:24.142 D/CoreBackPreview(  482): Window{ad47cbb u0 Splash Screen de.blauerbarsch.dexhub}: Setting back callback OnBackInvokedCallbackInfo{mCallback=android.window.IOnBackInvokedCallback$Stub$Proxy@c61bd31, mPriority=0}
+11-15 21:18:24.142 W/erbarsch.dexhub( 7449): Unexpected CPU variant for x86: x86_64.
+11-15 21:18:24.142 W/erbarsch.dexhub( 7449): Known variants: atom, sandybridge, silvermont, kabylake, default
+11-15 21:18:24.181 D/nativeloader( 7449): Configuring classloader-namespace for other apk /data/app/~~jHhJuF9mrRzU4ouwehGHpQ==/de.blauerbarsch.dexhub-iHJkNDLlHscTf3ERDx88bw==/base.apk. target_sdk_version=36, uses_libraries=, library_path=/data/app/~~jHhJuF9mrRzU4ouwehGHpQ==/de.blauerbarsch.dexhub-iHJkNDLlHscTf3ERDx88bw==/lib/x86_64:/data/app/~~jHhJuF9mrRzU4ouwehGHpQ==/de.blauerbarsch.dexhub-iHJkNDLlHscTf3ERDx88bw==/base.apk!/lib/x86_64, permitted_path=/data:/mnt/expand:/data/user/0/de.blauerbarsch.dexhub
+11-15 21:18:24.184 V/GraphicsEnvironment( 7449): ANGLE Developer option for 'de.blauerbarsch.dexhub' set to: 'default'
+11-15 21:18:24.184 V/GraphicsEnvironment( 7449): ANGLE GameManagerService for de.blauerbarsch.dexhub: false
+11-15 21:18:24.238 D/DOTNET  ( 7449): AndroidCryptoNative_InitLibraryOnLoad: jint AndroidCryptoNative_InitLibraryOnLoad(JavaVM *, void *) in /__w/1/s/src/runtime/src/native/libs/System.Security.Cryptography.Native.Android/pal_jni.c
+11-15 21:18:24.238 D/DOTNET  ( 7449): GetOptionalClassGRef: optional class com/android/org/conscrypt/OpenSSLEngineImpl was not found
+11-15 21:18:24.612 I/erbarsch.dexhub( 7449): Explicit concurrent copying GC freed 12914(772KB) AllocSpace objects, 0(0B) LOS objects, 49% free, 2030KB/4061KB, paused 65us,4us total 2.300ms
+11-15 21:18:25.153 D/CoreBackPreview(  482): Window{bd689e u0 de.blauerbarsch.dexhub/de.blauerbarsch.dexhub.MainActivity}: Setting back callback OnBackInvokedCallbackInfo{mCallback=android.window.IOnBackInvokedCallback$Stub$Proxy@2770b4c, mPriority=0}
+11-15 21:18:25.275 I/erbarsch.dexhub( 7449): Explicit concurrent copying GC freed 2024(238KB) AllocSpace objects, 0(0B) LOS objects, 49% free, 2230KB/4460KB, paused 11us,5us total 2.349ms
+11-15 21:18:25.378 I/AVALONIA( 7449): Surface Created
+11-15 21:18:28.439 W/monodroid-assembly( 7449): Timeout while waiting for shared library 'libandroid.so' to load.
+11-15 21:18:31.441 W/monodroid-assembly( 7449): Timeout while waiting for shared library 'android' to load.
+11-15 21:18:31.441 W/monodroid-assembly( 7449): Shared library 'android' not loaded, p/invoke 'ANativeWindow_fromSurface' may fail
+11-15 21:18:31.527 I/erbarsch.dexhub( 7449): Explicit concurrent copying GC freed 216(50KB) AllocSpace objects, 0(0B) LOS objects, 49% free, 2227KB/4455KB, paused 36us,3us total 2.122ms
+11-15 21:18:31.547 I/AVALONIA( 7449): Surface Changed
+11-15 21:18:31.949 I/ActivityTaskManager(  482): Displayed de.blauerbarsch.dexhub/.MainActivity: +7s834ms
+11-15 21:18:31.955 D/CoreBackPreview(  482): Window{ad47cbb u0 Splash Screen de.blauerbarsch.dexhub EXITING}: Setting back callback null
+11-15 21:18:31.955 W/InputManager-JNI(  482): Input channel object 'ad47cbb Splash Screen de.blauerbarsch.dexhub (client)' was disposed without first being removed with the input manager!
+11-15 21:18:32.084 I/erbarsch.dexhub( 7449): Explicit concurrent copying GC freed 307(94KB) AllocSpace objects, 0(0B) LOS objects, 49% free, 2229KB/4459KB, paused 83us,4us total 3.314ms
+11-15 21:18:32.228 I/erbarsch.dexhub( 7449): Explicit concurrent copying GC freed 164(31KB) AllocSpace objects, 0(0B) LOS objects, 49% free, 2229KB/4459KB, paused 43us,4us total 3.149ms
+11-15 21:18:32.253 I/erbarsch.dexhub( 7449): Explicit concurrent copying GC freed 3(16KB) AllocSpace objects, 0(0B) LOS objects, 49% free, 2229KB/4459KB, paused 44us,6us total 3.650ms
+11-15 21:18:32.384 I/erbarsch.dexhub( 7449): Explicit concurrent copying GC freed 23(47KB) AllocSpace objects, 0(0B) LOS objects, 49% free, 2229KB/4459KB, paused 46us,5us total 3.319ms
+11-15 21:18:32.511 I/erbarsch.dexhub( 7449): Explicit concurrent copying GC freed 120(32KB) AllocSpace objects, 0(0B) LOS objects, 49% free, 2229KB/4458KB, paused 35us,7us total 9.752ms
+11-15 21:18:32.517 I/erbarsch.dexhub( 7449): Explicit concurrent copying GC freed 3(16KB) AllocSpace objects, 0(0B) LOS objects, 49% free, 2229KB/4458KB, paused 33us,4us total 2.324ms
+11-15 21:18:32.544 I/GoogleInputMethodService( 1460): GoogleInputMethodService.onStartInput():1877 onStartInput(EditorInfo{inputType=0x0(NULL) imeOptions=0x0 privateImeOptions=null actionName=UNSPECIFIED actionLabel=null actionId=0 initialSelStart=-1 initialSelEnd=-1 initialCapsMode=0x0 hintText=null label=null packageName=de.blauerbarsch.dexhub fieldId=-1 fieldName=null extras=null}, false)
+11-15 21:18:32.549 D/ProfileInstaller( 7449): Installing profile for de.blauerbarsch.dexhub
+11-15 21:18:44.046 I/ActivityManager(  482): Force stopping de.blauerbarsch.dexhub appid=10174 user=0: from pid 7513
+11-15 21:18:44.048 I/ActivityManager(  482): Killing 7449:de.blauerbarsch.dexhub/u0a174 (adj 0): stop de.blauerbarsch.dexhub due to from pid 7513
+11-15 21:18:44.049 W/ActivityTaskManager(  482): Force removing ActivityRecord{7c8a9f2 u0 de.blauerbarsch.dexhub/.MainActivity} t18 f}}: app died, no saved state
+11-15 21:18:44.051 W/InputManager-JNI(  482): Input channel object 'bd689e de.blauerbarsch.dexhub/de.blauerbarsch.dexhub.MainActivity (client)' was disposed without first being removed with the input manager!
+11-15 21:18:44.060 D/CarrierSvcBindHelper(  978): onHandleForceStop: [de.blauerbarsch.dexhub]
+11-15 21:18:44.095 I/ActivityTaskManager(  482): START u0 {flg=0x10000000 cmp=de.blauerbarsch.dexhub/.MainActivity (has extras)} from uid 2000
+11-15 21:18:44.100 W/ActivityManager(  482): ProcessRecord{fdc07f9 0:de.blauerbarsch.dexhub/u0a174} is attached to a previous process 7449
+11-15 21:18:44.105 D/CoreBackPreview(  482): Window{74ee40c u0 Splash Screen de.blauerbarsch.dexhub}: Setting back callback OnBackInvokedCallbackInfo{mCallback=android.window.IOnBackInvokedCallback$Stub$Proxy@ffed76a, mPriority=0}
+11-15 21:18:44.110 W/ActivityManager(  482): ProcessRecord{fdc07f9 0:de.blauerbarsch.dexhub/u0a174} is attached to a previous process 7449
+11-15 21:18:44.110 W/ActivityManager(  482): ProcessRecord{fdc07f9 0:de.blauerbarsch.dexhub/u0a174} is attached to a previous process 7449
+11-15 21:18:44.127 V/ActivityManager(  482): Got obituary of 7449:de.blauerbarsch.dexhub
+11-15 21:18:44.142 I/erbarsch.dexhub( 7525): Using CollectorTypeCC GC.
+11-15 21:18:44.142 I/ActivityManager(  482): Start proc 7525:de.blauerbarsch.dexhub/u0a174 for next-top-activity {de.blauerbarsch.dexhub/de.blauerbarsch.dexhub.MainActivity}
+11-15 21:18:44.142 W/erbarsch.dexhub( 7525): Unexpected CPU variant for x86: x86_64.
+11-15 21:18:44.142 W/erbarsch.dexhub( 7525): Known variants: atom, sandybridge, silvermont, kabylake, default
+11-15 21:18:44.179 D/nativeloader( 7525): Configuring classloader-namespace for other apk /data/app/~~jHhJuF9mrRzU4ouwehGHpQ==/de.blauerbarsch.dexhub-iHJkNDLlHscTf3ERDx88bw==/base.apk. target_sdk_version=36, uses_libraries=, library_path=/data/app/~~jHhJuF9mrRzU4ouwehGHpQ==/de.blauerbarsch.dexhub-iHJkNDLlHscTf3ERDx88bw==/lib/x86_64:/data/app/~~jHhJuF9mrRzU4ouwehGHpQ==/de.blauerbarsch.dexhub-iHJkNDLlHscTf3ERDx88bw==/base.apk!/lib/x86_64, permitted_path=/data:/mnt/expand:/data/user/0/de.blauerbarsch.dexhub
+11-15 21:18:44.181 V/GraphicsEnvironment( 7525): ANGLE Developer option for 'de.blauerbarsch.dexhub' set to: 'default'
+11-15 21:18:44.182 V/GraphicsEnvironment( 7525): ANGLE GameManagerService for de.blauerbarsch.dexhub: false
+11-15 21:18:44.224 D/DOTNET  ( 7525): AndroidCryptoNative_InitLibraryOnLoad: jint AndroidCryptoNative_InitLibraryOnLoad(JavaVM *, void *) in /__w/1/s/src/runtime/src/native/libs/System.Security.Cryptography.Native.Android/pal_jni.c
+11-15 21:18:44.225 D/DOTNET  ( 7525): GetOptionalClassGRef: optional class com/android/org/conscrypt/OpenSSLEngineImpl was not found
+11-15 21:18:44.603 I/erbarsch.dexhub( 7525): Explicit concurrent copying GC freed 12852(752KB) AllocSpace objects, 0(0B) LOS objects, 49% free, 2035KB/4070KB, paused 134us,4us total 2.314ms
+11-15 21:18:45.130 D/CoreBackPreview(  482): Window{f2aad1f u0 de.blauerbarsch.dexhub/de.blauerbarsch.dexhub.MainActivity}: Setting back callback OnBackInvokedCallbackInfo{mCallback=android.window.IOnBackInvokedCallback$Stub$Proxy@41fbe35, mPriority=0}
+11-15 21:18:45.257 I/erbarsch.dexhub( 7525): Explicit concurrent copying GC freed 2026(238KB) AllocSpace objects, 0(0B) LOS objects, 49% free, 2234KB/4469KB, paused 11us,5us total 2.386ms
+11-15 21:18:45.360 I/AVALONIA( 7525): Surface Created
+11-15 21:18:48.426 W/monodroid-assembly( 7525): Timeout while waiting for shared library 'libandroid.so' to load.
+11-15 21:18:51.430 W/monodroid-assembly( 7525): Timeout while waiting for shared library 'android' to load.
+11-15 21:18:51.430 W/monodroid-assembly( 7525): Shared library 'android' not loaded, p/invoke 'ANativeWindow_fromSurface' may fail
+11-15 21:18:51.510 I/erbarsch.dexhub( 7525): Explicit concurrent copying GC freed 216(50KB) AllocSpace objects, 0(0B) LOS objects, 49% free, 2248KB/4496KB, paused 36us,4us total 2.448ms
+11-15 21:18:51.531 I/AVALONIA( 7525): Surface Changed
+11-15 21:18:51.932 I/ActivityTaskManager(  482): Displayed de.blauerbarsch.dexhub/.MainActivity: +7s836ms
+11-15 21:18:51.946 W/InputManager-JNI(  482): Input channel object '74ee40c Splash Screen de.blauerbarsch.dexhub (client)' was disposed without first being removed with the input manager!
+11-15 21:18:51.947 D/CoreBackPreview(  482): Window{74ee40c u0 Splash Screen de.blauerbarsch.dexhub EXITING}: Setting back callback null
+11-15 21:18:52.049 I/erbarsch.dexhub( 7525): Explicit concurrent copying GC freed 361(94KB) AllocSpace objects, 0(0B) LOS objects, 49% free, 2234KB/4468KB, paused 40us,5us total 2.700ms
+11-15 21:18:52.158 I/erbarsch.dexhub( 7525): Explicit concurrent copying GC freed 128(31KB) AllocSpace objects, 0(0B) LOS objects, 49% free, 2234KB/4468KB, paused 46us,6us total 3.374ms
+11-15 21:18:52.176 I/erbarsch.dexhub( 7525): Explicit concurrent copying GC freed 3(16KB) AllocSpace objects, 0(0B) LOS objects, 49% free, 2234KB/4468KB, paused 35us,5us total 2.989ms
+11-15 21:18:52.196 I/GoogleInputMethodService( 1460): GoogleInputMethodService.onStartInput():1877 onStartInput(EditorInfo{inputType=0x0(NULL) imeOptions=0x0 privateImeOptions=null actionName=UNSPECIFIED actionLabel=null actionId=0 initialSelStart=-1 initialSelEnd=-1 initialCapsMode=0x0 hintText=null label=null packageName=de.blauerbarsch.dexhub fieldId=-1 fieldName=null extras=null}, false)
+11-15 21:18:52.200 D/ProfileInstaller( 7525): Installing profile for de.blauerbarsch.dexhub
+11-15 21:18:52.290 I/erbarsch.dexhub( 7525): Explicit concurrent copying GC freed 1998(159KB) AllocSpace objects, 0(0B) LOS objects, 49% free, 2730KB/5460KB, paused 36us,6us total 5.714ms
+11-15 21:18:52.310 I/erbarsch.dexhub( 7525): Explicit concurrent copying GC freed 154(35KB) AllocSpace objects, 0(0B) LOS objects, 49% free, 2727KB/5454KB, paused 37us,7us total 3.693ms
+11-15 21:19:03.228 I/erbarsch.dexhub( 7525): Explicit concurrent copying GC freed 12704(469KB) AllocSpace objects, 0(0B) LOS objects, 49% free, 2737KB/5475KB, paused 52us,9us total 5.691ms
+11-15 21:19:04.033 I/ActivityManager(  482): Force stopping de.blauerbarsch.dexhub appid=10174 user=0: from pid 7580
+11-15 21:19:04.033 I/ActivityManager(  482): Killing 7525:de.blauerbarsch.dexhub/u0a174 (adj 0): stop de.blauerbarsch.dexhub due to from pid 7580
+11-15 21:19:04.033 W/ActivityTaskManager(  482): Force removing ActivityRecord{dda499 u0 de.blauerbarsch.dexhub/.MainActivity} t19 f}}: app died, no saved state
+11-15 21:19:04.037 W/InputManager-JNI(  482): Input channel object 'f2aad1f de.blauerbarsch.dexhub/de.blauerbarsch.dexhub.MainActivity (client)' was disposed without first being removed with the input manager!
+11-15 21:19:04.047 D/CarrierSvcBindHelper(  978): onHandleForceStop: [de.blauerbarsch.dexhub]
+11-15 21:19:04.110 W/InputMethodManagerService(  482): Got RemoteException sending setActive(false) notification to pid 7525 uid 10174
+11-15 21:19:04.115 V/ActivityManager(  482): Got obituary of 7525:de.blauerbarsch.dexhub
+11-15 21:19:04.118 I/ActivityTaskManager(  482): START u0 {flg=0x10000000 cmp=de.blauerbarsch.dexhub/.MainActivity (has extras)} from uid 2000
+11-15 21:19:04.138 D/CoreBackPreview(  482): Window{ce14e71 u0 Splash Screen de.blauerbarsch.dexhub}: Setting back callback OnBackInvokedCallbackInfo{mCallback=android.window.IOnBackInvokedCallback$Stub$Proxy@51899c4, mPriority=0}
+11-15 21:19:04.144 I/ActivityManager(  482): Start proc 7593:de.blauerbarsch.dexhub/u0a174 for next-top-activity {de.blauerbarsch.dexhub/de.blauerbarsch.dexhub.MainActivity}
+11-15 21:19:04.156 I/erbarsch.dexhub( 7593): Using CollectorTypeCC GC.
+11-15 21:19:04.157 W/erbarsch.dexhub( 7593): Unexpected CPU variant for x86: x86_64.
+11-15 21:19:04.157 W/erbarsch.dexhub( 7593): Known variants: atom, sandybridge, silvermont, kabylake, default
+11-15 21:19:04.189 D/nativeloader( 7593): Configuring classloader-namespace for other apk /data/app/~~jHhJuF9mrRzU4ouwehGHpQ==/de.blauerbarsch.dexhub-iHJkNDLlHscTf3ERDx88bw==/base.apk. target_sdk_version=36, uses_libraries=, library_path=/data/app/~~jHhJuF9mrRzU4ouwehGHpQ==/de.blauerbarsch.dexhub-iHJkNDLlHscTf3ERDx88bw==/lib/x86_64:/data/app/~~jHhJuF9mrRzU4ouwehGHpQ==/de.blauerbarsch.dexhub-iHJkNDLlHscTf3ERDx88bw==/base.apk!/lib/x86_64, permitted_path=/data:/mnt/expand:/data/user/0/de.blauerbarsch.dexhub
+11-15 21:19:04.193 V/GraphicsEnvironment( 7593): ANGLE Developer option for 'de.blauerbarsch.dexhub' set to: 'default'
+11-15 21:19:04.193 V/GraphicsEnvironment( 7593): ANGLE GameManagerService for de.blauerbarsch.dexhub: false
+11-15 21:19:04.220 D/DOTNET  ( 7593): AndroidCryptoNative_InitLibraryOnLoad: jint AndroidCryptoNative_InitLibraryOnLoad(JavaVM *, void *) in /__w/1/s/src/runtime/src/native/libs/System.Security.Cryptography.Native.Android/pal_jni.c
+11-15 21:19:04.220 D/DOTNET  ( 7593): GetOptionalClassGRef: optional class com/android/org/conscrypt/OpenSSLEngineImpl was not found
+11-15 21:19:04.598 I/erbarsch.dexhub( 7593): Explicit concurrent copying GC freed 12908(742KB) AllocSpace objects, 0(0B) LOS objects, 49% free, 2029KB/4058KB, paused 16us,4us total 2.118ms
+11-15 21:19:05.150 D/CoreBackPreview(  482): Window{703e4ea u0 de.blauerbarsch.dexhub/de.blauerbarsch.dexhub.MainActivity}: Setting back callback OnBackInvokedCallbackInfo{mCallback=android.window.IOnBackInvokedCallback$Stub$Proxy@c3dbe78, mPriority=0}
+11-15 21:19:05.290 I/erbarsch.dexhub( 7593): Explicit concurrent copying GC freed 2026(237KB) AllocSpace objects, 0(0B) LOS objects, 49% free, 2229KB/4459KB, paused 50us,5us total 2.545ms
+11-15 21:19:05.402 I/AVALONIA( 7593): Surface Created
+11-15 21:19:08.456 W/monodroid-assembly( 7593): Timeout while waiting for shared library 'libandroid.so' to load.
+11-15 21:19:10.359 W/TapAndPay( 5749): java.lang.NullPointerException: NfcAdapter is null
+11-15 21:19:10.478 E/StatsCompanionService(  482): android.content.pm.PackageManager$NameNotFoundException: com.google.android.trichromelibrary
+11-15 21:19:10.485 W/GLSUser ( 5749): [AppCertManager] Exception while requesting key: 
+11-15 21:19:10.485 W/GLSUser ( 5749): java.util.concurrent.ExecutionException: avvw: Parse Proto Exception.
+11-15 21:19:10.485 W/GLSUser ( 5749): Caused by: avvw: Parse Proto Exception.
+11-15 21:19:10.838 W/BcSmartspaceView( 1007): java.lang.SecurityException: No access to content://settings/secure/doze_always_on: Neither user 10152 nor current process has android.permission.INTERACT_ACROSS_USERS_FULL.
+11-15 21:19:10.838 W/BcSmartspaceView( 1007): 	at android.os.Parcel.createExceptionOrNull(Parcel.java:3011)
+11-15 21:19:10.838 W/BcSmartspaceView( 1007): 	at android.os.Parcel.createException(Parcel.java:2995)
+11-15 21:19:10.838 W/BcSmartspaceView( 1007): 	at android.os.Parcel.readException(Parcel.java:2978)
+11-15 21:19:10.838 W/BcSmartspaceView( 1007): 	at android.os.Parcel.readException(Parcel.java:2920)
+11-15 21:19:10.838 W/BcSmartspaceView( 1007): Caused by: android.os.RemoteException: Remote stack trace:
+11-15 21:19:11.456 W/monodroid-assembly( 7593): Timeout while waiting for shared library 'android' to load.
+11-15 21:19:11.456 W/monodroid-assembly( 7593): Shared library 'android' not loaded, p/invoke 'ANativeWindow_fromSurface' may fail
+11-15 21:19:11.554 I/erbarsch.dexhub( 7593): Explicit concurrent copying GC freed 199(82KB) AllocSpace objects, 0(0B) LOS objects, 49% free, 2227KB/4455KB, paused 47us,4us total 2.662ms
+11-15 21:19:11.577 I/AVALONIA( 7593): Surface Changed
+11-15 21:19:12.032 I/ActivityTaskManager(  482): Displayed de.blauerbarsch.dexhub/.MainActivity: +7s913ms
+11-15 21:19:12.044 D/CoreBackPreview(  482): Window{ce14e71 u0 Splash Screen de.blauerbarsch.dexhub EXITING}: Setting back callback null
+11-15 21:19:12.044 W/InputManager-JNI(  482): Input channel object 'ce14e71 Splash Screen de.blauerbarsch.dexhub (client)' was disposed without first being removed with the input manager!
+11-15 21:19:12.151 I/erbarsch.dexhub( 7593): Explicit concurrent copying GC freed 276(94KB) AllocSpace objects, 0(0B) LOS objects, 49% free, 2229KB/4459KB, paused 36us,6us total 2.465ms
+11-15 21:19:12.278 I/erbarsch.dexhub( 7593): Explicit concurrent copying GC freed 146(31KB) AllocSpace objects, 0(0B) LOS objects, 49% free, 2229KB/4459KB, paused 46us,7us total 3.439ms
+11-15 21:19:12.294 I/erbarsch.dexhub( 7593): Explicit concurrent copying GC freed 3(16KB) AllocSpace objects, 0(0B) LOS objects, 49% free, 2229KB/4459KB, paused 10us,4us total 3.126ms
+11-15 21:19:12.311 D/ProfileInstaller( 7593): Installing profile for de.blauerbarsch.dexhub
+11-15 21:19:12.315 I/GoogleInputMethodService( 1460): GoogleInputMethodService.onStartInput():1877 onStartInput(EditorInfo{inputType=0x0(NULL) imeOptions=0x0 privateImeOptions=null actionName=UNSPECIFIED actionLabel=null actionId=0 initialSelStart=-1 initialSelEnd=-1 initialCapsMode=0x0 hintText=null label=null packageName=de.blauerbarsch.dexhub fieldId=-1 fieldName=null extras=null}, false)
+11-15 21:19:12.335 I/erbarsch.dexhub( 7593): Explicit concurrent copying GC freed 584(116KB) AllocSpace objects, 0(0B) LOS objects, 49% free, 2261KB/4523KB, paused 12us,4us total 2.313ms
+11-15 21:19:12.369 I/erbarsch.dexhub( 7593): Explicit concurrent copying GC freed 1420(64KB) AllocSpace objects, 0(0B) LOS objects, 49% free, 2725KB/5450KB, paused 11us,7us total 4.176ms
+11-15 21:19:12.467 I/erbarsch.dexhub( 7593): Explicit concurrent copying GC freed 93(34KB) AllocSpace objects, 0(0B) LOS objects, 49% free, 2722KB/5445KB, paused 52us,5us total 3.533ms
