@@ -155,6 +155,15 @@ jobs:
         with:
           name: screenshots
           path: screenshots/*.png
+      # Zusätzlich in den Zweig "screenshots" legen (dort lassen sie sich ohne Anmeldung ansehen)
+      - name: In Zweig "screenshots" ablegen
+        run: |
+          cd screenshots
+          git init -q
+          git checkout -q -b screenshots
+          git add *.png
+          git -c user.name="DexHub CI" -c user.email="ci@users.noreply.github.com" commit -q -m "Bildschirmfotos ${GITHUB_SHA::7}"
+          git push -q -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" screenshots
 
   # Android (APK für 64-Bit-ARM). Wird nach der Veröffentlichung angehängt, damit ein Fehler hier
   # die Windows-/Linux-Pakete nicht aufhält.
