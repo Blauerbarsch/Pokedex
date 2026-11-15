@@ -298,6 +298,9 @@
     <Style Selector=":is(UserControl).compact TabControl#MainTabs > TabItem /template/ Border#Indicator">
       <Setter Property="IsVisible" Value="False" />
     </Style>
+    <Style Selector=":is(UserControl).compact TabControl#MainTabs > TabItem /template/ ContentPresenter#PART_Icon">
+      <Setter Property="IsVisible" Value="False" />
+    </Style>
     <Style Selector=":is(UserControl).compact TabControl#MainTabs > TabItem /template/ Border#PART_LayoutRoot">
       <Setter Property="Padding" Value="12,8" />
     </Style>

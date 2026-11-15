@@ -1,4 +1,7 @@
+using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Layout;
+using Avalonia.Media;
 using DexHub.Core.Models;
 using DexHub.Core.Settings;
 
@@ -15,9 +18,40 @@ public sealed class AndroidShell : Panel
     public GameEntry? RunningGame { get; private set; }
     public string? RunningProfile { get; private set; }
 
+    // Farbiger Streifen hinter der Statusleiste (Uhr, Akku) – passt zur roten Kopfleiste
+    private readonly Border _statusBar = new()
+    {
+        Background = new SolidColorBrush(Color.Parse("#DC0A2D")),
+        VerticalAlignment = VerticalAlignment.Top,
+        IsHitTestVisible = false,
+    };
+    private Thickness _safe;
+
+    public AndroidShell()
+    {
+        Background = new SolidColorBrush(Color.Parse("#15171C"));
+        Children.Add(_statusBar);
+        AttachedToVisualTree += (_, _) =>
+        {
+            if (TopLevel.GetTopLevel(this)?.InsetsManager is not { } insets) return;
+            insets.SafeAreaChanged += (_, _) => ApplySafeArea(insets.SafeAreaPadding);
+            ApplySafeArea(insets.SafeAreaPadding);
+        };
+    }
+
+    /// <summary>Android zeichnet die App bis unter Status- und Navigationsleiste – Inhalt daraus fernhalten.</summary>
+    private void ApplySafeArea(Thickness safe)
+    {
+        _safe = safe;
+        _statusBar.Height = safe.Top;
+        if (_main is not null) _main.Margin = safe;
+        if (_play is not null) _play.Margin = safe;
+    }
+
     public void ShowMain(Control main)
     {
         _main = main;
+        main.Margin = _safe;
         Children.Add(main);
     }
 
@@ -41,6 +75,7 @@ public sealed class AndroidShell : Panel
             GameExited?.Invoke(game, profile);
         };
         if (_main is not null) _main.IsVisible = false;
+        _play.Margin = _safe;
         Children.Add(_play);
         MainActivity.Current?.SetImmersive(true);
         return null;
