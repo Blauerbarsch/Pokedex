@@ -42,7 +42,7 @@
         <DockPanel>
           <StackPanel DockPanel.Dock="Top" Spacing="2" Margin="0,0,0,16">
             <TextBlock Classes="h1" Text="Bibliothek" />
-            <TextBlock Classes="muted" Text="Deine Spiele, nach Konsolen sortiert. Doppelklick startet, Rechtsklick zeigt mehr." TextWrapping="Wrap" />
+            <TextBlock x:Name="LibrarySubtitle" Classes="muted" Text="Deine Spiele, nach Konsolen sortiert. Doppelklick startet, Rechtsklick zeigt mehr." TextWrapping="Wrap" />
           </StackPanel>
         <Grid RowDefinitions="Auto,*,Auto">
           <Grid ColumnDefinitions="*,Auto">
@@ -92,7 +92,7 @@
             <TextBlock Classes="muted" Text="Alle Pokémon – was du gefangen ● und gesehen ○ hast, über alle deine Spiele." TextWrapping="Wrap" />
           </StackPanel>
         <Grid x:Name="DexGrid" ColumnDefinitions="*,300" RowDefinitions="Auto,*" Margin="0,8,0,0">
-          <StackPanel Orientation="Horizontal" Spacing="8" Grid.ColumnSpan="2">
+          <WrapPanel Grid.ColumnSpan="2" ItemSpacing="8" LineSpacing="8">
             <TextBox x:Name="SearchBox" Width="240" Watermark="Name oder Nummer…"
                      TextChanged="OnSearchChanged" />
             <ComboBox x:Name="GenFilter" SelectedIndex="0" Width="110"
@@ -117,7 +117,7 @@
             </ComboBox>
             <TextBlock x:Name="DexCounter" VerticalAlignment="Center" Opacity="0.7" />
             <Button Content="Daten neu laden" Click="OnReloadDexClick" />
-          </StackPanel>
+          </WrapPanel>
 
           <!-- Kacheln nach Generationen (wird im Code aufgebaut) -->
           <ScrollViewer Grid.Row="1" Margin="0,8,8,0">
@@ -206,7 +206,7 @@
             <TextBlock Classes="muted" Text="Typen, Attacken, Fundorte und Entwicklungen – passend zur gewählten Edition." TextWrapping="Wrap" />
           </StackPanel>
         <DockPanel Margin="0,8,0,0">
-          <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Spacing="8" Margin="0,0,0,8">
+          <WrapPanel DockPanel.Dock="Top" ItemSpacing="8" LineSpacing="8" Margin="0,0,0,8">
             <Button x:Name="GuideBackButton" Content="← Zurück" Click="OnGuideBackClick" IsEnabled="False" />
             <Button x:Name="GuideModePokemon" Content="Pokémon" Click="OnGuideModeClick" Tag="pokemon" />
             <Button x:Name="GuideModeTypes" Content="Typen" Click="OnGuideModeClick" Tag="types" />
@@ -215,7 +215,7 @@
             <TextBlock Text="Edition:" VerticalAlignment="Center" Margin="12,0,0,0" Opacity="0.8" />
             <ComboBox x:Name="GuideVersionBox" Width="280" SelectionChanged="OnGuideVersionChanged" />
             <TextBlock x:Name="GuideStatus" VerticalAlignment="Center" Opacity="0.7" />
-          </StackPanel>
+          </WrapPanel>
           <Grid x:Name="GuideGrid" ColumnDefinitions="260,*">
             <DockPanel x:Name="GuideSide">
               <TextBox x:Name="GuideSearchBox" DockPanel.Dock="Top" Watermark="Suchen (Name oder Nummer)…"
@@ -267,7 +267,7 @@
             <Expander Header="Bibliothek" IsExpanded="True" HorizontalAlignment="Stretch">
               <StackPanel Spacing="8">
                 <TextBlock Text="ROM-Ordner" FontWeight="SemiBold" />
-                <Grid ColumnDefinitions="*,Auto,Auto">
+                <Grid x:Name="RomFolderRow" ColumnDefinitions="*,Auto,Auto">
                   <TextBox x:Name="RomFolderBox" />
                   <Button Grid.Column="1" Content="…" Margin="6,0,0,0" Click="OnBrowseRomFolderClick" />
                   <Button Grid.Column="2" Content="Speichern" Classes="primary" Margin="6,0,0,0" Click="OnSaveSettingsClick" />

@@ -16,7 +16,8 @@ public partial class MainView
 
     private void UpdateCompactLayout()
     {
-        bool compact = Bounds.Width > 0 && Bounds.Width < CompactBelow;
+        // Schmal (Handy hochkant) oder niedrig (Handy quer): keine Seitenleiste
+        bool compact = Bounds.Width > 0 && (Bounds.Width < CompactBelow || Bounds.Height < 560);
         if (compact == _compact) return;
         _compact = compact;
 
@@ -29,6 +30,20 @@ public partial class MainView
         Stack(DexGrid, DexDetail, compact, 320, hasSearchRow: true, "*,300");
         Stack(StatsGrid, StatsDetail, compact, 300, hasSearchRow: false, "*,330");
         StackGuide(compact);
+
+        // Details erst zeigen, wenn etwas ausgewählt ist; Hinweis in der Spielen-Leiste weglassen
+        DexDetail.IsVisible = !compact || _selectedDexId != 0;
+        StatsDetail.IsVisible = !compact;
+        SelectedGameText.IsVisible = !compact;
+        if (_ready) RefreshGamesList(); // Kachelgröße
+
+        // Nach dem Wechsel der Reiter-Vorlage den Seiteninhalt neu einhängen (sonst bleibt er leer)
+        Avalonia.Threading.Dispatcher.UIThread.Post(() =>
+        {
+            var selected = MainTabs.SelectedItem;
+            MainTabs.SelectedItem = null;
+            MainTabs.SelectedItem = selected;
+        });
     }
 
     /// <summary>Zweite Spalte (Details) unter den Hauptinhalt legen bzw. zurück daneben.</summary>

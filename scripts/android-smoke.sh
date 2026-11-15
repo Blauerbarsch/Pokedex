@@ -1,6 +1,6 @@
 #!/bin/sh
 # Startet DexHub im Android-Emulator, macht Bildschirmfotos und sammelt das Log (für die CI).
-# Wenn homebrew.gbc vorhanden ist (freies Homebrew-Spiel), wird es zusätzlich gestartet.
+# Wenn homebrew.gb vorhanden ist (freies Homebrew-Spiel), wird es zusätzlich gestartet.
 set -x
 PKG=de.blauerbarsch.dexhub
 OUT=android-shots
@@ -22,11 +22,11 @@ adb shell settings put system user_rotation 0
 sleep 3
 
 # 3) Mit Spiel (Autostart über den Startparameter)
-if [ -f homebrew.gbc ]; then
+if [ -f homebrew.gb ]; then
   adb shell am force-stop $PKG
   adb shell mkdir -p /sdcard/Android/data/$PKG/files/roms
-  adb push homebrew.gbc /sdcard/Android/data/$PKG/files/roms/homebrew.gbc
-  adb shell am start -W -n $PKG/$PKG.MainActivity --es autostart homebrew.gbc
+  adb push homebrew.gb /sdcard/Android/data/$PKG/files/roms/homebrew.gb
+  adb shell am start -W -n $PKG/$PKG.MainActivity --es autostart homebrew.gb
   sleep 25
   adb exec-out screencap -p > $OUT/android-3-spiel.png
   adb shell input tap 300 1900

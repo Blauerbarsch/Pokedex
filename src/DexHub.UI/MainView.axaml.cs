@@ -53,6 +53,8 @@ public partial class MainView : UserControl
             Directory.CreateDirectory(romFolder);
             _settings.RomFolder = romFolder;
             RomFolderButton.Content = "＋ ROMs hinzufügen…";
+            RomFolderRow.IsVisible = false;
+            LibrarySubtitle.Text = "Deine Spiele, nach Konsolen sortiert. Antippen wählt aus, nochmal antippen startet, lange drücken zeigt mehr.";
         }
         FillSettingsForm();
         FillProfiles();
@@ -143,7 +145,8 @@ public partial class MainView : UserControl
         SetStatus($"{_games.Count} Spiel(e) gefunden.");
 
         // Automatischer Test: Spiel sofort starten
-        if (Host.AutostartRom is { } autostart && _games.FirstOrDefault(g => g.FileName == autostart) is { } auto)
+        if (Host.AutostartRom is { } autostart
+            && (_games.FirstOrDefault(g => g.FileName == autostart) ?? GameDetector.Detect(Path.Combine(_settings.RomFolder, autostart))) is { } auto)
         {
             Console.WriteLine("[DexHub] Autostart: " + auto.Title);
             await LaunchGameAsync(auto, resume: false);
@@ -201,7 +204,9 @@ public partial class MainView : UserControl
 
     private Border CreateTile(GameEntry game)
     {
-        var cover = new Image { Width = 150, Height = 150, Stretch = Stretch.Uniform };
+        // Auf schmalen Bildschirmen kleinere Kacheln (zwei nebeneinander)
+        double coverSize = _compact == true ? 118 : 150;
+        var cover = new Image { Width = coverSize, Height = coverSize, Stretch = Stretch.Uniform };
         var placeholder = new TextBlock
         {
             Text = game.PlatformName,
@@ -213,7 +218,7 @@ public partial class MainView : UserControl
         };
         var coverHost = new Border
         {
-            Width = 150, Height = 150,
+            Width = coverSize, Height = coverSize,
             CornerRadius = new CornerRadius(8),
             ClipToBounds = true,
             Background = new SolidColorBrush(Color.Parse("#1A1D23")),
@@ -223,8 +228,8 @@ public partial class MainView : UserControl
         var tile = new Border
         {
             Classes = { "tile" },
-            Width = 174,
-            Margin = new Thickness(6),
+            Width = coverSize + 24,
+            Margin = new Thickness(_compact == true ? 4 : 6),
             Padding = new Thickness(12),
             CornerRadius = new CornerRadius(12),
             BorderThickness = new Thickness(2),
@@ -257,8 +262,11 @@ public partial class MainView : UserControl
 
         tile.PointerPressed += async (_, e) =>
         {
+            // Touch (Handy): einmal tippen wählt aus, das ausgewählte nochmal antippen startet
+            bool touch = e.Pointer.Type == PointerType.Touch;
+            bool wasSelected = _selectedGame == game;
             SelectGame(game);
-            if (e.ClickCount == 2 && e.GetCurrentPoint(tile).Properties.IsLeftButtonPressed)
+            if ((e.ClickCount == 2 && e.GetCurrentPoint(tile).Properties.IsLeftButtonPressed) || (touch && wasSelected))
                 await LaunchGameAsync(game);
         };
 
@@ -324,7 +332,7 @@ public partial class MainView : UserControl
         foreach (var (g, tile) in _tiles)
             tile.BorderBrush = g == game ? SelectedBrush : Brushes.Transparent;
         SelectedGameText.Text = game is null
-            ? "Doppelklick startet ein Spiel, Rechtsklick zeigt mehr."
+            ? (Host.IsMobile ? "Antippen wählt aus, nochmal antippen startet." : "Doppelklick startet ein Spiel, Rechtsklick zeigt mehr.")
             : $"Ausgewählt: {game.Title}";
     }
 
@@ -821,6 +829,7 @@ public partial class MainView : UserControl
 
         int previous = _selectedDexId;
         _selectedDexId = id;
+        if (_compact == true) DexDetail.IsVisible = true;
         foreach (var other in new[] { previous, id })
             if (_dexTiles.TryGetValue(other, out var t) && _dexById.TryGetValue(other, out var e)) StyleDexTile(t, e);
 
@@ -1100,6 +1109,7 @@ public partial class MainView : UserControl
 
     private async Task ShowPokemonDetailAsync(OwnedPokemon p)
     {
+        if (_compact == true) StatsDetail.IsVisible = true;
         var panel = PokemonDetailPanel;
         panel.Children.Clear();
 
