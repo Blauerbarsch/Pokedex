@@ -188,14 +188,14 @@ public sealed class PlayView : UserControl
         {
             if (_bitmap is null || _bitmap.PixelSize.Width != w || _bitmap.PixelSize.Height != h)
             {
-                _bitmap = new WriteableBitmap(new PixelSize(w, h), new Vector(96, 96), PixelFormat.Bgra8888, AlphaFormat.Opaque);
+                _bitmap = new WriteableBitmap(new PixelSize(w, h), new Vector(96, 96), PixelFormat.Rgba8888, AlphaFormat.Opaque);
                 _lastFrameId = -1;
                 _croppedFor = null;
             }
             bool updated;
             using (var fb = _bitmap.Lock())
             {
-                updated = _session.CopyFrame(ref _lastFrameId, fb.Address, fb.RowBytes, w, h);
+                updated = _session.CopyFrame(ref _lastFrameId, fb.Address, fb.RowBytes, w, h, rgba: true);
                 if (updated && DexHub.Core.Libretro.LibretroCore.Trace && _traceFrames % 120 == 1)
                     unsafe
                     {

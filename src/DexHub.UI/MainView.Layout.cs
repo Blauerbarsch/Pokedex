@@ -37,16 +37,7 @@ public partial class MainView
         SelectedGameText.IsVisible = !compact;
         if (_ready) RefreshGamesList(); // Kachelgröße
 
-        // Nach dem Wechsel der Reiter-Vorlage den Seiteninhalt neu einhängen (sonst bleibt er leer)
-        Avalonia.Threading.Dispatcher.UIThread.Post(() =>
-        {
-            var index = Math.Max(0, MainTabs.SelectedIndex);
-            MainTabs.SelectedIndex = -1;
-            MainTabs.SelectedIndex = index;
-            Avalonia.Threading.Dispatcher.UIThread.Post(() => Console.WriteLine(
-                $"[DexHub] Reiter: {MainTabs.SelectedIndex}, Inhalt {MainTabs.SelectedContent?.GetType().Name}, Größe {MainTabs.Bounds.Size}, kompakt {compact}"),
-                Avalonia.Threading.DispatcherPriority.Background);
-        }, Avalonia.Threading.DispatcherPriority.Loaded);
+        EnsureRealTabSelected();
     }
 
     /// <summary>Zweite Spalte (Details) unter den Hauptinhalt legen bzw. zurück daneben.</summary>
@@ -90,6 +81,18 @@ public partial class MainView
             Grid.SetColumn(GuideScroll, 1);
             GuideScroll.Margin = new Thickness(12, 0, 0, 0);
         }
+    }
+
+    /// <summary>Falls die Auswahl verloren ging oder auf einer Abschnitts-Überschrift liegt: erste echte Seite wählen.</summary>
+    private void EnsureRealTabSelected()
+    {
+        if (MainTabs.SelectedItem is TabItem { IsEnabled: true } t && !t.Classes.Contains("group")) return;
+        foreach (var item in MainTabs.Items)
+            if (item is TabItem { IsEnabled: true } tab && !tab.Classes.Contains("group"))
+            {
+                MainTabs.SelectedItem = tab;
+                return;
+            }
     }
 
     private void OnCompactProfileChanged(object? sender, SelectionChangedEventArgs e)

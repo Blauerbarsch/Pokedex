@@ -186,7 +186,8 @@ public sealed unsafe class EmulatorSession : ICoreHost, IDisposable
     /// <summary>
     /// Kopiert das neueste Bild (BGRA, 32 Bit) nach dst, falls es neu ist und die Größe passt.
     /// </summary>
-    public bool CopyFrame(ref long lastFrameId, IntPtr dst, int dstRowBytes, int width, int height)
+    /// <param name="rgba">true: Ziel ist RGBA statt BGRA (Android/OpenGL ES kann BGRA-Bilder oft nicht hochladen)</param>
+    public bool CopyFrame(ref long lastFrameId, IntPtr dst, int dstRowBytes, int width, int height, bool rgba = false)
     {
         lock (_frameLock)
         {
@@ -194,7 +195,20 @@ public sealed unsafe class EmulatorSession : ICoreHost, IDisposable
             fixed (uint* src = _front)
             {
                 for (int y = 0; y < height; y++)
-                    Buffer.MemoryCopy(src + y * width, (byte*)dst + y * dstRowBytes, dstRowBytes, width * 4);
+                {
+                    if (!rgba)
+                    {
+                        Buffer.MemoryCopy(src + y * width, (byte*)dst + y * dstRowBytes, dstRowBytes, width * 4);
+                        continue;
+                    }
+                    var s = src + y * width;
+                    var d = (uint*)((byte*)dst + y * dstRowBytes);
+                    for (int x = 0; x < width; x++)
+                    {
+                        uint p = s[x];
+                        d[x] = (p & 0xFF00FF00) | ((p >> 16) & 0xFF) | ((p & 0xFF) << 16);
+                    }
+                }
             }
             lastFrameId = _frameId;
             return true;

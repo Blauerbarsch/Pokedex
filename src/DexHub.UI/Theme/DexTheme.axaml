@@ -192,16 +192,19 @@
       </Setter>
       <Setter Property="Template">
         <ControlTemplate>
-          <Grid ColumnDefinitions="236,*">
-            <!-- Platz oben für das Pokédex-Kopfteil und unten für die Benutzerkarte (liegen darüber) -->
-            <ScrollViewer Margin="0,160,0,132" HorizontalScrollBarVisibility="Disabled">
-              <ItemsPresenter Name="PART_ItemsPresenter" ItemsPanel="{TemplateBinding ItemsPanel}" Margin="10,4" />
-            </ScrollViewer>
-            <ContentPresenter Name="PART_SelectedContentHost" Grid.Column="1"
+          <!-- Eine Vorlage für beide Ansichten; schmale Bildschirme stellen nur per Stil um (kein Vorlagenwechsel) -->
+          <DockPanel>
+            <Border Name="TabStrip" DockPanel.Dock="Left" Width="236">
+              <!-- Platz oben für das Pokédex-Kopfteil und unten für die Benutzerkarte (liegen darüber) -->
+              <ScrollViewer Name="TabScroll" Margin="0,160,0,132" HorizontalScrollBarVisibility="Disabled">
+                <ItemsPresenter Name="PART_ItemsPresenter" ItemsPanel="{TemplateBinding ItemsPanel}" Margin="10,4" />
+              </ScrollViewer>
+            </Border>
+            <ContentPresenter Name="PART_SelectedContentHost"
                               Margin="28,22,24,8"
                               Content="{TemplateBinding SelectedContent}"
                               ContentTemplate="{TemplateBinding SelectedContentTemplate}" />
-          </Grid>
+          </DockPanel>
         </ControlTemplate>
       </Setter>
     </Style>
@@ -267,27 +270,27 @@
     </Style>
 
     <!-- ===== Schmale Bildschirme (Handy): Reiterleiste oben statt Seitenleiste ===== -->
-    <Style Selector=":is(UserControl).compact TabControl#MainTabs">
-      <Setter Property="ItemsPanel">
-        <ItemsPanelTemplate>
-          <StackPanel Orientation="Horizontal" Spacing="4" />
-        </ItemsPanelTemplate>
-      </Setter>
-      <Setter Property="Template">
-        <ControlTemplate>
-          <DockPanel>
-            <Border DockPanel.Dock="Top" Background="{StaticResource DexSidebar}"
-                    BorderBrush="{StaticResource DexBorder}" BorderThickness="0,0,0,1">
-              <ScrollViewer HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Disabled">
-                <ItemsPresenter Name="PART_ItemsPresenter" ItemsPanel="{TemplateBinding ItemsPanel}" Margin="6" />
-              </ScrollViewer>
-            </Border>
-            <ContentPresenter Name="PART_SelectedContentHost" Margin="12,10,12,4"
-                              Content="{TemplateBinding SelectedContent}"
-                              ContentTemplate="{TemplateBinding SelectedContentTemplate}" />
-          </DockPanel>
-        </ControlTemplate>
-      </Setter>
+    <Style Selector=":is(UserControl).compact TabControl#MainTabs /template/ Border#TabStrip">
+      <Setter Property="DockPanel.Dock" Value="Top" />
+      <Setter Property="Width" Value="NaN" />
+      <Setter Property="Background" Value="{StaticResource DexSidebar}" />
+      <Setter Property="BorderBrush" Value="{StaticResource DexBorder}" />
+      <Setter Property="BorderThickness" Value="0,0,0,1" />
+    </Style>
+    <Style Selector=":is(UserControl).compact TabControl#MainTabs /template/ ScrollViewer#TabScroll">
+      <Setter Property="Margin" Value="0" />
+      <Setter Property="HorizontalScrollBarVisibility" Value="Hidden" />
+      <Setter Property="VerticalScrollBarVisibility" Value="Disabled" />
+    </Style>
+    <Style Selector=":is(UserControl).compact TabControl#MainTabs /template/ ItemsPresenter#PART_ItemsPresenter">
+      <Setter Property="Margin" Value="6" />
+    </Style>
+    <Style Selector=":is(UserControl).compact TabControl#MainTabs /template/ ItemsPresenter#PART_ItemsPresenter > StackPanel">
+      <Setter Property="Orientation" Value="Horizontal" />
+      <Setter Property="Spacing" Value="4" />
+    </Style>
+    <Style Selector=":is(UserControl).compact TabControl#MainTabs /template/ ContentPresenter#PART_SelectedContentHost">
+      <Setter Property="Margin" Value="12,10,12,4" />
     </Style>
     <Style Selector=":is(UserControl).compact TabControl#MainTabs > TabItem.group">
       <Setter Property="IsVisible" Value="False" />
