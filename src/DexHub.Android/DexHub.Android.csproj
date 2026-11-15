@@ -20,6 +20,9 @@
     <!-- Kürzen (Trimming) würde per Reflexion genutzte Teile entfernen (JSON-Einstellungen, Avalonia) -->
     <JsonSerializerIsReflectionEnabledByDefault>true</JsonSerializerIsReflectionEnabledByDefault>
     <TrimMode>partial</TrimMode>
+    <!-- CoreCLR statt Mono: dieselbe Laufzeit wie am PC. Mono stürzte beim Rückruf aus den Emulator-Cores ab
+         und ist beim Emulieren deutlich langsamer. -->
+    <UseMonoRuntime>false</UseMonoRuntime>
     <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
   </PropertyGroup>
 
