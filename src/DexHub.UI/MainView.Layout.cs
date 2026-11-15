@@ -43,6 +43,9 @@ public partial class MainView
             var index = Math.Max(0, MainTabs.SelectedIndex);
             MainTabs.SelectedIndex = -1;
             MainTabs.SelectedIndex = index;
+            Avalonia.Threading.Dispatcher.UIThread.Post(() => Console.WriteLine(
+                $"[DexHub] Reiter: {MainTabs.SelectedIndex}, Inhalt {MainTabs.SelectedContent?.GetType().Name}, Größe {MainTabs.Bounds.Size}, kompakt {compact}"),
+                Avalonia.Threading.DispatcherPriority.Background);
         }, Avalonia.Threading.DispatcherPriority.Loaded);
     }
 

@@ -194,7 +194,17 @@ public sealed class PlayView : UserControl
             }
             bool updated;
             using (var fb = _bitmap.Lock())
+            {
                 updated = _session.CopyFrame(ref _lastFrameId, fb.Address, fb.RowBytes, w, h);
+                if (updated && DexHub.Core.Libretro.LibretroCore.Trace && _traceFrames % 120 == 1)
+                    unsafe
+                    {
+                        var px = (uint*)fb.Address;
+                        uint sum = 0;
+                        for (int i = 0; i < w * h; i += 97) sum += px[i] & 0xFFFFFF;
+                        Console.WriteLine($"[DexHub] Pixel: Mitte 0x{px[(h / 2) * (fb.RowBytes / 4) + w / 2]:X8}, Summe {sum}, Format {fb.Format}, Zeile {fb.RowBytes}");
+                    }
+            }
             ArrangeScreens(w, h);
             if (updated)
             {
