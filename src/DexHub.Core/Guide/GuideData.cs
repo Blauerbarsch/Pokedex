@@ -11,7 +11,11 @@ public sealed record MoveInfo(
     public string DamageClassName => DamageClass switch { 1 => "Status", 2 => "Physisch", 3 => "Speziell", _ => "–" };
 }
 
-public sealed record VersionGroupInfo(int Id, string Identifier, string Name, int Generation, int Order);
+public sealed record VersionGroupInfo(int Id, string Identifier, string Name, int Generation, int Order)
+{
+    /// <summary>Für Auswahllisten: nur der Name.</summary>
+    public override string ToString() => Name;
+}
 
 /// <summary>Wie ein Pokémon eine Attacke lernt (kompakt gespeichert – es gibt hunderttausende Einträge).</summary>
 public readonly record struct LearnEntry(short VersionGroup, short Move, byte Method, byte Level);

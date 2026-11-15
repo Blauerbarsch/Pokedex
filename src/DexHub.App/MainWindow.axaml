@@ -17,7 +17,7 @@
 
       <TabItem Classes="group" IsEnabled="False" Header="SPIELEN" />
       <!-- ============ Bibliothek ============ -->
-      <TabItem Header="🎮   Bibliothek">
+      <TabItem Header="Bibliothek" Tag="🎮">
         <DockPanel>
           <StackPanel DockPanel.Dock="Top" Spacing="2" Margin="0,0,0,16">
             <TextBlock Classes="h1" Text="Bibliothek" />
@@ -25,11 +25,11 @@
           </StackPanel>
         <Grid RowDefinitions="Auto,*,Auto">
           <Grid ColumnDefinitions="*,Auto">
-            <TextBox x:Name="LibrarySearchBox" HorizontalAlignment="Left" Width="320" Watermark="🔍  Spiel suchen…"
+            <TextBox x:Name="LibrarySearchBox" HorizontalAlignment="Left" Width="320" Watermark="Spiel suchen…"
                      TextChanged="OnLibrarySearchChanged" />
             <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
-              <Button Content="📁  ROM-Ordner…" Click="OnBrowseRomFolderClick" />
-              <Button Content="⟳  Neu scannen" Click="OnRescanClick" />
+              <Button Content="ROM-Ordner…" Click="OnBrowseRomFolderClick" />
+              <Button Content="Neu scannen" Click="OnRescanClick" />
             </StackPanel>
           </Grid>
 
@@ -51,7 +51,7 @@
         </DockPanel>
       </TabItem>
       <!-- ============ Spielstände (wird im Code aufgebaut) ============ -->
-      <TabItem x:Name="SavesTab" Header="💾   Spielstände">
+      <TabItem x:Name="SavesTab" Header="Spielstände" Tag="💾">
         <DockPanel>
           <StackPanel DockPanel.Dock="Top" Spacing="2" Margin="0,0,0,16">
             <TextBlock Classes="h1" Text="Spielstände" />
@@ -64,7 +64,7 @@
       </TabItem>
       <TabItem Classes="group" IsEnabled="False" Header="SAMMLUNG" />
       <!-- ============ Pokédex ============ -->
-      <TabItem Header="📕   Pokédex">
+      <TabItem Header="Pokédex" Tag="📕">
         <DockPanel>
           <StackPanel DockPanel.Dock="Top" Spacing="2" Margin="0,0,0,16">
             <TextBlock Classes="h1" Text="Pokédex" />
@@ -72,7 +72,7 @@
           </StackPanel>
         <Grid ColumnDefinitions="*,300" RowDefinitions="Auto,*" Margin="0,8,0,0">
           <StackPanel Orientation="Horizontal" Spacing="8" Grid.ColumnSpan="2">
-            <TextBox x:Name="SearchBox" Width="240" Watermark="🔍  Name oder Nummer…"
+            <TextBox x:Name="SearchBox" Width="240" Watermark="Name oder Nummer…"
                      TextChanged="OnSearchChanged" />
             <ComboBox x:Name="GenFilter" SelectedIndex="0" Width="110"
                       SelectionChanged="OnGenFilterChanged">
@@ -132,7 +132,7 @@
         </DockPanel>
       </TabItem>
       <!-- ============ Statistik (wird im Code aufgebaut) ============ -->
-      <TabItem Header="📊   Statistik">
+      <TabItem Header="Statistik" Tag="📊">
         <DockPanel>
           <StackPanel DockPanel.Dock="Top" Spacing="2" Margin="0,0,0,16">
             <TextBlock Classes="h1" Text="Statistik" />
@@ -153,7 +153,7 @@
         </DockPanel>
       </TabItem>
       <!-- ============ Tauschen (wird im Code aufgebaut) ============ -->
-      <TabItem Header="🔄   Tauschen">
+      <TabItem Header="Tauschen" Tag="🔄">
         <DockPanel>
           <StackPanel DockPanel.Dock="Top" Spacing="2" Margin="0,0,0,16">
             <TextBlock Classes="h1" Text="Tauschcenter" />
@@ -165,7 +165,7 @@
         </DockPanel>
       </TabItem>
       <!-- ============ Pokémon-Bank (wird im Code aufgebaut) ============ -->
-      <TabItem Header="🏦   Bank">
+      <TabItem Header="Bank" Tag="🏦">
         <DockPanel>
           <StackPanel DockPanel.Dock="Top" Spacing="2" Margin="0,0,0,16">
             <TextBlock Classes="h1" Text="Pokémon-Bank" />
@@ -178,7 +178,7 @@
       </TabItem>
       <TabItem Classes="group" IsEnabled="False" Header="WISSEN" />
       <!-- ============ Guide ============ -->
-      <TabItem x:Name="GuideTab" Header="📖   Guide">
+      <TabItem x:Name="GuideTab" Header="Guide" Tag="📖">
         <DockPanel>
           <StackPanel DockPanel.Dock="Top" Spacing="2" Margin="0,0,0,16">
             <TextBlock Classes="h1" Text="Guide" />
@@ -210,7 +210,7 @@
       </TabItem>
       <TabItem Classes="group" IsEnabled="False" Header="EINSTELLUNGEN" />
       <!-- ============ Steuerung (wird im Code aufgebaut) ============ -->
-      <TabItem Header="🕹️   Steuerung">
+      <TabItem Header="Steuerung" Tag="🕹️">
         <DockPanel>
           <StackPanel DockPanel.Dock="Top" Spacing="2" Margin="0,0,0,16">
             <TextBlock Classes="h1" Text="Steuerung" />
@@ -222,7 +222,7 @@
         </DockPanel>
       </TabItem>
       <!-- ============ Bild (wird im Code aufgebaut) ============ -->
-      <TabItem Header="🖼️   Bild">
+      <TabItem Header="Bild" Tag="🖼️">
         <DockPanel>
           <StackPanel DockPanel.Dock="Top" Spacing="2" Margin="0,0,0,16">
             <TextBlock Classes="h1" Text="Bild" />
@@ -234,7 +234,7 @@
         </DockPanel>
       </TabItem>
       <!-- ============ Einstellungen ============ -->
-      <TabItem Header="⚙️   Einstellungen">
+      <TabItem Header="Einstellungen" Tag="⚙️">
         <DockPanel>
           <StackPanel DockPanel.Dock="Top" Spacing="2" Margin="0,0,0,16">
             <TextBlock Classes="h1" Text="Einstellungen" />
@@ -361,33 +361,37 @@
       </Grid>
     </Border>
 
-    <!-- Benutzerkarte unten links -->
-    <Border Width="236" Height="196" HorizontalAlignment="Left" VerticalAlignment="Bottom" Padding="12">
+    <!-- Trainerkarte unten links -->
+    <Border Width="236" Height="150" HorizontalAlignment="Left" VerticalAlignment="Bottom" Padding="12,0,12,12">
       <Border Classes="card" Padding="12">
         <StackPanel Spacing="8">
           <TextBlock Classes="eyebrow" Text="TRAINER" />
-          <Grid ColumnDefinitions="Auto,*,Auto">
-            <Border Width="34" Height="34" CornerRadius="17" Background="{StaticResource DexRed}" Margin="0,0,8,0">
+          <Grid ColumnDefinitions="Auto,*">
+            <Border Width="32" Height="32" CornerRadius="16" Background="{StaticResource DexRed}" Margin="0,0,8,0">
               <TextBlock x:Name="ProfileInitial" Text="?" Foreground="White" FontWeight="Bold" FontSize="15"
                          HorizontalAlignment="Center" VerticalAlignment="Center" />
             </Border>
             <ComboBox Grid.Column="1" x:Name="ProfileBox" HorizontalAlignment="Stretch" SelectionChanged="OnProfileChanged"
                       ToolTip.Tip="Jeder Benutzer hat eigene Spielstände." />
-            <Button Grid.Column="2" Content="＋" Margin="6,0,0,0" Padding="10,6" Click="OnAddProfileClick"
-                    ToolTip.Tip="Neuen Benutzer anlegen" />
           </Grid>
-          <Button Content="🎮  Großbild-Modus" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
-                  Click="OnBigPictureClick"
-                  ToolTip.Tip="Vollbild, mit dem Controller bedienbar (auch: DexHub --bigpicture)" />
-          <Button x:Name="UpdateButton" Classes="primary" Content="⬆  Update installieren" IsVisible="False"
-                  HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Click="OnUpdateClick" />
+          <Grid ColumnDefinitions="*,6,*">
+            <Button Content="+ Neu" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Padding="6,6"
+                    Click="OnAddProfileClick" ToolTip.Tip="Neuen Benutzer anlegen" />
+            <Button Grid.Column="2" Content="Großbild" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Padding="6,6"
+                    Click="OnBigPictureClick"
+                    ToolTip.Tip="Vollbild, mit dem Controller bedienbar (auch: DexHub --bigpicture)" />
+          </Grid>
         </StackPanel>
       </Border>
     </Border>
 
     <!-- Statuszeile -->
     <Border Grid.Row="1" Padding="16,6" Background="#111318" BorderBrush="{StaticResource DexBorder}" BorderThickness="0,1,0,0">
-      <TextBlock x:Name="StatusText" Text="Bereit." FontSize="12" Foreground="{StaticResource DexMuted}" />
+      <Grid ColumnDefinitions="*,Auto">
+        <TextBlock x:Name="StatusText" Text="Bereit." FontSize="12" Foreground="{StaticResource DexMuted}" VerticalAlignment="Center" />
+        <Button Grid.Column="1" x:Name="UpdateButton" Classes="primary" Content="⬆ Update installieren" IsVisible="False"
+                Padding="12,3" FontSize="12" Click="OnUpdateClick" />
+      </Grid>
     </Border>
   </Grid>
 </Window>

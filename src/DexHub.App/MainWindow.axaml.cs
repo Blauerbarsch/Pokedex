@@ -967,7 +967,7 @@ public partial class MainWindow : Window
         }
         else
         {
-            panel.Children.Add(Text("Noch keine Pokémon in den Spielständen gefunden (Gen 1–4 werden gelesen).", opacity: 0.6));
+            panel.Children.Add(Text("Noch keine Pokémon in den Spielständen gefunden (Gen 1–5 werden gelesen).", opacity: 0.6));
         }
 
         return panel;

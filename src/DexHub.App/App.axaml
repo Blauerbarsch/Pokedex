@@ -55,7 +55,12 @@
         </ResourceDictionary>
       </ResourceDictionary.ThemeDictionaries>
 
-      <!-- DexHub-Farben (auch im Code über Theme.cs) -->
+      <!-- Schrift: Inter, Emojis aus der Emoji-Schrift des Systems. Als Liste angegeben, damit Leerzeichen
+           nach einem Emoji wieder aus Inter kommen (sonst entstehen breite Lücken). -->
+      <FontFamily x:Key="DexFont">fonts:Inter#Inter, Noto Color Emoji, Segoe UI Emoji, Apple Color Emoji</FontFamily>
+      <FontFamily x:Key="ContentControlThemeFontFamily">fonts:Inter#Inter, Noto Color Emoji, Segoe UI Emoji, Apple Color Emoji</FontFamily>
+
+      <!-- DexHub-Farben -->
       <SolidColorBrush x:Key="DexRed" Color="#DC0A2D" />
       <SolidColorBrush x:Key="DexRedDark" Color="#A3081F" />
       <SolidColorBrush x:Key="DexRedSoft" Color="#33DC0A2D" />
@@ -80,6 +85,19 @@
     <Style Selector="Window">
       <Setter Property="Background" Value="{StaticResource DexBackground}" />
       <Setter Property="Foreground" Value="{StaticResource DexText}" />
+      <Setter Property="FontFamily" Value="{StaticResource DexFont}" />
+    </Style>
+
+    <Style Selector="ListBox">
+      <Setter Property="Background" Value="{StaticResource DexSurface}" />
+      <Setter Property="CornerRadius" Value="12" />
+      <Setter Property="BorderBrush" Value="{StaticResource DexBorder}" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="Padding" Value="4" />
+    </Style>
+    <Style Selector="ListBoxItem">
+      <Setter Property="CornerRadius" Value="8" />
+      <Setter Property="Padding" Value="10,7" />
     </Style>
 
     <Style Selector="TextBlock.h1">
@@ -180,7 +198,7 @@
         <ControlTemplate>
           <Grid ColumnDefinitions="236,*">
             <!-- Platz oben für das Pokédex-Kopfteil und unten für die Benutzerkarte (liegen darüber) -->
-            <ScrollViewer Margin="0,168,0,196" HorizontalScrollBarVisibility="Disabled">
+            <ScrollViewer Margin="0,168,0,150" HorizontalScrollBarVisibility="Disabled">
               <ItemsPresenter Name="PART_ItemsPresenter" ItemsPanel="{TemplateBinding ItemsPanel}" Margin="10,4" />
             </ScrollViewer>
             <ContentPresenter Name="PART_SelectedContentHost" Grid.Column="1"
@@ -196,16 +214,23 @@
       <Setter Property="FontSize" Value="14" />
       <Setter Property="Foreground" Value="#C9CFDA" />
       <Setter Property="Background" Value="Transparent" />
+      <Setter Property="MinHeight" Value="0" />
+      <Setter Property="Padding" Value="0" />
       <Setter Property="Cursor" Value="Hand" />
       <Setter Property="Template">
         <ControlTemplate>
           <Grid>
-            <Border Name="PART_LayoutRoot" Background="{TemplateBinding Background}" CornerRadius="10" Padding="14,9">
-              <ContentPresenter Name="PART_ContentPresenter"
-                                Content="{TemplateBinding Header}"
-                                ContentTemplate="{TemplateBinding HeaderTemplate}"
-                                Foreground="{TemplateBinding Foreground}"
-                                FontWeight="{TemplateBinding FontWeight}" />
+            <Border Name="PART_LayoutRoot" Background="{TemplateBinding Background}" CornerRadius="10" Padding="14,8">
+              <StackPanel Orientation="Horizontal" Spacing="12">
+                <!-- Symbol aus Tag (bei Abschnitts-Überschriften leer) -->
+                <ContentPresenter Name="PART_Icon" Content="{TemplateBinding Tag}" Width="22"
+                                  HorizontalContentAlignment="Center" FontSize="15" />
+                <ContentPresenter Name="PART_ContentPresenter"
+                                  Content="{TemplateBinding Header}"
+                                  ContentTemplate="{TemplateBinding HeaderTemplate}"
+                                  Foreground="{TemplateBinding Foreground}"
+                                  FontWeight="{TemplateBinding FontWeight}" />
+              </StackPanel>
             </Border>
             <!-- roter Strich links am aktiven Eintrag -->
             <Border Name="Indicator" Width="4" Height="18" CornerRadius="2" HorizontalAlignment="Left"
@@ -231,12 +256,15 @@
       <Setter Property="FontSize" Value="11" />
       <Setter Property="FontWeight" Value="Bold" />
       <Setter Property="Foreground" Value="#6E7787" />
-      <Setter Property="Margin" Value="0,12,0,0" />
+      <Setter Property="Margin" Value="0,10,0,0" />
       <Setter Property="Cursor" Value="Arrow" />
     </Style>
     <Style Selector="TabControl#MainTabs > TabItem.group:disabled /template/ Border#PART_LayoutRoot">
       <Setter Property="Background" Value="Transparent" />
-      <Setter Property="Padding" Value="14,4" />
+      <Setter Property="Padding" Value="14,2" />
+    </Style>
+    <Style Selector="TabControl#MainTabs > TabItem.group /template/ ContentPresenter#PART_Icon">
+      <Setter Property="IsVisible" Value="False" />
     </Style>
     <Style Selector="TabControl#MainTabs > TabItem.group:disabled /template/ ContentPresenter#PART_ContentPresenter">
       <Setter Property="Foreground" Value="#6E7787" />
