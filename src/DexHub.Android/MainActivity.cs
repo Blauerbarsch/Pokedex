@@ -44,6 +44,13 @@ public class MainActivity : AvaloniaMainActivity<App>
         App.Shell?.SetBackground(false);
     }
 
+    /// <summary>Android blendet die Leisten z. B. nach Drehen oder Benachrichtigungen wieder ein – erneut ausblenden.</summary>
+    public override void OnWindowFocusChanged(bool hasFocus)
+    {
+        base.OnWindowFocusChanged(hasFocus);
+        if (hasFocus && _immersive) SetImmersive(true);
+    }
+
     /// <summary>Controller-Tasten gehen direkt an den Emulator, solange ein Spiel läuft.</summary>
     public override bool DispatchKeyEvent(KeyEvent? e)
     {
@@ -59,8 +66,11 @@ public class MainActivity : AvaloniaMainActivity<App>
     }
 
     /// <summary>Im Spiel den ganzen Bildschirm nutzen (Statusleiste ausblenden).</summary>
+    private bool _immersive;
+
     public void SetImmersive(bool on)
     {
+        _immersive = on;
         if (Window is null) return;
         if (Build.VERSION.SdkInt >= BuildVersionCodes.R && Window.InsetsController is { } insets)
         {

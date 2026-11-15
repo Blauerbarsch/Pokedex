@@ -198,6 +198,29 @@ public partial class MainView : UserControl
             LibraryPanel.Children.Add(expander);
         }
 
+        if (LibraryPanel.Children.Count == 0)
+            LibraryPanel.Children.Add(new Border
+            {
+                Classes = { "card" },
+                Padding = new Thickness(20),
+                Child = new StackPanel
+                {
+                    Spacing = 6,
+                    Children =
+                    {
+                        new TextBlock { Text = query.Length > 0 ? "Nichts gefunden" : "Noch keine Spiele", FontSize = 17, FontWeight = FontWeight.SemiBold },
+                        new TextBlock
+                        {
+                            Classes = { "muted" },
+                            TextWrapping = TextWrapping.Wrap,
+                            Text = query.Length > 0 ? $"Kein Spiel passt zu „{query}“."
+                                : Host.IsMobile ? "Tippe auf „ROMs hinzufügen…“ und wähle deine Spieldateien (.gb, .gbc, .gba, .nds …) aus – sie werden in die App kopiert."
+                                : "Wähle oben deinen ROM-Ordner aus.",
+                        },
+                    },
+                },
+            });
+
         if (_selectedGame is not null && !_tiles.ContainsKey(_selectedGame)) _selectedGame = null;
         SelectGame(_selectedGame);
     }

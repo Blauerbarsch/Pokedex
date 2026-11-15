@@ -1,5 +1,6 @@
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Layout;
 
 namespace DexHub.UI;
 
@@ -18,6 +19,7 @@ public partial class MainView
     {
         // Schmal (Handy hochkant) oder niedrig (Handy quer): keine Seitenleiste
         bool compact = Bounds.Width > 0 && (Bounds.Width < CompactBelow || Bounds.Height < 560);
+        LibrarySubtitle.IsVisible = Bounds.Height <= 0 || Bounds.Height >= 520; // Querformat am Handy: Platz sparen
         if (compact == _compact) return;
         _compact = compact;
 
@@ -36,6 +38,15 @@ public partial class MainView
         StatsDetail.IsVisible = !compact;
         SelectedGameText.IsVisible = !compact;
         if (_ready) RefreshGamesList(); // Kachelgröße
+
+        // Bibliothek: Suche über volle Breite, Knöpfe darunter
+        LibrarySearchBox.Width = compact ? double.NaN : 320;
+        LibrarySearchBox.HorizontalAlignment = compact ? HorizontalAlignment.Stretch : HorizontalAlignment.Left;
+        Grid.SetColumnSpan(LibrarySearchBox, compact ? 2 : 1);
+        Grid.SetRow(LibraryButtons, compact ? 1 : 0);
+        Grid.SetColumn(LibraryButtons, compact ? 0 : 1);
+        LibraryButtons.Margin = compact ? new Thickness(0, 8, 0, 0) : default;
+        PlayFreshButton.Content = compact ? "Neu starten" : "Ohne Fortsetzen starten";
 
         EnsureRealTabSelected();
     }

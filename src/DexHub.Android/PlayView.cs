@@ -358,14 +358,19 @@ public sealed class PlayView : UserControl
             Orientation = Orientation.Horizontal,
             Spacing = 14,
             HorizontalAlignment = HorizontalAlignment.Center,
-            VerticalAlignment = VerticalAlignment.Bottom,
-            Margin = new Thickness(0, 0, 0, 6),
+            Margin = new Thickness(0, 14, 0, 0),
             Children = { Pill("SELECT", JoypadButton.Select), Pill("START", JoypadButton.Start) },
         };
 
-        var main = new Grid { ColumnDefinitions = new ColumnDefinitions("Auto,*,Auto"), Margin = new Thickness(18, 4, 18, 18) };
+        var main = new Grid
+        {
+            ColumnDefinitions = new ColumnDefinitions("Auto,*,Auto"),
+            RowDefinitions = new RowDefinitions("Auto,Auto"),
+            Margin = new Thickness(18, 8, 18, 18),
+        };
         main.Children.Add(dpad);
-        Grid.SetColumn(startSelect, 1);
+        Grid.SetRow(startSelect, 1);
+        Grid.SetColumnSpan(startSelect, 3);
         main.Children.Add(startSelect);
         Grid.SetColumn(face, 2);
         main.Children.Add(face);
