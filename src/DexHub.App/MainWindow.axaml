@@ -4,61 +4,75 @@
         xmlns:p="clr-namespace:DexHub.Core.Pokedex;assembly=DexHub.Core"
         x:Class="DexHub.App.MainWindow"
         Title="DexHub"
-        Width="1100" Height="720"
-        MinWidth="800" MinHeight="500">
+        Width="1280" Height="820"
+        MinWidth="980" MinHeight="620">
 
-  <DockPanel>
-    <!-- Statuszeile unten -->
-    <Border DockPanel.Dock="Bottom" Padding="12,6" Background="{DynamicResource SystemControlBackgroundBaseLowBrush}">
-      <TextBlock x:Name="StatusText" Text="Bereit." />
-    </Border>
+  <Grid RowDefinitions="*,Auto">
 
-    <!-- Benutzer -->
-    <Border DockPanel.Dock="Top" Padding="16,10,16,0">
-      <StackPanel Orientation="Horizontal" Spacing="8">
-        <TextBlock Text="Benutzer:" VerticalAlignment="Center" Opacity="0.8" />
-        <ComboBox x:Name="ProfileBox" MinWidth="180" SelectionChanged="OnProfileChanged" />
-        <Button Content="+ Neuer Benutzer" Click="OnAddProfileClick" />
-        <Button x:Name="UpdateButton" Content="⬆ Update verfügbar" Classes="accent" IsVisible="False" Click="OnUpdateClick" />
-        <Button Content="🎮 Großbild-Modus" Click="OnBigPictureClick"
-                ToolTip.Tip="Vollbild, mit dem Controller bedienbar (auch: DexHub --bigpicture)" />
-        <TextBlock VerticalAlignment="Center" Opacity="0.5"
-                   Text="Jeder Benutzer hat eigene Spielstände." />
-      </StackPanel>
-    </Border>
+    <!-- Seitenleiste: Hintergrund -->
+    <Border Width="236" HorizontalAlignment="Left" Background="{StaticResource DexSidebar}"
+            BorderBrush="{StaticResource DexBorder}" BorderThickness="0,0,1,0" />
 
-    <TabControl x:Name="MainTabs" Margin="8" SelectionChanged="OnMainTabChanged">
+    <TabControl x:Name="MainTabs" SelectedIndex="1" SelectionChanged="OnMainTabChanged">
 
+      <TabItem Classes="group" IsEnabled="False" Header="SPIELEN" />
       <!-- ============ Bibliothek ============ -->
-      <TabItem Header="Bibliothek">
-        <Grid RowDefinitions="Auto,*,Auto" Margin="0,8,0,0">
-          <StackPanel Orientation="Horizontal" Spacing="8">
-            <Button Content="ROM-Ordner wählen…" Click="OnBrowseRomFolderClick" />
-            <Button Content="Neu scannen" Click="OnRescanClick" />
-            <TextBox x:Name="LibrarySearchBox" Width="220" Watermark="Spiel suchen…"
-                     TextChanged="OnLibrarySearchChanged" />
+      <TabItem Header="🎮   Bibliothek">
+        <DockPanel>
+          <StackPanel DockPanel.Dock="Top" Spacing="2" Margin="0,0,0,16">
+            <TextBlock Classes="h1" Text="Bibliothek" />
+            <TextBlock Classes="muted" Text="Deine Spiele, nach Konsolen sortiert. Doppelklick startet, Rechtsklick zeigt mehr." TextWrapping="Wrap" />
           </StackPanel>
+        <Grid RowDefinitions="Auto,*,Auto">
+          <Grid ColumnDefinitions="*,Auto">
+            <TextBox x:Name="LibrarySearchBox" HorizontalAlignment="Left" Width="320" Watermark="🔍  Spiel suchen…"
+                     TextChanged="OnLibrarySearchChanged" />
+            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
+              <Button Content="📁  ROM-Ordner…" Click="OnBrowseRomFolderClick" />
+              <Button Content="⟳  Neu scannen" Click="OnRescanClick" />
+            </StackPanel>
+          </Grid>
 
           <!-- Kacheln, nach Konsolen gruppiert (wird im Code aufgebaut) -->
           <ScrollViewer Grid.Row="1" Margin="0,8">
             <StackPanel x:Name="LibraryPanel" Spacing="6" />
           </ScrollViewer>
 
-          <StackPanel Grid.Row="2" Orientation="Horizontal" Spacing="8">
-            <Button Content="▶ Spielen" Click="OnPlayClick" Classes="accent" />
+          <Border Grid.Row="2" Classes="card" Padding="12,10">
+          <StackPanel Orientation="Horizontal" Spacing="10">
+            <Button Content="▶  Spielen" Click="OnPlayClick" Classes="primary" />
             <Button Content="Ohne Fortsetzen starten" Click="OnPlayFreshClick"
                     ToolTip.Tip="Startet das Spiel neu, statt die automatische Sicherung zu laden" />
-            <TextBlock x:Name="SelectedGameText" VerticalAlignment="Center" Opacity="0.7"
+            <TextBlock x:Name="SelectedGameText" VerticalAlignment="Center" Classes="muted"
                        Text="Doppelklick startet ein Spiel, Rechtsklick zeigt mehr." />
           </StackPanel>
+          </Border>
         </Grid>
+        </DockPanel>
       </TabItem>
-
+      <!-- ============ Spielstände (wird im Code aufgebaut) ============ -->
+      <TabItem x:Name="SavesTab" Header="💾   Spielstände">
+        <DockPanel>
+          <StackPanel DockPanel.Dock="Top" Spacing="2" Margin="0,0,0,16">
+            <TextBlock Classes="h1" Text="Spielstände" />
+            <TextBlock Classes="muted" Text="Alle Spielstände pro Benutzer – importieren, exportieren, sichern." TextWrapping="Wrap" />
+          </StackPanel>
+        <ScrollViewer>
+          <StackPanel x:Name="SavesPanel" Spacing="8" Margin="0,12,12,12" />
+        </ScrollViewer>
+        </DockPanel>
+      </TabItem>
+      <TabItem Classes="group" IsEnabled="False" Header="SAMMLUNG" />
       <!-- ============ Pokédex ============ -->
-      <TabItem Header="Pokédex">
+      <TabItem Header="📕   Pokédex">
+        <DockPanel>
+          <StackPanel DockPanel.Dock="Top" Spacing="2" Margin="0,0,0,16">
+            <TextBlock Classes="h1" Text="Pokédex" />
+            <TextBlock Classes="muted" Text="Alle Pokémon – was du gefangen ● und gesehen ○ hast, über alle deine Spiele." TextWrapping="Wrap" />
+          </StackPanel>
         <Grid ColumnDefinitions="*,300" RowDefinitions="Auto,*" Margin="0,8,0,0">
           <StackPanel Orientation="Horizontal" Spacing="8" Grid.ColumnSpan="2">
-            <TextBox x:Name="SearchBox" Width="220" Watermark="Name oder Nummer…"
+            <TextBox x:Name="SearchBox" Width="240" Watermark="🔍  Name oder Nummer…"
                      TextChanged="OnSearchChanged" />
             <ComboBox x:Name="GenFilter" SelectedIndex="0" Width="110"
                       SelectionChanged="OnGenFilterChanged">
@@ -92,11 +106,20 @@
           <!-- Detailansicht -->
           <ScrollViewer Grid.Row="1" Grid.Column="1" Margin="0,8,0,0">
           <StackPanel Spacing="10" Margin="0,0,12,0">
-            <Border Height="200" CornerRadius="8" Background="{DynamicResource SystemControlBackgroundBaseLowBrush}">
-              <Image x:Name="SpriteImage" Width="192" Height="192"
-                     RenderOptions.BitmapInterpolationMode="None" />
+            <!-- Pokédex-Bildschirm -->
+            <Border CornerRadius="14" Padding="10" Background="#D9DDE4">
+              <Border Height="200" CornerRadius="8" BorderBrush="#0B2A4A" BorderThickness="2">
+                <Border.Background>
+                  <RadialGradientBrush Center="50%,40%" GradientOrigin="50%,35%" RadiusX="70%" RadiusY="70%">
+                    <GradientStop Offset="0" Color="#2E7FC8" />
+                    <GradientStop Offset="1" Color="#0D2F55" />
+                  </RadialGradientBrush>
+                </Border.Background>
+                <Image x:Name="SpriteImage" Width="192" Height="192"
+                       RenderOptions.BitmapInterpolationMode="None" />
+              </Border>
             </Border>
-            <TextBlock x:Name="DetailName" FontSize="20" FontWeight="SemiBold"
+            <TextBlock x:Name="DetailName" FontSize="22" FontWeight="Bold"
                        Text="Pokémon auswählen" />
             <TextBlock x:Name="DetailText" TextWrapping="Wrap" />
             <Button x:Name="OpenInGuideButton" Content="📖 Im Guide öffnen" Click="OnOpenInGuideClick" IsVisible="False" />
@@ -106,10 +129,61 @@
           </StackPanel>
           </ScrollViewer>
         </Grid>
+        </DockPanel>
       </TabItem>
-
+      <!-- ============ Statistik (wird im Code aufgebaut) ============ -->
+      <TabItem Header="📊   Statistik">
+        <DockPanel>
+          <StackPanel DockPanel.Dock="Top" Spacing="2" Margin="0,0,0,16">
+            <TextBlock Classes="h1" Text="Statistik" />
+            <TextBlock Classes="muted" Text="Deine Pokémon, Fortschritt, Erfolge, Shiny-Jagden und der Rückblick." TextWrapping="Wrap" />
+          </StackPanel>
+        <Grid ColumnDefinitions="*,330" Margin="0,8,0,0">
+          <ScrollViewer Margin="0,0,8,0">
+            <StackPanel x:Name="StatsPanel" Spacing="8" />
+          </ScrollViewer>
+          <Border Grid.Column="1" Classes="card" Padding="14">
+            <ScrollViewer>
+              <StackPanel x:Name="PokemonDetailPanel" Spacing="8">
+                <TextBlock Text="Pokémon anklicken, um Details zu sehen." Opacity="0.6" TextWrapping="Wrap" />
+              </StackPanel>
+            </ScrollViewer>
+          </Border>
+        </Grid>
+        </DockPanel>
+      </TabItem>
+      <!-- ============ Tauschen (wird im Code aufgebaut) ============ -->
+      <TabItem Header="🔄   Tauschen">
+        <DockPanel>
+          <StackPanel DockPanel.Dock="Top" Spacing="2" Margin="0,0,0,16">
+            <TextBlock Classes="h1" Text="Tauschcenter" />
+            <TextBlock Classes="muted" Text="Pokémon zwischen zwei Spielständen tauschen – auch zwischen Benutzern." TextWrapping="Wrap" />
+          </StackPanel>
+        <ScrollViewer>
+          <StackPanel x:Name="TradePanel" Spacing="10" Margin="0,12,12,12" />
+        </ScrollViewer>
+        </DockPanel>
+      </TabItem>
+      <!-- ============ Pokémon-Bank (wird im Code aufgebaut) ============ -->
+      <TabItem Header="🏦   Bank">
+        <DockPanel>
+          <StackPanel DockPanel.Dock="Top" Spacing="2" Margin="0,0,0,16">
+            <TextBlock Classes="h1" Text="Pokémon-Bank" />
+            <TextBlock Classes="muted" Text="Pokémon ablegen und in ein anderes Spiel holen – auch über Generationen hinweg." TextWrapping="Wrap" />
+          </StackPanel>
+        <ScrollViewer>
+          <StackPanel x:Name="BankPanel" Spacing="10" Margin="0,12,12,12" />
+        </ScrollViewer>
+        </DockPanel>
+      </TabItem>
+      <TabItem Classes="group" IsEnabled="False" Header="WISSEN" />
       <!-- ============ Guide ============ -->
-      <TabItem x:Name="GuideTab" Header="Guide">
+      <TabItem x:Name="GuideTab" Header="📖   Guide">
+        <DockPanel>
+          <StackPanel DockPanel.Dock="Top" Spacing="2" Margin="0,0,0,16">
+            <TextBlock Classes="h1" Text="Guide" />
+            <TextBlock Classes="muted" Text="Typen, Attacken, Fundorte und Entwicklungen – passend zur gewählten Edition." TextWrapping="Wrap" />
+          </StackPanel>
         <DockPanel Margin="0,8,0,0">
           <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Spacing="8" Margin="0,0,0,8">
             <Button x:Name="GuideBackButton" Content="← Zurück" Click="OnGuideBackClick" IsEnabled="False" />
@@ -132,62 +206,40 @@
             </ScrollViewer>
           </Grid>
         </DockPanel>
+        </DockPanel>
       </TabItem>
-
-      <!-- ============ Statistik (wird im Code aufgebaut) ============ -->
-      <TabItem Header="Statistik">
-        <Grid ColumnDefinitions="*,330" Margin="0,8,0,0">
-          <ScrollViewer Margin="0,0,8,0">
-            <StackPanel x:Name="StatsPanel" Spacing="8" />
-          </ScrollViewer>
-          <Border Grid.Column="1" CornerRadius="8" Padding="12"
-                  Background="{DynamicResource SystemControlBackgroundBaseLowBrush}">
-            <ScrollViewer>
-              <StackPanel x:Name="PokemonDetailPanel" Spacing="8">
-                <TextBlock Text="Pokémon anklicken, um Details zu sehen." Opacity="0.6" TextWrapping="Wrap" />
-              </StackPanel>
-            </ScrollViewer>
-          </Border>
-        </Grid>
-      </TabItem>
-
-      <!-- ============ Spielstände (wird im Code aufgebaut) ============ -->
-      <TabItem x:Name="SavesTab" Header="Spielstände">
-        <ScrollViewer>
-          <StackPanel x:Name="SavesPanel" Spacing="8" Margin="0,12,12,12" />
-        </ScrollViewer>
-      </TabItem>
-
-      <!-- ============ Tauschen (wird im Code aufgebaut) ============ -->
-      <TabItem Header="Tauschen">
-        <ScrollViewer>
-          <StackPanel x:Name="TradePanel" Spacing="10" Margin="0,12,12,12" />
-        </ScrollViewer>
-      </TabItem>
-
-      <!-- ============ Pokémon-Bank (wird im Code aufgebaut) ============ -->
-      <TabItem Header="Bank">
-        <ScrollViewer>
-          <StackPanel x:Name="BankPanel" Spacing="10" Margin="0,12,12,12" />
-        </ScrollViewer>
-      </TabItem>
-
+      <TabItem Classes="group" IsEnabled="False" Header="EINSTELLUNGEN" />
       <!-- ============ Steuerung (wird im Code aufgebaut) ============ -->
-      <TabItem Header="Steuerung">
+      <TabItem Header="🕹️   Steuerung">
+        <DockPanel>
+          <StackPanel DockPanel.Dock="Top" Spacing="2" Margin="0,0,0,16">
+            <TextBlock Classes="h1" Text="Steuerung" />
+            <TextBlock Classes="muted" Text="Tastatur und Controller belegen, Hotkeys festlegen." TextWrapping="Wrap" />
+          </StackPanel>
         <ScrollViewer>
           <StackPanel x:Name="ControlsPanel" Spacing="10" Margin="0,12,12,12" MaxWidth="820" HorizontalAlignment="Left" />
         </ScrollViewer>
+        </DockPanel>
       </TabItem>
-
       <!-- ============ Bild (wird im Code aufgebaut) ============ -->
-      <TabItem Header="Bild">
+      <TabItem Header="🖼️   Bild">
+        <DockPanel>
+          <StackPanel DockPanel.Dock="Top" Spacing="2" Margin="0,0,0,16">
+            <TextBlock Classes="h1" Text="Bild" />
+            <TextBlock Classes="muted" Text="Skalierung, Effekte und Bildschirm-Anordnung pro Konsole." TextWrapping="Wrap" />
+          </StackPanel>
         <ScrollViewer>
           <StackPanel x:Name="VideoPanel" Spacing="8" Margin="0,12,12,12" MaxWidth="900" HorizontalAlignment="Left" />
         </ScrollViewer>
+        </DockPanel>
       </TabItem>
-
       <!-- ============ Einstellungen ============ -->
-      <TabItem Header="Einstellungen">
+      <TabItem Header="⚙️   Einstellungen">
+        <DockPanel>
+          <StackPanel DockPanel.Dock="Top" Spacing="2" Margin="0,0,0,16">
+            <TextBlock Classes="h1" Text="Einstellungen" />
+            <TextBlock Classes="muted" Text="Ordner, Ton, Updates und Sicherungen." TextWrapping="Wrap" />
+          </StackPanel>
         <ScrollViewer>
           <StackPanel Spacing="8" Margin="0,12,12,12" MaxWidth="900" HorizontalAlignment="Left">
 
@@ -197,7 +249,7 @@
                 <Grid ColumnDefinitions="*,Auto,Auto">
                   <TextBox x:Name="RomFolderBox" />
                   <Button Grid.Column="1" Content="…" Margin="6,0,0,0" Click="OnBrowseRomFolderClick" />
-                  <Button Grid.Column="2" Content="Speichern" Classes="accent" Margin="6,0,0,0" Click="OnSaveSettingsClick" />
+                  <Button Grid.Column="2" Content="Speichern" Classes="primary" Margin="6,0,0,0" Click="OnSaveSettingsClick" />
                 </Grid>
                 <CheckBox x:Name="ShowAllGamesBox" IsCheckedChanged="OnShowAllGamesChanged"
                           Content="Auch Spiele ohne Pokémon anzeigen (z. B. Zelda, Mario – spielbar, aber ohne Pokédex &amp; Co.)" />
@@ -242,7 +294,7 @@
                 <TextBlock x:Name="VersionText" />
                 <StackPanel Orientation="Horizontal" Spacing="8">
                   <Button Content="Nach Updates suchen" Click="OnCheckUpdatesClick" />
-                  <Button x:Name="InstallUpdateButton" Content="Update installieren" Classes="accent"
+                  <Button x:Name="InstallUpdateButton" Content="Update installieren" Classes="primary"
                           IsVisible="False" Click="OnUpdateClick" />
                 </StackPanel>
                 <TextBlock x:Name="UpdateStatusText" TextWrapping="Wrap" Opacity="0.8" />
@@ -262,8 +314,80 @@
 
           </StackPanel>
         </ScrollViewer>
+        </DockPanel>
       </TabItem>
 
     </TabControl>
-  </DockPanel>
+
+    <!-- Pokédex-Kopfteil oben links: rotes Gehäuse mit Linse und Lämpchen -->
+    <Border Width="236" Height="168" HorizontalAlignment="Left" VerticalAlignment="Top"
+            CornerRadius="0,0,18,0" ClipToBounds="True">
+      <Border.Background>
+        <LinearGradientBrush StartPoint="0%,0%" EndPoint="100%,100%">
+          <GradientStop Offset="0" Color="#EE1C3A" />
+          <GradientStop Offset="1" Color="#A3081F" />
+        </LinearGradientBrush>
+      </Border.Background>
+      <Grid RowDefinitions="*,Auto,10">
+        <StackPanel Orientation="Horizontal" Spacing="14" Margin="18,16,0,0" VerticalAlignment="Top">
+          <!-- große Linse -->
+          <Grid Width="62" Height="62">
+            <Ellipse Fill="#F4F6FA" />
+            <Ellipse Width="50" Height="50" Stroke="#1E2A3A" StrokeThickness="2">
+              <Ellipse.Fill>
+                <RadialGradientBrush GradientOrigin="35%,30%" Center="50%,50%" RadiusX="60%" RadiusY="60%">
+                  <GradientStop Offset="0" Color="#B5E2FF" />
+                  <GradientStop Offset="0.45" Color="#3BA7FF" />
+                  <GradientStop Offset="1" Color="#0B4FA8" />
+                </RadialGradientBrush>
+              </Ellipse.Fill>
+            </Ellipse>
+            <Ellipse Width="13" Height="13" Fill="White" Opacity="0.75"
+                     HorizontalAlignment="Left" VerticalAlignment="Top" Margin="17,15,0,0" />
+          </Grid>
+          <!-- drei Lämpchen -->
+          <StackPanel Orientation="Horizontal" Spacing="7" VerticalAlignment="Top" Margin="0,4,0,0">
+            <Ellipse Width="13" Height="13" Fill="#FF5A5A" Stroke="#5A0010" StrokeThickness="1.5" />
+            <Ellipse Width="13" Height="13" Fill="#FFD93D" Stroke="#5A4A00" StrokeThickness="1.5" />
+            <Ellipse Width="13" Height="13" Fill="#4CD964" Stroke="#0A4A1A" StrokeThickness="1.5" />
+          </StackPanel>
+        </StackPanel>
+        <StackPanel Grid.Row="1" Margin="20,0,0,10">
+          <TextBlock Text="DexHub" FontSize="26" FontWeight="Bold" Foreground="White" />
+          <TextBlock Text="Pokémon-Emulator &amp; Pokédex" FontSize="12" Foreground="#FFD0D6" />
+        </StackPanel>
+        <!-- Scharnier -->
+        <Border Grid.Row="2" Background="#7A0618" />
+      </Grid>
+    </Border>
+
+    <!-- Benutzerkarte unten links -->
+    <Border Width="236" Height="196" HorizontalAlignment="Left" VerticalAlignment="Bottom" Padding="12">
+      <Border Classes="card" Padding="12">
+        <StackPanel Spacing="8">
+          <TextBlock Classes="eyebrow" Text="TRAINER" />
+          <Grid ColumnDefinitions="Auto,*,Auto">
+            <Border Width="34" Height="34" CornerRadius="17" Background="{StaticResource DexRed}" Margin="0,0,8,0">
+              <TextBlock x:Name="ProfileInitial" Text="?" Foreground="White" FontWeight="Bold" FontSize="15"
+                         HorizontalAlignment="Center" VerticalAlignment="Center" />
+            </Border>
+            <ComboBox Grid.Column="1" x:Name="ProfileBox" HorizontalAlignment="Stretch" SelectionChanged="OnProfileChanged"
+                      ToolTip.Tip="Jeder Benutzer hat eigene Spielstände." />
+            <Button Grid.Column="2" Content="＋" Margin="6,0,0,0" Padding="10,6" Click="OnAddProfileClick"
+                    ToolTip.Tip="Neuen Benutzer anlegen" />
+          </Grid>
+          <Button Content="🎮  Großbild-Modus" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
+                  Click="OnBigPictureClick"
+                  ToolTip.Tip="Vollbild, mit dem Controller bedienbar (auch: DexHub --bigpicture)" />
+          <Button x:Name="UpdateButton" Classes="primary" Content="⬆  Update installieren" IsVisible="False"
+                  HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Click="OnUpdateClick" />
+        </StackPanel>
+      </Border>
+    </Border>
+
+    <!-- Statuszeile -->
+    <Border Grid.Row="1" Padding="16,6" Background="#111318" BorderBrush="{StaticResource DexBorder}" BorderThickness="0,1,0,0">
+      <TextBlock x:Name="StatusText" Text="Bereit." FontSize="12" Foreground="{StaticResource DexMuted}" />
+    </Border>
+  </Grid>
 </Window>

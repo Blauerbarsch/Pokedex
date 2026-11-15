@@ -118,8 +118,8 @@ public partial class MainWindow : Window
     private readonly Dictionary<GameEntry, Border> _tiles = [];
     private GameEntry? _selectedGame;
 
-    private static readonly IBrush TileBrush = new SolidColorBrush(Color.FromArgb(28, 255, 255, 255));
-    private static readonly IBrush SelectedBrush = new SolidColorBrush(Color.Parse("#E3350D"));
+    private static readonly IBrush TileBrush = new SolidColorBrush(Color.Parse("#232730"));
+    private static readonly IBrush SelectedBrush = new SolidColorBrush(Color.Parse("#DC0A2D"));
 
     /// <summary>Baut die Bibliothek neu auf: pro Konsole ein einklappbarer Bereich mit Spiel-Kacheln.</summary>
     private void RefreshGamesList()
@@ -163,7 +163,7 @@ public partial class MainWindow : Window
 
     private Border CreateTile(GameEntry game)
     {
-        var cover = new Image { Width = 140, Height = 140, Stretch = Stretch.Uniform };
+        var cover = new Image { Width = 150, Height = 150, Stretch = Stretch.Uniform };
         var placeholder = new TextBlock
         {
             Text = game.PlatformName,
@@ -173,15 +173,22 @@ public partial class MainWindow : Window
             HorizontalAlignment = HorizontalAlignment.Center,
             VerticalAlignment = VerticalAlignment.Center,
         };
-        var coverHost = new Grid { Width = 140, Height = 140, Children = { placeholder, cover } };
+        var coverHost = new Border
+        {
+            Width = 150, Height = 150,
+            CornerRadius = new CornerRadius(8),
+            ClipToBounds = true,
+            Background = new SolidColorBrush(Color.Parse("#1A1D23")),
+            Child = new Grid { Children = { placeholder, cover } },
+        };
 
         var tile = new Border
         {
-            Width = 170,
+            Classes = { "tile" },
+            Width = 174,
             Margin = new Thickness(6),
-            Padding = new Thickness(10),
-            CornerRadius = new CornerRadius(8),
-            Background = TileBrush,
+            Padding = new Thickness(12),
+            CornerRadius = new CornerRadius(12),
             BorderThickness = new Thickness(2),
             BorderBrush = Brushes.Transparent,
             Cursor = new Cursor(StandardCursorType.Hand),
@@ -668,11 +675,11 @@ public partial class MainWindow : Window
             var marker = new TextBlock { Foreground = SelectedBrush, FontSize = 14, HorizontalAlignment = HorizontalAlignment.Right };
             var tile = new Border
             {
+                Classes = { "tile" },
                 Width = 124,
                 Margin = new Thickness(4),
                 Padding = new Thickness(6),
-                CornerRadius = new CornerRadius(8),
-                Background = TileBrush,
+                CornerRadius = new CornerRadius(12),
                 BorderThickness = new Thickness(2),
                 BorderBrush = Brushes.Transparent,
                 Cursor = new Cursor(StandardCursorType.Hand),
@@ -1543,6 +1550,14 @@ public partial class MainWindow : Window
     {
         ProfileBox.ItemsSource = _settings.Profiles.ToList();
         ProfileBox.SelectedItem = _settings.CurrentProfile;
+        UpdateProfileBadge();
+    }
+
+    /// <summary>Anfangsbuchstabe des Benutzers im roten Kreis der Trainerkarte.</summary>
+    private void UpdateProfileBadge()
+    {
+        var name = _settings.CurrentProfile.Trim();
+        ProfileInitial.Text = name.Length > 0 ? char.ToUpperInvariant(name[0]).ToString() : "?";
     }
 
     private void OnProfileChanged(object? sender, SelectionChangedEventArgs e)
@@ -1564,6 +1579,7 @@ public partial class MainWindow : Window
         RebuildDex();
         BuildTradePanel();
         BuildBankPanel();
+        UpdateProfileBadge();
         SetStatus($"Benutzer gewechselt: {profile}");
     }
 

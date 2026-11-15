@@ -37,7 +37,7 @@ public sealed class BigPictureWindow : Window
     private readonly Dictionary<PadControl, (bool Down, DateTime Next)> _padState = [];
 
     private const double TileWidth = 220, TileHeight = 300;
-    private static readonly IBrush Accent = new SolidColorBrush(Color.Parse("#E3350D"));
+    private static readonly IBrush Accent = new SolidColorBrush(Color.Parse("#DC0A2D"));
 
     public BigPictureWindow(Func<List<GameEntry>> games, Func<GameEntry, bool, Task> launch,
         AppSettings settings, Action<string> switchProfile)
@@ -48,29 +48,52 @@ public sealed class BigPictureWindow : Window
         _switchProfile = switchProfile;
 
         Title = "DexHub – Großbild";
-        Background = new SolidColorBrush(Color.Parse("#101418"));
+        Background = new SolidColorBrush(Color.Parse("#15171C"));
         WindowState = WindowState.FullScreen;
 
         _scroll = new ScrollViewer { Content = _grid, Margin = new Thickness(40, 0) };
 
-        var header = new Grid
+        // Kopfleiste im Pokédex-Look: rotes Gehäuse, Linse, Lämpchen
+        var header = new Border
         {
-            ColumnDefinitions = new ColumnDefinitions("*,Auto"),
-            Margin = new Thickness(40, 30, 40, 10),
-            Children =
+            Background = new LinearGradientBrush
             {
-                new TextBlock { Text = "DexHub", FontSize = 40, FontWeight = FontWeight.Bold, Foreground = Accent },
-                WithColumn(new StackPanel
+                StartPoint = new RelativePoint(0, 0, RelativeUnit.Relative),
+                EndPoint = new RelativePoint(1, 1, RelativeUnit.Relative),
+                GradientStops = { new GradientStop(Color.Parse("#EE1C3A"), 0), new GradientStop(Color.Parse("#A3081F"), 1) },
+            },
+            BorderBrush = new SolidColorBrush(Color.Parse("#7A0618")),
+            BorderThickness = new Thickness(0, 0, 0, 8),
+            Padding = new Thickness(40, 22, 40, 22),
+            Child = new Grid
+            {
+                ColumnDefinitions = new ColumnDefinitions("*,Auto"),
+                Children =
                 {
-                    Orientation = Orientation.Horizontal,
-                    Spacing = 16,
-                    VerticalAlignment = VerticalAlignment.Center,
-                    Children = { Hint("LB"), _profileText, Hint("RB"), CloseButton() },
-                }, 1),
+                    new StackPanel
+                    {
+                        Orientation = Orientation.Horizontal,
+                        Spacing = 18,
+                        Children =
+                        {
+                            Lens(),
+                            Light("#FF5A5A"), Light("#FFD93D"), Light("#4CD964"),
+                            new TextBlock { Text = "DexHub", FontSize = 40, FontWeight = FontWeight.Bold, Foreground = Brushes.White,
+                                            VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(10, 0, 0, 0) },
+                        },
+                    },
+                    WithColumn(new StackPanel
+                    {
+                        Orientation = Orientation.Horizontal,
+                        Spacing = 16,
+                        VerticalAlignment = VerticalAlignment.Center,
+                        Children = { Hint("LB"), _profileText, Hint("RB"), CloseButton() },
+                    }, 1),
+                },
             },
         };
 
-        var info = new StackPanel { Margin = new Thickness(40, 10, 40, 0), Spacing = 4, Children = { _selectedText, _detailText } };
+        var info = new StackPanel { Margin = new Thickness(40, 24, 40, 0), Spacing = 4, Children = { _selectedText, _detailText } };
 
         var footer = new StackPanel
         {
@@ -104,6 +127,35 @@ public sealed class BigPictureWindow : Window
         Closed += (_, _) => _padTimer.Stop();
         _padTimer.Tick += (_, _) => PollGamepad();
     }
+
+    /// <summary>Große blaue Pokédex-Linse.</summary>
+    private static Control Lens() => new Grid
+    {
+        Width = 64, Height = 64,
+        Children =
+        {
+            new Avalonia.Controls.Shapes.Ellipse { Fill = new SolidColorBrush(Color.Parse("#F4F6FA")) },
+            new Avalonia.Controls.Shapes.Ellipse
+            {
+                Width = 52, Height = 52,
+                Stroke = new SolidColorBrush(Color.Parse("#1E2A3A")), StrokeThickness = 2,
+                Fill = new RadialGradientBrush
+                {
+                    GradientOrigin = new RelativePoint(0.35, 0.3, RelativeUnit.Relative),
+                    GradientStops = { new GradientStop(Color.Parse("#B5E2FF"), 0), new GradientStop(Color.Parse("#3BA7FF"), 0.45), new GradientStop(Color.Parse("#0B4FA8"), 1) },
+                },
+            },
+        },
+    };
+
+    private static Control Light(string color) => new Avalonia.Controls.Shapes.Ellipse
+    {
+        Width = 16, Height = 16,
+        VerticalAlignment = VerticalAlignment.Top,
+        Margin = new Thickness(0, 4, 0, 0),
+        Fill = new SolidColorBrush(Color.Parse(color)),
+        Stroke = new SolidColorBrush(Color.FromArgb(120, 0, 0, 0)), StrokeThickness = 1.5,
+    };
 
     private static Control WithColumn(Control c, int column)
     {
@@ -161,7 +213,7 @@ public sealed class BigPictureWindow : Window
                 Margin = new Thickness(10),
                 Padding = new Thickness(12),
                 CornerRadius = new CornerRadius(12),
-                Background = new SolidColorBrush(Color.FromArgb(30, 255, 255, 255)),
+                Background = new SolidColorBrush(Color.Parse("#232730")),
                 BorderThickness = new Thickness(4),
                 BorderBrush = Brushes.Transparent,
                 Child = new StackPanel

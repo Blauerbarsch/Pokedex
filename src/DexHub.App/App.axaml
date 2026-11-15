@@ -1,8 +1,250 @@
 <Application xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              x:Class="DexHub.App.App"
-             RequestedThemeVariant="Default">
+             RequestedThemeVariant="Dark">
+
+  <!--
+    DexHub-Design "Pokédex-Gerät": dunkles Gehäuse, Pokédex-Rot als Akzent, Linsen-Blau für Hinweise.
+    Alle Farben stehen hier – im Code gibt es dafür die gleichnamigen Ressourcen (Theme.cs).
+  -->
+  <Application.Resources>
+    <ResourceDictionary>
+      <ResourceDictionary.ThemeDictionaries>
+        <ResourceDictionary x:Key="Dark">
+          <!-- Akzentfarbe für alle Fluent-Steuerelemente (Schalter, Regler, Haken, Akzent-Knöpfe …) -->
+          <Color x:Key="SystemAccentColor">#DC0A2D</Color>
+          <Color x:Key="SystemAccentColorDark1">#B8082A</Color>
+          <Color x:Key="SystemAccentColorDark2">#940622</Color>
+          <Color x:Key="SystemAccentColorDark3">#70041A</Color>
+          <Color x:Key="SystemAccentColorLight1">#F0283F</Color>
+          <Color x:Key="SystemAccentColorLight2">#FF5468</Color>
+          <Color x:Key="SystemAccentColorLight3">#FF8191</Color>
+
+          <SolidColorBrush x:Key="SystemControlBackgroundBaseLowBrush" Color="#232730" />
+
+          <!-- Klappbereiche als Karten -->
+          <SolidColorBrush x:Key="ExpanderHeaderBackground" Color="#232730" />
+          <SolidColorBrush x:Key="ExpanderHeaderBackgroundPointerOver" Color="#2B303A" />
+          <SolidColorBrush x:Key="ExpanderHeaderBackgroundPressed" Color="#2B303A" />
+          <SolidColorBrush x:Key="ExpanderHeaderBorderBrush" Color="#2F3440" />
+          <SolidColorBrush x:Key="ExpanderHeaderBorderBrushPointerOver" Color="#3A404D" />
+          <SolidColorBrush x:Key="ExpanderHeaderBorderBrushPressed" Color="#3A404D" />
+          <SolidColorBrush x:Key="ExpanderContentBackground" Color="#1C1F26" />
+          <SolidColorBrush x:Key="ExpanderContentBorderBrush" Color="#2F3440" />
+
+          <!-- Eingabefelder und Listen -->
+          <SolidColorBrush x:Key="TextControlBackground" Color="#1C1F26" />
+          <SolidColorBrush x:Key="TextControlBackgroundPointerOver" Color="#21252D" />
+          <SolidColorBrush x:Key="TextControlBackgroundFocused" Color="#1C1F26" />
+          <SolidColorBrush x:Key="TextControlBorderBrush" Color="#343945" />
+          <SolidColorBrush x:Key="TextControlBorderBrushPointerOver" Color="#454C5A" />
+          <SolidColorBrush x:Key="ComboBoxBackground" Color="#232730" />
+          <SolidColorBrush x:Key="ComboBoxBackgroundPointerOver" Color="#2B303A" />
+          <SolidColorBrush x:Key="ComboBoxBorderBrush" Color="#343945" />
+          <SolidColorBrush x:Key="ComboBoxDropDownBackground" Color="#232730" />
+          <SolidColorBrush x:Key="ButtonBackground" Color="#2A2E38" />
+          <SolidColorBrush x:Key="ButtonBackgroundPointerOver" Color="#333845" />
+          <SolidColorBrush x:Key="ButtonBackgroundPressed" Color="#3C4250" />
+          <SolidColorBrush x:Key="ButtonBorderBrush" Color="#363B47" />
+          <SolidColorBrush x:Key="ButtonBorderBrushPointerOver" Color="#454C5A" />
+          <SolidColorBrush x:Key="FlyoutPresenterBackground" Color="#232730" />
+          <SolidColorBrush x:Key="MenuFlyoutPresenterBackground" Color="#232730" />
+          <SolidColorBrush x:Key="ListBoxItemBackgroundPointerOver" Color="#2B303A" />
+          <SolidColorBrush x:Key="ListBoxItemBackgroundSelected" Color="#3A1A22" />
+          <SolidColorBrush x:Key="ListBoxItemBackgroundSelectedPointerOver" Color="#4A1F2A" />
+        </ResourceDictionary>
+      </ResourceDictionary.ThemeDictionaries>
+
+      <!-- DexHub-Farben (auch im Code über Theme.cs) -->
+      <SolidColorBrush x:Key="DexRed" Color="#DC0A2D" />
+      <SolidColorBrush x:Key="DexRedDark" Color="#A3081F" />
+      <SolidColorBrush x:Key="DexRedSoft" Color="#33DC0A2D" />
+      <SolidColorBrush x:Key="DexBackground" Color="#15171C" />
+      <SolidColorBrush x:Key="DexSidebar" Color="#1A1D23" />
+      <SolidColorBrush x:Key="DexSurface" Color="#1C1F26" />
+      <SolidColorBrush x:Key="DexCard" Color="#232730" />
+      <SolidColorBrush x:Key="DexCardHover" Color="#2B303A" />
+      <SolidColorBrush x:Key="DexBorder" Color="#2F3440" />
+      <SolidColorBrush x:Key="DexText" Color="#F2F4F8" />
+      <SolidColorBrush x:Key="DexMuted" Color="#9AA3B2" />
+      <SolidColorBrush x:Key="DexLens" Color="#3BA7FF" />
+      <SolidColorBrush x:Key="DexGold" Color="#F5C542" />
+      <SolidColorBrush x:Key="DexGreen" Color="#4CC38A" />
+    </ResourceDictionary>
+  </Application.Resources>
+
   <Application.Styles>
     <FluentTheme />
+
+    <!-- ===== Grundlagen ===== -->
+    <Style Selector="Window">
+      <Setter Property="Background" Value="{StaticResource DexBackground}" />
+      <Setter Property="Foreground" Value="{StaticResource DexText}" />
+    </Style>
+
+    <Style Selector="TextBlock.h1">
+      <Setter Property="FontSize" Value="26" />
+      <Setter Property="FontWeight" Value="Bold" />
+    </Style>
+    <Style Selector="TextBlock.h2">
+      <Setter Property="FontSize" Value="18" />
+      <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
+    <Style Selector="TextBlock.muted">
+      <Setter Property="Foreground" Value="{StaticResource DexMuted}" />
+    </Style>
+    <Style Selector="TextBlock.eyebrow">
+      <Setter Property="FontSize" Value="11" />
+      <Setter Property="FontWeight" Value="Bold" />
+      <Setter Property="LetterSpacing" Value="1.2" />
+      <Setter Property="Foreground" Value="{StaticResource DexMuted}" />
+    </Style>
+
+    <!-- ===== Knöpfe ===== -->
+    <Style Selector="Button">
+      <Setter Property="CornerRadius" Value="8" />
+      <Setter Property="Padding" Value="14,7" />
+    </Style>
+    <Style Selector="Button.accent">
+      <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
+    <!-- Großer Haupt-Knopf (z. B. Spielen) -->
+    <Style Selector="Button.primary">
+      <Setter Property="Background" Value="{StaticResource DexRed}" />
+      <Setter Property="Foreground" Value="White" />
+      <Setter Property="FontWeight" Value="SemiBold" />
+      <Setter Property="Padding" Value="20,9" />
+      <Setter Property="BorderThickness" Value="0" />
+    </Style>
+    <Style Selector="Button.primary:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="#F0283F" />
+      <Setter Property="Foreground" Value="White" />
+    </Style>
+    <Style Selector="Button.primary:pressed /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="#B8082A" />
+      <Setter Property="Foreground" Value="White" />
+    </Style>
+    <!-- Flacher Knopf ohne Rahmen (Leisten) -->
+    <Style Selector="Button.flat">
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="BorderThickness" Value="0" />
+    </Style>
+
+    <Style Selector="TextBox, ComboBox, AutoCompleteBox, NumericUpDown">
+      <Setter Property="CornerRadius" Value="8" />
+    </Style>
+
+    <!-- ===== Karten ===== -->
+    <Style Selector="Expander">
+      <Setter Property="CornerRadius" Value="12" />
+      <Setter Property="Margin" Value="0,0,0,4" />
+    </Style>
+    <Style Selector="Expander /template/ ToggleButton#ExpanderHeader">
+      <Setter Property="FontSize" Value="15" />
+      <Setter Property="FontWeight" Value="SemiBold" />
+      <Setter Property="MinHeight" Value="48" />
+    </Style>
+
+    <Style Selector="Border.card">
+      <Setter Property="Background" Value="{StaticResource DexCard}" />
+      <Setter Property="BorderBrush" Value="{StaticResource DexBorder}" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="CornerRadius" Value="12" />
+      <Setter Property="Padding" Value="16" />
+    </Style>
+
+    <!-- Kacheln (Spiele, Pokémon): leicht anheben beim Darüberfahren -->
+    <Style Selector="Border.tile">
+      <Setter Property="Background" Value="{StaticResource DexCard}" />
+      <Setter Property="Transitions">
+        <Transitions>
+          <BrushTransition Property="Background" Duration="0:0:0.12" />
+          <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.12" />
+        </Transitions>
+      </Setter>
+    </Style>
+    <Style Selector="Border.tile:pointerover">
+      <Setter Property="Background" Value="{StaticResource DexCardHover}" />
+      <Setter Property="RenderTransform" Value="translateY(-2px)" />
+    </Style>
+
+    <!-- ===== Seitenleiste (Hauptnavigation) ===== -->
+    <Style Selector="TabControl#MainTabs">
+      <Setter Property="Padding" Value="0" />
+      <Setter Property="ItemsPanel">
+        <ItemsPanelTemplate>
+          <StackPanel Spacing="2" />
+        </ItemsPanelTemplate>
+      </Setter>
+      <Setter Property="Template">
+        <ControlTemplate>
+          <Grid ColumnDefinitions="236,*">
+            <!-- Platz oben für das Pokédex-Kopfteil und unten für die Benutzerkarte (liegen darüber) -->
+            <ScrollViewer Margin="0,168,0,196" HorizontalScrollBarVisibility="Disabled">
+              <ItemsPresenter Name="PART_ItemsPresenter" ItemsPanel="{TemplateBinding ItemsPanel}" Margin="10,4" />
+            </ScrollViewer>
+            <ContentPresenter Name="PART_SelectedContentHost" Grid.Column="1"
+                              Margin="28,22,24,8"
+                              Content="{TemplateBinding SelectedContent}"
+                              ContentTemplate="{TemplateBinding SelectedContentTemplate}" />
+          </Grid>
+        </ControlTemplate>
+      </Setter>
+    </Style>
+
+    <Style Selector="TabControl#MainTabs > TabItem">
+      <Setter Property="FontSize" Value="14" />
+      <Setter Property="Foreground" Value="#C9CFDA" />
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="Cursor" Value="Hand" />
+      <Setter Property="Template">
+        <ControlTemplate>
+          <Grid>
+            <Border Name="PART_LayoutRoot" Background="{TemplateBinding Background}" CornerRadius="10" Padding="14,9">
+              <ContentPresenter Name="PART_ContentPresenter"
+                                Content="{TemplateBinding Header}"
+                                ContentTemplate="{TemplateBinding HeaderTemplate}"
+                                Foreground="{TemplateBinding Foreground}"
+                                FontWeight="{TemplateBinding FontWeight}" />
+            </Border>
+            <!-- roter Strich links am aktiven Eintrag -->
+            <Border Name="Indicator" Width="4" Height="18" CornerRadius="2" HorizontalAlignment="Left"
+                    Background="{StaticResource DexRed}" IsVisible="False" />
+          </Grid>
+        </ControlTemplate>
+      </Setter>
+    </Style>
+    <Style Selector="TabControl#MainTabs > TabItem:pointerover">
+      <Setter Property="Background" Value="#262A33" />
+      <Setter Property="Foreground" Value="White" />
+    </Style>
+    <Style Selector="TabControl#MainTabs > TabItem:selected">
+      <Setter Property="Background" Value="{StaticResource DexRedSoft}" />
+      <Setter Property="Foreground" Value="White" />
+      <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
+    <Style Selector="TabControl#MainTabs > TabItem:selected /template/ Border#Indicator">
+      <Setter Property="IsVisible" Value="True" />
+    </Style>
+    <!-- Abschnitts-Überschriften in der Leiste (nicht anklickbar) -->
+    <Style Selector="TabControl#MainTabs > TabItem.group">
+      <Setter Property="FontSize" Value="11" />
+      <Setter Property="FontWeight" Value="Bold" />
+      <Setter Property="Foreground" Value="#6E7787" />
+      <Setter Property="Margin" Value="0,12,0,0" />
+      <Setter Property="Cursor" Value="Arrow" />
+    </Style>
+    <Style Selector="TabControl#MainTabs > TabItem.group:disabled /template/ Border#PART_LayoutRoot">
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="Padding" Value="14,4" />
+    </Style>
+    <Style Selector="TabControl#MainTabs > TabItem.group:disabled /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Foreground" Value="#6E7787" />
+    </Style>
+
+    <!-- Reiter innerhalb von Seiten (z. B. Guide) bleiben schlicht -->
+    <Style Selector="ScrollBar">
+      <Setter Property="AllowAutoHide" Value="True" />
+    </Style>
   </Application.Styles>
 </Application>
