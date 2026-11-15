@@ -190,6 +190,14 @@ jobs:
       - name: Emulator-Cores laden (Android)
         run: dotnet run scripts/FetchCores.cs android
 
+      # Ohne eigene Secrets: denselben Test-Schlüssel über alle Builds behalten (GitHub-Cache),
+      # damit sich neue Versionen über die alte installieren lassen, ohne Spielstände zu verlieren.
+      - name: Test-Schlüssel wiederverwenden
+        uses: actions/cache@v4
+        with:
+          path: ~/.local/share/Xamarin/Mono for Android/debug.keystore
+          key: dexhub-android-debug-keystore
+
       # Signatur: Sind die Secrets ANDROID_KEYSTORE (Base64) und ANDROID_KEYSTORE_PASSWORD gesetzt, wird
       # immer mit demselben Schlüssel signiert – dann installieren sich Updates direkt über die alte Version.
       # Sonst nimmt der Build einen Test-Schlüssel (vor einem Update die alte App deinstallieren).
