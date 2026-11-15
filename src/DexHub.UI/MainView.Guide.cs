@@ -40,7 +40,11 @@ public partial class MainView
 
     private async void OnMainTabChanged(object? sender, SelectionChangedEventArgs e)
     {
-        if (!_ready || e.Source != MainTabs) return;
+        if (e.Source != MainTabs) return;
+        // Handy: gewählten Reiter in der wischbaren Leiste sichtbar machen
+        if (MainTabs.SelectedItem is TabItem current)
+            Avalonia.Threading.Dispatcher.UIThread.Post(() => current.BringIntoView(), Avalonia.Threading.DispatcherPriority.Loaded);
+        if (!_ready) return;
         if (MainTabs.SelectedItem == GuideTab) await EnsureGuideLoadedAsync();
         if (MainTabs.SelectedItem == SavesTab) BuildSavesPanel();
     }

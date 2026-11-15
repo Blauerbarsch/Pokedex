@@ -46,6 +46,14 @@ public partial class MainView
         Grid.SetRow(LibraryButtons, compact ? 1 : 0);
         Grid.SetColumn(LibraryButtons, compact ? 0 : 1);
         LibraryButtons.Margin = compact ? new Thickness(0, 8, 0, 0) : default;
+        // Einstellungen „Ton & Spielen“: schmalere Beschriftung, Auswahlfelder über die Restbreite
+        SoundGrid.ColumnDefinitions = new ColumnDefinitions(compact ? "112,*" : "180,*");
+        SoundGrid.RowDefinitions = new RowDefinitions(compact ? "48,48,48,Auto" : "44,44,44,44");
+        VolumeSlider.Width = compact ? 140 : 260;
+        FastForwardBox.Width = compact ? double.NaN : 160;
+        FastForwardModeBox.Width = compact ? double.NaN : 320;
+        FastForwardBox.HorizontalAlignment = FastForwardModeBox.HorizontalAlignment = compact ? HorizontalAlignment.Stretch : HorizontalAlignment.Left;
+
         PlayFreshButton.Content = compact ? "Neu starten" : "Ohne Fortsetzen starten";
 
         EnsureRealTabSelected();

@@ -278,7 +278,7 @@
             </Expander>
 
             <Expander Header="Ton &amp; Spielen" IsExpanded="True" HorizontalAlignment="Stretch">
-              <Grid ColumnDefinitions="180,*" RowDefinitions="44,44,44,44">
+              <Grid x:Name="SoundGrid" ColumnDefinitions="180,*" RowDefinitions="44,44,44,44">
                 <TextBlock Text="Lautstärke" VerticalAlignment="Center" />
                 <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10">
                   <Slider x:Name="VolumeSlider" Minimum="0" Maximum="100" Width="260"
