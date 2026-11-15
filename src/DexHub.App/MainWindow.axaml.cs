@@ -1703,8 +1703,8 @@ public partial class MainWindow : Window
 
         VideoPanel.Children.Add(new TextBlock
         {
-            Text = "Hinweis: Echte Grafik-Shader und eine höhere interne Auflösung (z. B. DS in 2x) brauchen die " +
-                   "Grafikkarte. Das kommt zusammen mit N64, GameCube und 3DS.",
+            Text = "Hinweis: N64, GameCube/Wii und 3DS rechnen mit der Grafikkarte. Deren interne Auflösung stellst du " +
+                   "unter „Erweiterte Optionen“ der jeweiligen Konsole ein.",
             TextWrapping = TextWrapping.Wrap,
             Opacity = 0.6,
         });
@@ -1937,7 +1937,7 @@ public partial class MainWindow : Window
     /// <summary>Kleiner ✕-Knopf zum Löschen einer Belegung.</summary>
     private Button ClearButton(string tooltip, Action clear)
     {
-        var button = new Button { Content = "✕", HorizontalContentAlignment = HorizontalAlignment.Center };
+        var button = new Button { Content = "✕", HorizontalContentAlignment = HorizontalAlignment.Center, Padding = new Thickness(0), Width = 32 };
         ToolTip.SetTip(button, tooltip);
         button.Click += (_, _) =>
         {
