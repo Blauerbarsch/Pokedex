@@ -144,6 +144,11 @@ public partial class MainView : UserControl
         BuildBankPanel();
         SetStatus($"{_games.Count} Spiel(e) gefunden.");
 
+        // Automatischer Test: bestimmte Seite zeigen
+        if (Host.StartTab is { } startTab)
+            foreach (var item in MainTabs.Items)
+                if (item is TabItem { Header: string h } t && h == startTab) MainTabs.SelectedItem = t;
+
         // Automatischer Test: Spiel sofort starten
         if (Host.AutostartRom is { } autostart
             && (_games.FirstOrDefault(g => g.FileName == autostart) ?? GameDetector.Detect(Path.Combine(_settings.RomFolder, autostart))) is { } auto)

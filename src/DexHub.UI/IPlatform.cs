@@ -40,6 +40,9 @@ public interface IPlatform
 
     /// <summary>Für automatische Tests: dieses Spiel (Dateiname) nach dem Start sofort spielen.</summary>
     string? AutostartRom => null;
+
+    /// <summary>Für automatische Tests: diese Seite (Reiter-Überschrift) nach dem Start zeigen.</summary>
+    string? StartTab => null;
 }
 
 /// <summary>Controller-Infos für die Seite "Steuerung".</summary>

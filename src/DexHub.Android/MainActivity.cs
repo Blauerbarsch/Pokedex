@@ -27,6 +27,7 @@ public class MainActivity : AvaloniaMainActivity<App>
         // Android/data/de.blauerbarsch.dexhub/files/roms) – dorthin kopiert auch "ROMs hinzufügen".
         AndroidPlatform.RomFolder = System.IO.Path.Combine(GetExternalFilesDir(null)?.AbsolutePath ?? FilesDir!.AbsolutePath, "roms");
         AndroidPlatform.Autostart = Intent?.GetStringExtra("autostart");
+        AndroidPlatform.StartTabName = Intent?.GetStringExtra("tab");
         DexHub.Core.Libretro.LibretroCore.Trace = AndroidPlatform.Autostart is not null; // automatischer Test: alles protokollieren
         base.OnCreate(savedInstanceState);
         BackRequested += (_, e) => e.Handled = App.HandleBack();

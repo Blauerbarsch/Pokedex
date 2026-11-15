@@ -35,7 +35,19 @@ if [ -f homebrew.gb ]; then
   adb shell settings put system user_rotation 1
   sleep 6
   adb exec-out screencap -p > $OUT/android-5-spiel-quer.png
+  adb shell settings put system user_rotation 0
+  sleep 3
 fi
+
+# 4) Alle Seiten einmal im Hochformat (Seite über den Startparameter "tab")
+n=10
+for tab in Bibliothek Spielstände Pokédex Statistik Tauschen Bank Guide Steuerung Bild Einstellungen; do
+  adb shell am force-stop $PKG
+  adb shell am start -W -n $PKG/$PKG.MainActivity --es tab "$tab"
+  sleep 12
+  adb exec-out screencap -p > "$OUT/android-$n-$tab.png"
+  n=$((n+1))
+done
 
 adb shell pidof $PKG > $OUT/pid.txt || echo "nicht mehr aktiv" > $OUT/pid.txt
 adb logcat -d -v time > $OUT/logcat-full.txt

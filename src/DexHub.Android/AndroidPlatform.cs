@@ -19,6 +19,10 @@ public sealed class AndroidPlatform(AndroidShell shell) : IPlatform
     public string? DefaultRomFolder => RomFolder;
     public string? AutostartRom => Autostart;
 
+    /// <summary>Für automatische Tests: Seite, die nach dem Start gezeigt wird.</summary>
+    public static string? StartTabName { get; set; }
+    public string? StartTab => StartTabName;
+
     public event Action<GameEntry, string>? GameExited
     {
         add => shell.GameExited += value;
