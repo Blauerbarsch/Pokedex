@@ -414,8 +414,12 @@ public sealed unsafe class LibretroCore : IDisposable
     /// Der Core fragt hierüber alles Mögliche ab oder teilt Dinge mit.
     /// Rückgabe false = "kenne ich nicht / kann ich nicht". Das ist für unbekannte Befehle in Ordnung.
     /// </summary>
+    /// <summary>Ausführliches Protokoll aller Aufrufe (zur Fehlersuche, z. B. im automatischen Android-Test).</summary>
+    public static bool Trace { get; set; }
+
     private bool OnEnvironment(uint cmd, IntPtr data)
     {
+        if (Trace) Console.WriteLine($"[DexHub] env {cmd & ~Retro.Experimental} data=0x{data:X}");
         try
         {
             switch (cmd & ~Retro.Experimental)

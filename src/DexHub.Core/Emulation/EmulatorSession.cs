@@ -218,7 +218,9 @@ public sealed unsafe class EmulatorSession : ICoreHost, IDisposable
         try
         {
             CoreCatalog.EnsureSystemFiles(CoreName);
+            if (LibretroCore.Trace) Log("Trace: lade Core");
             _core = new LibretroCore(_corePath, this, AppSettings.SystemFolder, AppSettings.SavesFolder);
+            if (LibretroCore.Trace) Log("Trace: Core geladen");
             foreach (var (key, value) in CoreOptions)
                 if (!key.StartsWith(TransferPakPrefix, StringComparison.Ordinal)) _core.OptionOverrides[key] = value;
 
@@ -234,7 +236,9 @@ public sealed unsafe class EmulatorSession : ICoreHost, IDisposable
             LoadSram();
 
             var timing = _core.AvInfo.Timing;
+            if (LibretroCore.Trace) Log("Trace: Spiel geladen, öffne Ton");
             OpenAudio(timing.SampleRate);
+            if (LibretroCore.Trace) Log("Trace: Ton offen");
 
             double fps = timing.Fps > 1 ? timing.Fps : 60;
             long ticksPerFrame = (long)(Stopwatch.Frequency / fps);
@@ -267,7 +271,9 @@ public sealed unsafe class EmulatorSession : ICoreHost, IDisposable
                 HandlePadHotkeys(pad);
                 CheckQuitCombo();
 
+                if (LibretroCore.Trace && frameCounter < 3) Log($"Trace: Bild {frameCounter}");
                 _core.RunFrame();
+                if (LibretroCore.Trace && frameCounter < 3) Log($"Trace: Bild {frameCounter} fertig");
                 FlushAudio(fastForward);
 
                 // Etwa alle 5 Sekunden prüfen, ob das Spiel gespeichert hat
