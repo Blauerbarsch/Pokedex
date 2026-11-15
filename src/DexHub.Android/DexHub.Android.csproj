@@ -23,6 +23,7 @@
     <!-- CoreCLR statt Mono: dieselbe Laufzeit wie am PC. Mono stürzte beim Rückruf aus den Emulator-Cores ab
          und ist beim Emulieren deutlich langsamer. -->
     <UseMonoRuntime>false</UseMonoRuntime>
+    <PublishReadyToRun>false</PublishReadyToRun>
     <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
   </PropertyGroup>
 
